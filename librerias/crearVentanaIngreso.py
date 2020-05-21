@@ -91,7 +91,7 @@ def abrirLote(cuit, accion):
 			ventanaIngreso.ingreso(cuit, accion)
 
 
-def eliminarLote(cuit, accion)
+def eliminarLote(cuit, accion):
 	if (cuit == ""):
 		messagebox.showerror("ERROR", "Primero seleccione un productor con doble click en la lista")
 	else:
