@@ -26,20 +26,28 @@ from sqlite3 import Error
 import shutil
 
 diccionario_textos = {}
+#direccionBaseDeDatos = 'C:\\Users\\Santiago\\Desktop\\PROYECTO_IL_TANO\\index\\librerias\\database\\iltanohacienda.db'
+direccionBaseDeDatos = 'database/iltanohacienda.db'
 
 def sql_connection():
 	try:
-		con = sqlite3.connect('C:\\Users\\Santiago\\Desktop\\PROYECTO_IL_TANO\\index\\librerias\\database\\iltanohacienda.db')
+		con = sqlite3.connect(direccionBaseDeDatos)
 		return con
 	except Error:
 		messagebox.showerror("ERROR", "Error conectando a la base de datos")
-
 def actualizar_db(con, tabla, condiciones):
 	cursorObj = con.cursor()
 	cursorObj.execute("SELECT * FROM " + str(tabla) + condiciones)
 	rows = cursorObj.fetchall()
 
 	return rows
+
+def productFiltrar(entrada, tabla_productor):
+	pal_clave = str(entrada)
+	con = sql_connection()
+	condiciones =  ' WHERE (nombre LIKE "%' + pal_clave + '%" OR razon LIKE "%' + pal_clave + '%" OR ndoc LIKE "%' + pal_clave + '%" OR grupo LIKE "%' + pal_clave + '%" OR con_iva LIKE "%' + pal_clave + '%" OR localidad LIKE "%' + pal_clave + '%" OR provincia LIKE "%' + pal_clave + '%" OR ruca LIKE "%' + pal_clave + '%" OR establecimiento LIKE "%' + pal_clave + '%") AND estado = "activo"'
+	rows = actualizar_db(con, "productores", condiciones)
+	cargarTabla(rows, tabla_productor)
 
 def cargarTabla(rows, tabla_productor):
 	pintura = 0
@@ -50,14 +58,6 @@ def cargarTabla(rows, tabla_productor):
 		tabla_productor.insert("", tk.END, text = pintura, iid=i, values = (str(row[1]), 
 			str(row[3])))
 		i = i + 1 
-
-def productFiltrar(entrada, tabla_productor):
-	pal_clave = str(entrada)
-	con = sql_connection()
-	condiciones =  ' WHERE (nombre LIKE "%' + pal_clave + '%" OR razon LIKE "%' + pal_clave + '%" OR ndoc LIKE "%' + pal_clave + '%" OR grupo LIKE "%' + pal_clave + '%" OR con_iva LIKE "%' + pal_clave + '%" OR localidad LIKE "%' + pal_clave + '%" OR provincia LIKE "%' + pal_clave + '%" OR ruca LIKE "%' + pal_clave + '%" OR establecimiento LIKE "%' + pal_clave + '%") AND estado = "activo"'
-	rows = actualizar_db(con, "productores", condiciones)
-	cargarTabla(rows, tabla_productor)
-
 def cargarProductor(entrada):
 	cuit = str(entrada["values"][1])
 	
@@ -72,38 +72,24 @@ def cargarProductor(entrada):
 	diccionario_textos["cuit"].set(row[3])
 	diccionario_textos["ruca"].set(row[19])
 
-def eliminar(cuit, accion):
+def eliminarLote(cuit, lote):
 	if (cuit == ""):
 		messagebox.showerror("ERROR", "Primero seleccione un productor con doble click en la lista")
 	else:
-		if(accion == ""):
+		if(lote == ""):
 			messagebox.showerror("ERROR", "Primero seleccione un lote con doble click en la lista")
 		else:
-			ventanaIngreso.ingreso(cuit, accion)
+			respuesta = messagebox.askquestion("ATENCION", "¿Desea eliminar esta tropa?")
+			if respuesta == 'yes':
+				try:
+					con = sql_connection()
+					cursorObj = con.cursor()
+					cursorObj.execute('UPDATE lotes SET estado = "borrado" WHERE id = ' + str(lote))
+					con.commit()
+					messagebox.showinfo("Éxito", "Productor borrado con éxito")
 
-def abrirLote(cuit, accion):
-	if (cuit == ""):
-		messagebox.showerror("ERROR", "Primero seleccione un productor con doble click en la lista")
-	else:
-		if(accion == ""):
-			messagebox.showerror("ERROR", "Primero seleccione un lote con doble click en la lista")
-		else:
-			ventanaIngreso.ingreso(cuit, accion)
-
-
-def eliminarLote(cuit, accion):
-	if (cuit == ""):
-		messagebox.showerror("ERROR", "Primero seleccione un productor con doble click en la lista")
-	else:
-		if(accion == ""):
-			messagebox.showerror("ERROR", "Primero seleccione un lote con doble click en la lista")
-		else:
-			eliminar(cuit, accion)
-
-
-
-
-
+				except:
+					messagebox.showerror("ERROR", "Error al borrar")
 
 def pinturaSet(entry, texto):
 	texto.set(entry)
