@@ -26,8 +26,13 @@ from sqlite3 import Error
 import shutil
 
 diccionario_textos = {}
-#direccionBaseDeDatos = 'C:\\Users\\Santiago\\Desktop\\PROYECTO_IL_TANO\\index\\librerias\\database\\iltanohacienda.db'
+diccionario_objetos = {}
+diccionario_pinturas = {}
+
 direccionBaseDeDatos = 'database/iltanohacienda.db'
+
+remate = "remate1"
+
 
 def sql_connection():
 	try:
@@ -41,36 +46,198 @@ def actualizar_db(con, tabla, condiciones):
 	rows = cursorObj.fetchall()
 
 	return rows
+print
+def actualizar_db2(con, tabla, condiciones):
+	cursorObj = con.cursor()
+	cursorObj.execute("SELECT productor FROM " + str(tabla) + condiciones)
+	rows = cursorObj.fetchall()
+
+	return rows
+
+def actualizarPinturas():
+	con = sql_connection()
+	condiciones = " WHERE estado = 'activo'"
+	rows = actualizar_db(con, "productores", condiciones)
+	for row in rows:
+		diccionario_pinturas[str(row[3])] = "-"
+
+	con = sql_connection()
+	condiciones = " WHERE remate = '" + remate + "'"
+	rows = actualizar_db(con, "pintura", condiciones)
+	for row in rows:
+		diccionario_pinturas[str(row[3])] = str(row[2])
+	return diccionario_pinturas
 
 def productFiltrar(entrada, tabla_productor):
 	pal_clave = str(entrada)
 	con = sql_connection()
 	condiciones =  ' WHERE (nombre LIKE "%' + pal_clave + '%" OR razon LIKE "%' + pal_clave + '%" OR ndoc LIKE "%' + pal_clave + '%" OR grupo LIKE "%' + pal_clave + '%" OR con_iva LIKE "%' + pal_clave + '%" OR localidad LIKE "%' + pal_clave + '%" OR provincia LIKE "%' + pal_clave + '%" OR ruca LIKE "%' + pal_clave + '%" OR establecimiento LIKE "%' + pal_clave + '%") AND estado = "activo"'
 	rows = actualizar_db(con, "productores", condiciones)
-	cargarTabla(rows, tabla_productor)
+	cargarTabla2(rows, tabla_productor)
 
-def cargarTabla(rows, tabla_productor):
-	pintura = 0
+def cargarTabla2(rows, tabla_productor):
+	pinturas = actualizarPinturas()
+
 	for i in tabla_productor.get_children():
 		tabla_productor.delete(i)
 	i=0
+
 	for row in rows:
-		tabla_productor.insert("", tk.END, text = pintura, iid=i, values = (str(row[1]), 
+		tabla_productor.insert("", tk.END, text = pinturas[str(row[3])], iid=i, values = (str(row[1]), 
 			str(row[3])))
-		i = i + 1 
-def cargarProductor(entrada):
-	cuit = str(entrada["values"][1])
+		i = i + 1
+def cargarTabla(tabla_productor, tabla_productor_cargado):
+	#Todos los productores
+	try:
+		con = sql_connection()
+		condiciones = " WHERE estado = 'activo'"
+		rows = actualizar_db(con, "productores", condiciones)
+	except:
+		messagebox.showerror("ERROR", "Error al leer base de datos")
+		rows = []
+	try:
+		pinturas = actualizarPinturas()
+		for i in tabla_productor.get_children():
+			tabla_productor.delete(i)
+		i=0
+		for row in rows:
+			tabla_productor.insert("", tk.END, text = pinturas[str(row[3])], iid=i, values = (str(row[1]), 
+			str(row[3])))
+			i = i + 1
+	except:
+		messagebox.showerror("ERROR", "Error al cargar los productores")
+
+	#Productores usados obtener
+	try:
+		con = sql_connection()
+		condiciones = ""
+		rows = actualizar_db2(con, "lotes", condiciones)
+
+		lista = []
+		for i in range(0, len(rows)):
+			lista.append(rows[i][0])
+
+		listaCuitsUsados = list(set(lista))
+
+		if (len(listaCuitsUsados)>0):
+			condiciones = " WHERE ndoc ='" + listaCuitsUsados[0] + "'"
+			for i in range(1, len(listaCuitsUsados)):
+				condiciones = condiciones + " OR ndoc = '" + listaCuitsUsados[i] + "'"
+
+		con = sql_connection()
+		rows = actualizar_db(con, "productores", condiciones)
+	except:
+		messagebox.showerror("ERROR", "Error al leer base de datos")
+		rows = []
+
+	#Productores usados cargar
+	try:
+		for i in tabla_productor_cargado.get_children():
+			tabla_productor_cargado.delete(i)
+		i=0
+		for row in rows:
+			tabla_productor_cargado.insert("", tk.END, text = pinturas[str(row[3])], iid=i, values = (str(row[1]), 
+			str(row[3])))
+			i = i + 1
+	except:
+		messagebox.showerror("ERROR", "Error al cargar los productores usados")
+
+
+def cargarProductor(tabla_productor):
+	try:
+		entrada = tabla_productor.item(tabla_productor.selection()[0])
+		cuit = str(entrada["values"][1])
+		pintura = tabla_productor.item(tabla_productor.selection())["text"]
+
+		con = sql_connection()
+		condiciones = " WHERE ndoc = '" + cuit + "' AND estado = 'activo'"
+		rows = actualizar_db(con, "productores", condiciones)
+
+		row = rows[0]
+
+		diccionario_textos["alias"].set(row[1])
+		diccionario_textos["razon"].set(row[2])
+		diccionario_textos["cuit"].set(row[3])
+		diccionario_textos["ruca"].set(row[19])
+		diccionario_textos["pintura_inic"].set(pintura)
+		cargarTablaLotes(cuit)
+		limpiarLote()
+	except:
+		inneserario = 0
 	
-	con = sql_connection()
-	condiciones = " WHERE ndoc = '" + cuit + "' AND estado = 'activo'"
-	rows = actualizar_db(con, "productores", condiciones)
 
-	row = rows[0]
+def cargarTablaLotes(cuit):
+	try:
+		con = sql_connection()
+		condiciones = " WHERE remate = '" + remate + "' AND productor = '" + cuit + "' AND estado = 'activo'"
+		rows = actualizar_db(con, "lotes", condiciones)
+	except:
+		messagebox.showerror("ERROR", "Error al leer la base de datos")
+		rows = []
 
-	diccionario_textos["alias"].set(row[1])
-	diccionario_textos["razon"].set(row[2])
-	diccionario_textos["cuit"].set(row[3])
-	diccionario_textos["ruca"].set(row[19])
+	try:
+		tabla = diccionario_objetos["tabla_lotes"]
+
+		for i in tabla.get_children():
+			tabla.delete(i)
+		i=0
+
+		varLocal_corrales = 0
+		varLocar_animales = 0
+		varLocar_kg = 0.0
+
+		for row in rows:
+			id_Lote = int(row[0])
+			varLocal_corral = row[4]
+			varLocal_catVenta = row[5]
+			varLocal_catHacienda = row[6]
+			varLocal_cantidad = row[3]
+			varLocal_kgs = row[12]
+			varLocal_kgsProm = row[13]
+			varLocal_observaciones = row[14]
+
+			varLocal_corrales = varLocal_corrales + 1
+			varLocar_animales = varLocar_animales + int(varLocal_cantidad)
+			varLocar_kg = varLocar_kg + float(varLocal_kgs)
+
+			tabla.insert("", tk.END, text = varLocal_corral, iid=id_Lote, values = (varLocal_catVenta,
+				varLocal_catHacienda,
+				varLocal_cantidad,
+				varLocal_kgs,
+				varLocal_kgsProm,
+				varLocal_observaciones))
+			i = i + 1
+
+		diccionario_textos["corrales"].set(str(varLocal_corrales))
+		diccionario_textos["animales"].set(str(varLocar_animales))
+		diccionario_textos["kg"].set(str(varLocar_kg))
+
+	except:
+		messagebox.showerror("ERROR", "Error al cargar los lotes")
+def cargarLote(tabla):
+	try:
+		id_Lote = tabla.selection()[0]
+		con = sql_connection()
+		condiciones = " WHERE id = " + id_Lote + " AND estado = 'activo'"
+		rows = actualizar_db(con, "lotes", condiciones)
+
+		row = rows[0]
+
+		diccionario_textos["cantidad"].set(row[3])
+		diccionario_textos["corral"].set(row[4])
+		diccionario_textos["catVenta"].set(row[5])
+		diccionario_textos["catHacienda"].set(row[6])
+		diccionario_textos["pintura"].set(row[7])
+		diccionario_textos["kgBruto"].set(row[8])
+		diccionario_textos["kgPromedio"].set(row[9])
+		diccionario_textos["desbastePorcentaje"].set(row[10])
+		diccionario_textos["desbasteKg"].set(row[11])
+		diccionario_textos["neto"].set(row[12])
+		diccionario_textos["promedio"].set(row[13])
+
+		diccionario_textos["id"].set(row[0])
+	except:
+		messagebox.showerror("ERROR", "Error al cargar el lote")
 
 def eliminarLote(cuit, lote):
 	if (cuit == ""):
@@ -86,13 +253,62 @@ def eliminarLote(cuit, lote):
 					cursorObj = con.cursor()
 					cursorObj.execute('UPDATE lotes SET estado = "borrado" WHERE id = ' + str(lote))
 					con.commit()
-					messagebox.showinfo("Éxito", "Productor borrado con éxito")
-
+					messagebox.showinfo("Éxito", "Lote eliminado con éxito")
+					cargarTablaLotes(cuit)
+					limpiarLote()
 				except:
 					messagebox.showerror("ERROR", "Error al borrar")
 
-def pinturaSet(entry, texto):
-	texto.set(entry)
+def limpiarLote():
+	diccionario_textos["cantidad"].set("     -")
+	diccionario_textos["corral"].set("     -")
+	diccionario_textos["catVenta"].set("     -")
+	diccionario_textos["catHacienda"].set("     -")
+	diccionario_textos["pintura"].set("     -")
+	diccionario_textos["kgBruto"].set("     -")
+	diccionario_textos["kgPromedio"].set("     -")
+	diccionario_textos["desbastePorcentaje"].set("     -")
+	diccionario_textos["desbasteKg"].set("     -")
+	diccionario_textos["neto"].set("     -")
+	diccionario_textos["promedio"].set("     -")
+	diccionario_textos["id"].set("")
+
+def pinturaSet(entry):
+	mandar = "-"
+	try:
+		if(entry==""):
+			messagebox.showerror("ERROR", "Ingresar una pintura válida")
+		else:
+			diccionario_textos["pintura_inic"].set(entry)
+			mandar = entry
+	except:
+		messagebox.showerror("ERROR", "Error al cargar la pintura del productor")
+
+	cuit = diccionario_textos["cuit"].get()
+
+	pinturas = actualizarPinturas()
+	pintura = pinturas[cuit]
+
+	if(pintura!='-'):
+		try:
+			con = sql_connection()
+			cursorObj = con.cursor()
+			cursorObj.execute('UPDATE pintura SET pintura = "' + mandar + '" where (remate = "' + remate + '" AND productor = "' + cuit + '")')
+			con.commit()
+			cargarTabla(diccionario_objetos["tabla_productor"], diccionario_objetos["tabla_productor_cargado"])
+		except:
+			messagebox.showerror("ERROR", "Error al editar pintura en base de datos")
+	else:
+		try:
+			entities = [remate, mandar, cuit]
+
+			con = sql_connection()
+			cursorObj = con.cursor()
+			cursorObj.execute("INSERT INTO pintura VALUES(NULL, ?, ?, ?)", entities)
+			con.commit()
+			cargarTabla(diccionario_objetos["tabla_productor"], diccionario_objetos["tabla_productor_cargado"])
+		except:
+			messagebox.showerror("ERROR", "Error al guardar pintura en base de datos")
 
 def ingreso(window):
 	padX = 5
@@ -136,7 +352,7 @@ def ingreso(window):
 	sbr_productor.config(command=tabla_productor.yview)
 	tabla_productor.config(yscrollcommand=sbr_productor.set)
 
-	tabla_productor.heading("#0", text="Cód.")
+	tabla_productor.heading("#0", text="Pint.")
 	tabla_productor.heading("cliente", text="Productor")
 	tabla_productor.heading("doc", text="CUIT/DNI")
 
@@ -153,7 +369,7 @@ def ingreso(window):
 	sbr_productor_cargado.config(command=tabla_productor_cargado.yview)
 	tabla_productor_cargado.config(yscrollcommand=sbr_productor_cargado.set)
 
-	tabla_productor_cargado.heading("#0", text="Cód.")
+	tabla_productor_cargado.heading("#0", text="Pint.")
 	tabla_productor_cargado.heading("cliente", text="Productor")
 	tabla_productor_cargado.heading("doc", text="CUIT/DNI")
 
@@ -162,24 +378,28 @@ def ingreso(window):
 	tabla_productor_cargado.column("doc", width=120)
 
 	entry_filtrar_productor.bind("<Return>", (lambda event: productFiltrar(entry_filtrar_productor.get(), tabla_productor)))
-	tabla_productor.bind("<Double-1>", (lambda event: cargarProductor(tabla_productor.item((tabla_productor.selection()[0])))))
-	tabla_productor.bind("<Return>", (lambda event: cargarProductor(tabla_productor.item((tabla_productor.selection()[0])))))
+	tabla_productor.bind("<Double-1>", (lambda event: cargarProductor(tabla_productor)))
+	tabla_productor.bind("<Return>", (lambda event: cargarProductor(tabla_productor)))
+	tabla_productor_cargado.bind("<Double-1>", (lambda event: cargarProductor(tabla_productor_cargado)))
+	tabla_productor_cargado.bind("<Return>", (lambda event: cargarProductor(tabla_productor_cargado)))
 
+	cargarTabla(tabla_productor, tabla_productor_cargado)
+	
 	#Informacion
 	texto_alias = StringVar()
 	texto_alias.set("") # Caso 1
 	texto_razon = StringVar()
 	texto_razon.set("")
 	texto_cuit = StringVar()
-	texto_cuit.set("")
+	texto_cuit.set("     -")
 	texto_ruca = StringVar()
-	texto_ruca.set("")
+	texto_ruca.set("     -")
 	texto_corrales = StringVar()
-	texto_corrales.set("")
+	texto_corrales.set("     -")
 	texto_animales = StringVar()
-	texto_animales.set("")
+	texto_animales.set("     -")
 	texto_kg = StringVar()
-	texto_kg.set("")
+	texto_kg.set("     -")
 	texto_id_lote = StringVar()
 	texto_id_lote.set("")
 
@@ -187,6 +407,9 @@ def ingreso(window):
 	diccionario_textos["razon"] = texto_razon
 	diccionario_textos["cuit"] = texto_cuit
 	diccionario_textos["ruca"] = texto_ruca
+	diccionario_textos["corrales"] = texto_corrales
+	diccionario_textos["animales"] = texto_animales
+	diccionario_textos["kg"] = texto_kg
 
 	lbl_alias = tk.Label(lbl_ventana_productor_informacion, font=("Helvetica Neue",14,"bold"), anchor="w")
 	lbl_alias.place(x=0, y=0, width=350)
@@ -224,20 +447,20 @@ def ingreso(window):
 	lbl_kg.config(textvariable=texto_kg)
 
 
-	texto_pintura = StringVar()
-	texto_pintura.set("888")
+	texto_pintura_inic = StringVar()
+	texto_pintura_inic.set("-")
 
 	lbl_pintura = tk.Label(lbl_ventana_productor_pintura, font=("Helvetica Neue",40,"bold"), anchor="center", backgroun="#FFFFFF", borderwidth=2, relief="sunken")
 	lbl_pintura.place(x=6, y=15, width=108)
-	lbl_pintura.config(textvariable=texto_pintura)
+	lbl_pintura.config(textvariable=texto_pintura_inic)
 
 	entry_pintura = Entry(lbl_ventana_productor_pintura)
 	entry_pintura.place(x=32, y=120, width=50)
 
-	btn_pintura = tk.Button(lbl_ventana_productor_pintura, text="Setear", backgroun="#D6F4F8", font=("Helvetica Neue",8), command= lambda: pinturaSet(entry_pintura.get(), texto_pintura))
+	btn_pintura = tk.Button(lbl_ventana_productor_pintura, text="Setear", backgroun="#D6F4F8", font=("Helvetica Neue",8), command= lambda: pinturaSet(entry_pintura.get()))
 	btn_pintura.place(x=32, y = 145, width = 50)
 
-	entry_pintura.bind("<Return>", (lambda event: pinturaSet(entry_pintura.get(), texto_pintura)))
+	entry_pintura.bind("<Return>", (lambda event: pinturaSet(entry_pintura.get())))
 
 	#Acciones:
 	btn_nuevo_lote = tk.Button(lbl_ventana_acciones, text="NUEVO\n(F1)", backgroun="#CBF9E1", font=("Helvetica Neue",12,"bold"), command= lambda: abrirLote(str(texto_cuit.get()),"nuevo"))
@@ -271,23 +494,103 @@ def ingreso(window):
 	lbl_obs.place(x = 442, y = 2, width = 216, height = 180)
 	lbl_dte.place(x = 662, y = 2, width = 210, height = 180)
 
+	texto_cantidad = StringVar()
+	texto_corral = StringVar()
+	texto_catVenta = StringVar()
+	texto_catHacienda = StringVar()
+	texto_pintura = StringVar()
+	texto_kgBruto = StringVar()
+	texto_kgPromedio = StringVar()
+	texto_desbastePorcentaje = StringVar()
+	texto_desbasteKg = StringVar()
+	texto_neto = StringVar()
+	texto_promedio = StringVar()
+
+	texto_cantidad.set("     -")
+	texto_corral.set("     -")
+	texto_catVenta.set("     -")
+	texto_catHacienda.set("     -")
+	texto_pintura.set("     -")
+	texto_kgBruto.set("     -")
+	texto_kgPromedio.set("     -")
+	texto_desbastePorcentaje.set("     -")
+	texto_desbasteKg.set("     -")
+	texto_neto.set("     -")
+	texto_promedio.set("     -")
+
+	diccionario_textos["cantidad"] = texto_cantidad
+	diccionario_textos["corral"] = texto_corral
+	diccionario_textos["catVenta"] = texto_catVenta
+	diccionario_textos["catHacienda"] = texto_catHacienda
+	diccionario_textos["pintura"] = texto_pintura
+	diccionario_textos["kgBruto"] = texto_kgBruto
+	diccionario_textos["kgPromedio"] = texto_kgPromedio
+	diccionario_textos["desbastePorcentaje"] = texto_desbastePorcentaje
+	diccionario_textos["desbasteKg"] = texto_desbasteKg
+	diccionario_textos["neto"] = texto_neto
+	diccionario_textos["promedio"] = texto_promedio
+	diccionario_textos["id"] = texto_id_lote
+
+	diccionario_textos["pintura_inic"] = texto_pintura_inic
+
 	Label(lbl_hacienda, font=("verdana",10), text="Cantidad:", anchor="e", backgroun="#FFFFFF").place(x=2, y=20, width=100)
 	Label(lbl_hacienda, font=("verdana",10), text="Corral:", anchor="e", backgroun="#FFFFFF").place(x=2, y=50, width=100)
 	Label(lbl_hacienda, font=("verdana",10), text="Cat. venta:", anchor="e", backgroun="#FFFFFF").place(x=2, y=80, width=100)
 	Label(lbl_hacienda, font=("verdana",10), text="Cat. hacienda:", anchor="e", backgroun="#FFFFFF").place(x=2, y=110, width=100)
 	Label(lbl_hacienda, font=("verdana",10), text="Pintura:", anchor="e", backgroun="#FFFFFF").place(x=2, y=140, width=100)
 
-	Label(lbl_peso, font=("verdana",10), text="Kg bruto:", anchor="e", backgroun="#FFFFFF").place(x=2, y=20, width=90)
-	Label(lbl_peso, font=("verdana",10), text="Kg prom:", anchor="e", backgroun="#FFFFFF").place(x=2, y=50, width=90)
-	Label(lbl_peso, font=("verdana",10), text="Desbaste %:", anchor="e", backgroun="#FFFFFF").place(x=2, y=80, width=90)
-	Label(lbl_peso, font=("verdana",10), text="Desbaste kg:", anchor="e", backgroun="#FFFFFF").place(x=2, y=110, width=90)
+
+	lbl_cantidad = tk.Label(lbl_hacienda, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_cantidad.place(x=100, y=16, width=100)
+	lbl_cantidad.config(textvariable=texto_cantidad)
+
+	lbl_corral = tk.Label(lbl_hacienda, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_corral.place(x=100, y=46, width=100)
+	lbl_corral.config(textvariable=texto_corral)
+
+	lbl_catVenta = tk.Label(lbl_hacienda, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_catVenta.place(x=100, y=76, width=100)
+	lbl_catVenta.config(textvariable=texto_catVenta)
+
+	lbl_catHacienda = tk.Label(lbl_hacienda, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_catHacienda.place(x=100, y=106, width=100)
+	lbl_catHacienda.config(textvariable=texto_catHacienda)
+
+	lbl_pintura = tk.Label(lbl_hacienda, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_pintura.place(x=100, y=138, width=100)
+	lbl_pintura.config(textvariable=texto_pintura)
+
+	Label(lbl_peso, font=("verdana",10), text="Kg bruto:", anchor="e", backgroun="#FFFFFF").place(x=22, y=20, width=90)
+	Label(lbl_peso, font=("verdana",10), text="Kg prom:", anchor="e", backgroun="#FFFFFF").place(x=22, y=50, width=90)
+	Label(lbl_peso, font=("verdana",10), text="Desbaste %:", anchor="e", backgroun="#FFFFFF").place(x=22, y=80, width=90)
+	Label(lbl_peso, font=("verdana",10), text="Desbaste kg:", anchor="e", backgroun="#FFFFFF").place(x=22, y=110, width=90)
 	Label(lbl_peso, font=("verdana",10), text="NETO:", anchor="e", backgroun="#FFFFFF").place(x=2, y=140, width=50)
 	Label(lbl_peso, font=("verdana",10), text="Prom:", anchor="e", backgroun="#FFFFFF").place(x=100, y=140, width=50)
 
 
+	lbl_kgBruto = tk.Label(lbl_peso, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_kgBruto.place(x=120, y=16, width=100)
+	lbl_kgBruto.config(textvariable=texto_kgBruto)
 
+	lbl_kgPromedio = tk.Label(lbl_peso, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_kgPromedio.place(x=120, y=46, width=100)
+	lbl_kgPromedio.config(textvariable=texto_kgPromedio)
 
+	lbl_desbasteProcentaje = tk.Label(lbl_peso, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_desbasteProcentaje.place(x=120, y=76, width=100)
+	lbl_desbasteProcentaje.config(textvariable=texto_desbastePorcentaje)
 
+	lbl_desbasteKg = tk.Label(lbl_peso, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_desbasteKg.place(x=120, y=106, width=100)
+	lbl_desbasteKg.config(textvariable=texto_desbasteKg)
+
+	lbl_neto = tk.Label(lbl_peso, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_neto.place(x=48, y=138, width=58)
+	lbl_neto.config(textvariable=texto_neto)
+
+	lbl_promedio = tk.Label(lbl_peso, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_promedio.place(x=148, y=138, width=60)
+	lbl_promedio.config(textvariable=texto_promedio)
 
 	#LOTES DEL PRODUCTOR
 	sbr_lotes = Scrollbar(lbl_ventana_lotes)
@@ -314,15 +617,14 @@ def ingreso(window):
 	tabla_lotes.column("kgProm", width=60)
 	tabla_lotes.column("observaciones", width=250)
 
-	try:
-		con = sql_connection()
-		condiciones = " WHERE estado = 'activo'"
-		rows = actualizar_db(con, "productores", condiciones)
-		cargarTabla(rows, tabla_productor)
-	except:
-		messagebox.showerror("ERROR", "Error al leer base de datos")
+	diccionario_objetos["tabla_lotes"] = tabla_lotes
+	diccionario_objetos["tabla_productor"] = tabla_productor
+	diccionario_objetos["tabla_productor_cargado"] = tabla_productor_cargado
 
 
+
+	tabla_lotes.bind("<Double-1>", (lambda event: cargarLote(tabla_lotes)))
+	tabla_lotes.bind("<Return>", (lambda event: cargarLote(tabla_lotes)))
 
 
 window1 = Tk()
