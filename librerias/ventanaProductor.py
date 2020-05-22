@@ -344,4 +344,4 @@ def productor(entrada):
 );
 """
 entrada = {"enviar" : "nuevo"}
-#productor(entrada)
+productor(entrada)

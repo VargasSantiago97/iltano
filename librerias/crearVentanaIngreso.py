@@ -46,7 +46,7 @@ def actualizar_db(con, tabla, condiciones):
 	rows = cursorObj.fetchall()
 
 	return rows
-print
+
 def actualizar_db2(con, tabla, condiciones):
 	cursorObj = con.cursor()
 	cursorObj.execute("SELECT productor FROM " + str(tabla) + condiciones)
@@ -110,7 +110,7 @@ def cargarTabla(tabla_productor, tabla_productor_cargado):
 	#Productores usados obtener
 	try:
 		con = sql_connection()
-		condiciones = ""
+		condiciones = " WHERE estado = 'activo'"
 		rows = actualizar_db2(con, "lotes", condiciones)
 
 		lista = []
@@ -234,13 +234,18 @@ def cargarLote(tabla):
 		diccionario_textos["desbasteKg"].set(row[11])
 		diccionario_textos["neto"].set(row[12])
 		diccionario_textos["promedio"].set(row[13])
+		diccionario_textos["observaciones"].set(row[14])
+		diccionario_objetos["txt_observaciones"].config(state="normal")
+		diccionario_objetos["txt_observaciones"].delete("1.0", tk.END)
+		diccionario_objetos["txt_observaciones"].insert("1.0", row[15])
+		diccionario_objetos["txt_observaciones"].config(state="disabled")
 
 		diccionario_textos["id"].set(row[0])
 	except:
 		messagebox.showerror("ERROR", "Error al cargar el lote")
 
 def eliminarLote(cuit, lote):
-	if (cuit == ""):
+	if (cuit == "     -"):
 		messagebox.showerror("ERROR", "Primero seleccione un productor con doble click en la lista")
 	else:
 		if(lote == ""):
@@ -272,6 +277,7 @@ def limpiarLote():
 	diccionario_textos["neto"].set("     -")
 	diccionario_textos["promedio"].set("     -")
 	diccionario_textos["id"].set("")
+	diccionario_textos["observaciones"].set("")
 
 def pinturaSet(entry):
 	mandar = "-"
@@ -309,6 +315,26 @@ def pinturaSet(entry):
 			cargarTabla(diccionario_objetos["tabla_productor"], diccionario_objetos["tabla_productor_cargado"])
 		except:
 			messagebox.showerror("ERROR", "Error al guardar pintura en base de datos")
+
+def abrirLote(cuit, accion):
+	if (cuit == "     -"):
+		messagebox.showerror("ERROR", "Primero seleccione un productor con doble click en la lista")
+	else:
+		if(accion == "nuevo"):
+			try:
+				ventanaIngreso.ingreso(cuit, accion, remate)
+			except:
+				messagebox.showerror("ERROR", "Error al abrir la ventana")
+		else:
+			if(diccionario_textos["id"].get() == ""):
+				messagebox.showerror("ERROR", "Primero seleccione un lote con doble click en la lista")
+			else:
+				try:
+					ventanaIngreso.ingreso(cuit, diccionario_textos["id"].get(), remate)
+				except:
+					messagebox.showerror("ERROR", "Error al abrir la ventana")
+
+
 
 def ingreso(window):
 	padX = 5
@@ -505,6 +531,8 @@ def ingreso(window):
 	texto_desbasteKg = StringVar()
 	texto_neto = StringVar()
 	texto_promedio = StringVar()
+	texto_observaciones = StringVar()
+
 
 	texto_cantidad.set("     -")
 	texto_corral.set("     -")
@@ -517,6 +545,7 @@ def ingreso(window):
 	texto_desbasteKg.set("     -")
 	texto_neto.set("     -")
 	texto_promedio.set("     -")
+	texto_observaciones.set("")
 
 	diccionario_textos["cantidad"] = texto_cantidad
 	diccionario_textos["corral"] = texto_corral
@@ -530,6 +559,7 @@ def ingreso(window):
 	diccionario_textos["neto"] = texto_neto
 	diccionario_textos["promedio"] = texto_promedio
 	diccionario_textos["id"] = texto_id_lote
+	diccionario_textos["observaciones"] = texto_observaciones
 
 	diccionario_textos["pintura_inic"] = texto_pintura_inic
 
@@ -548,12 +578,12 @@ def ingreso(window):
 	lbl_corral.place(x=100, y=46, width=100)
 	lbl_corral.config(textvariable=texto_corral)
 
-	lbl_catVenta = tk.Label(lbl_hacienda, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
-	lbl_catVenta.place(x=100, y=76, width=100)
+	lbl_catVenta = tk.Label(lbl_hacienda, font=("verdana",8,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_catVenta.place(x=100, y=80, width=100)
 	lbl_catVenta.config(textvariable=texto_catVenta)
 
-	lbl_catHacienda = tk.Label(lbl_hacienda, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
-	lbl_catHacienda.place(x=100, y=106, width=100)
+	lbl_catHacienda = tk.Label(lbl_hacienda, font=("verdana",8,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_catHacienda.place(x=100, y=110, width=100)
 	lbl_catHacienda.config(textvariable=texto_catHacienda)
 
 	lbl_pintura = tk.Label(lbl_hacienda, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
@@ -568,29 +598,52 @@ def ingreso(window):
 	Label(lbl_peso, font=("verdana",10), text="Prom:", anchor="e", backgroun="#FFFFFF").place(x=100, y=140, width=50)
 
 
-	lbl_kgBruto = tk.Label(lbl_peso, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_kgBruto = tk.Label(lbl_peso, font=("verdana",10,"bold"), anchor="w", backgroun="#FFFFFF")
 	lbl_kgBruto.place(x=120, y=16, width=100)
 	lbl_kgBruto.config(textvariable=texto_kgBruto)
 
-	lbl_kgPromedio = tk.Label(lbl_peso, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_kgPromedio = tk.Label(lbl_peso, font=("verdana",10,"bold"), anchor="w", backgroun="#FFFFFF")
 	lbl_kgPromedio.place(x=120, y=46, width=100)
 	lbl_kgPromedio.config(textvariable=texto_kgPromedio)
 
-	lbl_desbasteProcentaje = tk.Label(lbl_peso, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_desbasteProcentaje = tk.Label(lbl_peso, font=("verdana",10,"bold"), anchor="w", backgroun="#FFFFFF")
 	lbl_desbasteProcentaje.place(x=120, y=76, width=100)
 	lbl_desbasteProcentaje.config(textvariable=texto_desbastePorcentaje)
 
-	lbl_desbasteKg = tk.Label(lbl_peso, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_desbasteKg = tk.Label(lbl_peso, font=("verdana",10,"bold"), anchor="w", backgroun="#FFFFFF")
 	lbl_desbasteKg.place(x=120, y=106, width=100)
 	lbl_desbasteKg.config(textvariable=texto_desbasteKg)
 
-	lbl_neto = tk.Label(lbl_peso, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_neto = tk.Label(lbl_peso, font=("verdana",10,"bold"), anchor="w", backgroun="#FFFFFF")
 	lbl_neto.place(x=48, y=138, width=58)
 	lbl_neto.config(textvariable=texto_neto)
 
-	lbl_promedio = tk.Label(lbl_peso, font=("verdana",12,"bold"), anchor="w", backgroun="#FFFFFF")
+	lbl_promedio = tk.Label(lbl_peso, font=("verdana",10,"bold"), anchor="w", backgroun="#FFFFFF")
 	lbl_promedio.place(x=148, y=138, width=60)
 	lbl_promedio.config(textvariable=texto_promedio)
+
+	#OBSERVACIONES
+	lbl_obs.place(x = 442, y = 2, width = 216, height = 180)
+
+	lbl_observaciones = tk.Label(lbl_obs, font=("verdana",10,"bold"), anchor="w", backgroun="#D6F4F8")
+	lbl_observaciones.place(x=2, y=2, width=212)
+	lbl_observaciones.config(textvariable=texto_observaciones)
+
+	txt_observaciones = scrolledtext.ScrolledText(lbl_obs)
+	txt_observaciones.place(x = 2, y = 25, width = 212, height = 150)
+	txt_observaciones.config(state="disabled")
+	diccionario_objetos["txt_observaciones"] = txt_observaciones
+
+
+
+
+
+
+
+
+
+
+
 
 	#LOTES DEL PRODUCTOR
 	sbr_lotes = Scrollbar(lbl_ventana_lotes)
