@@ -32,6 +32,7 @@ diccionario_entry_dte = {}
 diccionario_entry_flete = {}
 diccionario_entry_flete["flete"] = "flete n°"
 
+
 def sql_connection():
 	try:
 		con = sqlite3.connect(direccionBaseDeDatos)
@@ -84,16 +85,19 @@ def guardar():
 		if(entities!=[]):
 			respuesta = messagebox.askquestion("ATENCION", "¿Desea EDITAR esta lote?")
 			if respuesta == 'yes':
-				#try:
-				entities.append(diccionario_datos["lote"])
-				print(entities)
-				con = sql_connection()
-				cursorObj = con.cursor()
-				cursorObj.execute('UPDATE lotes SET remate = ?, productor = ?, cantidad = ?, corral = ?, catVenta = ?, catHacienda = ?, pintura = ?, kgBruto = ?, kgProm = ?, desbastePorcentaje = ?, desbasteKg = ?, neto = ?, netoPromedio = ?, observaciones = ?, observacionesDescripcion = ?, dte = ?, flete = ?, estado = ? where id = ?', entities)
-				con.commit()
-				messagebox.showinfo("Éxito", "Lote ingresado con éxito!")
-				#except:
-				#	messagebox.showerror("ERROR", "Error al cargar los datos a la DB")
+				try:
+					entities.append(diccionario_datos["lote"])
+					con = sql_connection()
+					cursorObj = con.cursor()
+					cursorObj.execute('UPDATE lotes SET remate = ?, productor = ?, cantidad = ?, corral = ?, catVenta = ?, catHacienda = ?, pintura = ?, kgBruto = ?, kgProm = ?, desbastePorcentaje = ?, desbasteKg = ?, neto = ?, netoPromedio = ?, observaciones = ?, observacionesDescripcion = ?, dte = ?, flete = ?, estado = ? where id = ?', entities)
+					con.commit()
+					messagebox.showinfo("Éxito", "Lote ingresado con éxito!")
+				except:
+					messagebox.showerror("ERROR", "Error al cargar los datos a la DB")
+
+	diccionario_datos["funcion"](diccionario_datos["cuit"])
+	diccionario_datos["funcion2"]()
+	diccionario_datos["funcion3"]()
 
 
 
@@ -258,15 +262,67 @@ def calc_desbasteKg():
 	except:
 		messagebox.showerror("ERROR", "Error de cálculo, verifique los datos")
 
+def cargarLote():
+	con = sql_connection()
+	condiciones = " WHERE id = " + str(diccionario_datos["lote"])
+	rows = actualizar_db(con, "lotes", condiciones)
+	
+	row = rows[0]
+
+	borrarTodo()
+
+	diccionario_entry_hacienda["entry_cantidad"].insert(0, str(row[3]))
+	diccionario_entry_hacienda["combo_catVenta"].current(0)#5
+	diccionario_entry_hacienda["combo_catHacienda"].current(0)#6
+	diccionario_entry_hacienda["entry_corral"].insert(0, str(row[4]))
+	diccionario_entry_hacienda["entry_pintura"].insert(0, str(row[7]))
+
+	diccionario_entry_pesaje["entry_brutoTropa"].insert(0, str(row[8]))
+	diccionario_entry_pesaje["entry_brutoPromedio"].insert(0, str(row[9]))
+	diccionario_entry_pesaje["entry_desbastePorcentaje"].insert(0, str(row[10]))
+	diccionario_entry_pesaje["entry_desbasteKg"].insert(0, str(row[11]))
+	diccionario_entry_pesaje["entry_netoTropa"].insert(0, str(row[12]))
+	diccionario_entry_pesaje["entry_netoPromedio"].insert(0, str(row[13]))
+
+	diccionario_entry_observaciones["entry_observaciones"].insert(0, str(row[14]))
+	diccionario_entry_observaciones["txt_observaciones"].insert("1.0", str(row[15]))#15
+
+	diccionario_entry_dte["entry_dte"].insert(0, str(row[16]))
+
+	diccionario_entry_flete["flete"] = str(row[17])
+
+
+def borrarTodo():
+	diccionario_entry_hacienda["entry_cantidad"].delete(0, tk.END)
+	diccionario_entry_hacienda["combo_catVenta"].current(0)
+	diccionario_entry_hacienda["combo_catHacienda"].current(0)
+	diccionario_entry_hacienda["entry_corral"].delete(0, tk.END)
+	diccionario_entry_hacienda["entry_pintura"].delete(0, tk.END)
+
+	diccionario_entry_pesaje["entry_brutoTropa"].delete(0, tk.END)
+	diccionario_entry_pesaje["entry_brutoPromedio"].delete(0, tk.END)
+	diccionario_entry_pesaje["entry_desbastePorcentaje"].delete(0, tk.END)
+	diccionario_entry_pesaje["entry_desbasteKg"].delete(0, tk.END)
+	diccionario_entry_pesaje["entry_netoTropa"].delete(0, tk.END)
+	diccionario_entry_pesaje["entry_netoPromedio"].delete(0, tk.END)
+
+	diccionario_entry_observaciones["entry_observaciones"].delete(0, tk.END)
+	diccionario_entry_observaciones["txt_observaciones"].delete("1.0", tk.END)
+
+	diccionario_entry_dte["entry_dte"].delete(0, tk.END)
+
+	diccionario_entry_flete["flete"] = "flete n°"
 
 
 
-
-def ingreso(cuit, lote, remate):
+def ingreso(cuit, lote, remate, cargarTablaLotes, limpiarLote, cargarTabla):
 
 	diccionario_datos["cuit"] = cuit
 	diccionario_datos["lote"] = lote
 	diccionario_datos["remate"] = remate
+	diccionario_datos["funcion"] = cargarTablaLotes
+	diccionario_datos["funcion2"] = limpiarLote
+	diccionario_datos["funcion3"] = cargarTabla
 
 	window = Tk()
 
@@ -485,28 +541,60 @@ def ingreso(cuit, lote, remate):
 		tabla.column("categoria", width=115)
 		tabla.column("cantidad", width=50)
 
+		def animalAgregar():
+			motivo = str(combo_dte_motivo.get())
+			especie = str(combo_dte_especie.get())
+			categoria = str(combo_dte_categoria.get())
+			cantidad = str(entry_dte_cantidad.get())
+
+			tabla.insert("", tk.END, text = motivo, values = (especie, categoria,cantidad))
+			#tabla.insert("", tk.END, text = "", values = ("", "TOTAL","25"))
+
+		entry_dte_cantidad.bind("<Return>", (lambda event: animalAgregar()))
+
+	#PESTAÑA FLETE
+	if(True):
+		tk.Label(label_flete, font=("verdana",12, "bold"), text="Flete:", anchor="e", bg='#E8F6FA').place(x=10, y=10, width = 170)
+
+		#select.get()
+		select = IntVar()
+		rad1 = tk.Radiobutton(label_flete,text='Propio', value=1,variable = select, font=("verdana",12), anchor="w", bg='#E8F6FA')
+		rad2 = tk.Radiobutton(label_flete,text='Tercero', value=2,variable = select, font=("verdana",12), anchor="w", bg='#E8F6FA')
+		rad3 = tk.Radiobutton(label_flete,text='Otros', value=3,variable = select, font=("verdana",12), anchor="w", bg='#E8F6FA')
+
+		rad1.place(x=200, y=10, width = 100)
+		rad2.place(x=200, y=30, width = 100)
+		rad3.place(x=200, y=50, width = 100)
 
 
-	def animalAgregar():
-		motivo = str(combo_dte_motivo.get())
-		especie = str(combo_dte_especie.get())
-		categoria = str(combo_dte_categoria.get())
-		cantidad = str(entry_dte_cantidad.get())
 
-		tabla.insert("", tk.END, text = motivo, values = (especie, categoria,cantidad))
-		#tabla.insert("", tk.END, text = "", values = ("", "TOTAL","25"))
 
-	entry_dte_cantidad.bind("<Return>", (lambda event: animalAgregar()))
 
 	btn_guardar = tk.Button(window, text=text_boton, backgroun="#CBF9E1", font=("Helvetica Neue",15,"bold"), command = guardar)
 	btn_guardar.place(x=250, y = 420, width = 200, height = 60)
 
+	btn_1 = tk.Button(window, text="BORRAR", backgroun="#CBF9E1", font=("Helvetica Neue",15,"bold"), command = borrarTodo)
+	btn_1.place(x=500, y = 420, width = 200, height = 60)
+
+	if(diccionario_datos["lote"]!="nuevo"):
+		cargarLote()
+
+		
+
+
 	window.bind("<F5>", (lambda event: guardar(text_guardar, obtenerdatos(), borrarCampos, entry_alias, cargarCampos)))
 	window.mainloop()
-	("700x500")
+
 
 cuit = "20-40500364-4"
 lote = "nuevo"
 remate = "remate1"
 
-#ingreso(cuit, lote, remate)
+def func():
+	print("Func 1")
+def func2():
+	print("Func 2")
+def func3():
+	print("Func 3")
+
+#ingreso(cuit, lote, remate, func, func2, func3)

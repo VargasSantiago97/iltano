@@ -347,23 +347,17 @@ def abrirLote(cuit, accion):
 
 
 
-def ingreso(window):
+def catalogo(window):
 	padX = 5
 	padY = 5
 
-	lbl_ventana_productor_buscador = LabelFrame(window, text="Buscar productor")
-	lbl_ventana_productor_informacion = LabelFrame(window, text="Informacion del Productor")
-	lbl_ventana_productor_pintura = LabelFrame(window, text = "Pintura")
-	lbl_ventana_acciones = LabelFrame(window, text="Acciones")
-	lbl_ventana_lote = LabelFrame(window, text="Lote")
-	lbl_ventana_lotes = LabelFrame(window, text="Lotes del productor")
+	lbl_ventana_inicio_portada = Label(window)
+	lbl_ventana_inicio_acciones = Label(window)
+	lbl_ventana_inicio_remates = LabelFrame(window, text = "Remates")
 
-	lbl_ventana_productor_buscador.place(x = 2, y = 2, width = 390, height = 698)
-	lbl_ventana_productor_informacion.place(x = 400, y = 2, width = 370, height = 210)
-	lbl_ventana_productor_pintura.place(x = 778, y = 2, width = 122, height = 210)
-	lbl_ventana_acciones.place(x = 908, y = 2, width = 371, height = 210)
-	lbl_ventana_lote.place(x = 400, y = 220, width = 879, height = 210)
-	lbl_ventana_lotes.place(x = 400, y = 438, width = 879, height = 262)
+	lbl_ventana_inicio_portada.place(x = 2, y = 2, width = 636, height = 200)
+	lbl_ventana_inicio_acciones.place(x = 644, y = 2, width = 636, height = 200)
+	lbl_ventana_inicio_remates.place(x = 2, y = 207, width = 1279, height = 496)
 
 	#--Buscador
 	lbl_ventana_productor_buscador_entry = LabelFrame(lbl_ventana_productor_buscador, text="Filtrar")
@@ -706,8 +700,8 @@ def ingreso(window):
 
 
 window1 = Tk()
-window1.title("")
+window1.title("Catalogo")
 window1.geometry("1285x728")
 window1.configure(backgroun="#2C4D4F") #E8F6FA
-ingreso(window1)
+catalogo(window1)
 window1.mainloop()

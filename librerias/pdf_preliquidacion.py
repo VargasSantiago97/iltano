@@ -24,6 +24,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 
 dire = "PDF\\fecha_" + str(time.strftime("%d-%m-%y")) + "_hora_" + str(time.strftime("%H-%M-%S")) + ".pdf"
 
+imagenLogo = "tano.jpeg"
 
 
 
@@ -99,7 +100,7 @@ entrada = {
 
 def insertar_cabecera(c, entrada):
 	#logo
-	c.drawImage("..\\tano.jpeg", 40 , 765, width=210, height=50)
+	c.drawImage(imagenLogo, 40 , 765, width=210, height=50)
 
 	#1er cuadro
 	c.setFont("Helvetica", 10)
@@ -459,7 +460,7 @@ def preliquidacionPDF(entrada):
 	insertar_firmas(c, entrada)
 	insertar_npag(c, "1", "1")
 
-	
+
 
 	c.setTitle(entrada["datos"]["titulo"])
 	c.save()

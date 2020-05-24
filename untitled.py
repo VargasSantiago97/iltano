@@ -82,6 +82,8 @@ pestañas.add(label_configuracion, text="Configuracion", padding = 0)
 
 pestañas.place(x = 0, y = 0, relwidth = 1, relheight = 1)
 
+#pestañas.select(label_productores)
+
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
 #            PESTAÑA 1 "MOVIMIENTOS"
