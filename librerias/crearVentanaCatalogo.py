@@ -351,13 +351,209 @@ def catalogo(window):
 	padX = 5
 	padY = 5
 
-	lbl_ventana_inicio_portada = Label(window)
-	lbl_ventana_inicio_acciones = Label(window)
-	lbl_ventana_inicio_remates = LabelFrame(window, text = "Remates")
+	lbl_datos = Label(window, backgroun="#E0F8F1")
+	lbl_tablaCategorias = Label(window)
+	lbl_tablaCategoriasMover = Label(window, backgroun="#E0F8F1")
+	lbl_acciones = Label(window, backgroun="#E0F8F1")
+	lbl_filtrar = Label(window, backgroun="#E0F8F1")
+	lbl_tabla = Label(window)
+	lbl_cargar = Label(window, backgroun="#E0F8F1")
+	lbl_tablaCargados = Label(window)
+	lbl_tablaCargadosMover = Label(window, backgroun="#E0F8F1")
 
-	lbl_ventana_inicio_portada.place(x = 2, y = 2, width = 636, height = 200)
-	lbl_ventana_inicio_acciones.place(x = 644, y = 2, width = 636, height = 200)
-	lbl_ventana_inicio_remates.place(x = 2, y = 207, width = 1279, height = 496)
+	mod_alt = 0
+
+	lbl_datos.place(x = 2, y = 2+mod_alt, width = 300, height = 250)
+	lbl_tablaCategorias.place(x = 304, y = 2+mod_alt, width = 450, height = 250)
+	lbl_tablaCategoriasMover.place(x = 756, y = 2+mod_alt, width = 100, height = 250)
+	lbl_acciones.place(x = 858, y = 2+mod_alt, width = 425, height = 250)
+	lbl_filtrar.place(x = 2, y = 254+mod_alt, width = 150, height = 370)
+	lbl_tabla.place(x = 154, y = 254+mod_alt, width = 500, height = 370)
+	lbl_cargar.place(x = 656, y = 254+mod_alt, width = 100, height = 370)
+	lbl_tablaCargados.place(x = 758, y = 254+mod_alt, width = 423, height = 370)
+	lbl_tablaCargadosMover.place(x = 1183, y = 254+mod_alt, width = 100, height = 370)
+
+	#DATOS DE CATALOGO
+	if(True):	
+		tk.Label(lbl_datos, text="Datos catálogo", font=("Helvetica Neue",14, "bold"), anchor="c", backgroun="#E0F8F1").place(x = 0, y = 2, width = 298)
+	
+		tk.Label(lbl_datos, text="Fecha:", font=("Helvetica Neue",10), anchor="e", backgroun="#E0F8F1").place(x = 0, y = 50, width = 80)
+		tk.Label(lbl_datos, text="Titulo:", font=("Helvetica Neue",10), anchor="e", backgroun="#E0F8F1").place(x = 0, y = 80, width = 80)
+		tk.Label(lbl_datos, text="Predio:", font=("Helvetica Neue",10), anchor="e", backgroun="#E0F8F1").place(x = 0, y = 110, width = 80)
+		tk.Label(lbl_datos, text="Localidad:", font=("Helvetica Neue",10), anchor="e", backgroun="#E0F8F1").place(x = 0, y = 140, width = 80)
+		tk.Label(lbl_datos, text="Remata:", font=("Helvetica Neue",10), anchor="e", backgroun="#E0F8F1").place(x = 0, y = 170, width = 80)
+
+		entry_datosFecha = Entry(lbl_datos)
+		entry_datosFecha.place(x = 90, y = 50, width = 180)
+
+		entry_datosFecha = Entry(lbl_datos)
+		entry_datosFecha.place(x = 90, y = 80, width = 180)
+
+		entry_datosFecha = Entry(lbl_datos)
+		entry_datosFecha.place(x = 90, y = 110, width = 180)
+
+		entry_datosFecha = Entry(lbl_datos)
+		entry_datosFecha.place(x = 90, y = 140, width = 180)
+
+		entry_datosFecha = Entry(lbl_datos)
+		entry_datosFecha.place(x = 90, y = 170, width = 180)
+
+	#TABLA -> CATEGORIAS DE VENTA
+	if(True):
+		sbr_catVenta = Scrollbar(lbl_tablaCategorias)
+		sbr_catVenta.pack(side=RIGHT, fill="y")
+
+		tabla_catVenta = ttk.Treeview(lbl_tablaCategorias, columns=("alias", "nombre"), selectmode=tk.BROWSE, height=7) 
+		tabla_catVenta.pack(side=LEFT, fill="both", expand=True)
+		sbr_catVenta.config(command=tabla_catVenta.yview)
+		tabla_catVenta.config(yscrollcommand=sbr_catVenta.set)
+
+		tabla_catVenta.heading("#0", text="Cant.")
+		tabla_catVenta.heading("alias", text="Alias")
+		tabla_catVenta.heading("nombre", text="Nombre")
+
+		tabla_catVenta.column("#0", width=40)
+		tabla_catVenta.column("alias", width=120)
+		tabla_catVenta.column("nombre", width=120)
+
+	#MOVER -> TABLA CATEGORIAS
+	if(True):
+		btn_moverArribaCat = tk.Button(lbl_tablaCategoriasMover, text="↑", font=("verdana",15,"bold"), backgroun="#F5D0A9")
+		btn_moverArribaCat.place(x = 25, y = 70, width=50, height=50)
+
+		btn_moverAbajoCat = tk.Button(lbl_tablaCategoriasMover, text="↓", font=("verdana",15,"bold"), backgroun="#F5D0A9")
+		btn_moverAbajoCat.place(x = 25, y = 130, width=50, height=50)
+
+		btn_moverArribaTodoCat = tk.Button(lbl_tablaCategoriasMover, text="↑↑↑", font=("verdana",15,"bold"), backgroun="#F5A9A9")
+		btn_moverArribaTodoCat.place(x = 25, y = 10, width=50, height=50)
+
+		btn_moverAbajoTodoCat = tk.Button(lbl_tablaCategoriasMover, text="↓↓↓", font=("verdana",15,"bold"), backgroun="#F5A9A9")
+		btn_moverAbajoTodoCat.place(x = 25, y = 190, width=50, height=50)
+
+	#ACCIONES
+
+
+	#FILTRAR
+	if(True):
+		tk.Label(lbl_filtrar, text="Filtrar", font=("Helvetica Neue",12, "bold"), anchor="c", backgroun="#E0F8F1").place(x = 0, y = 2, width = 149)
+
+		tk.Label(lbl_filtrar, text="Productor", font=("Helvetica Neue",10), anchor="w", backgroun="#E0F8F1").place(x = 8, y = 30, width = 149)
+		tk.Label(lbl_filtrar, text="Corral", font=("Helvetica Neue",10), anchor="w", backgroun="#E0F8F1").place(x = 8, y = 100, width = 149)
+		tk.Label(lbl_filtrar, text="Cat. hacienda", font=("Helvetica Neue",10), anchor="w", backgroun="#E0F8F1").place(x = 8, y = 170, width = 149)
+
+		entry_filtrarProductor = Entry(lbl_filtrar)
+		entry_filtrarProductor.place(x = 10, y = 50, width = 130)
+
+		entry_filtrarCorral = Entry(lbl_filtrar)
+		entry_filtrarCorral.place(x = 10, y = 120, width = 130)
+
+		entry_filtrarCat = Entry(lbl_filtrar)
+		entry_filtrarCat.place(x = 10, y = 190, width = 130)
+
+
+		btn_filtrar = tk.Button(lbl_filtrar, text="Filtrar", font=("verdana",10), backgroun="#F5D0A9")
+		btn_filtrar.place(x = 20, y = 230, width=110, height=30)
+
+		btn_filtrarMostrarTodo = tk.Button(lbl_filtrar, text="Mostrar Todo", font=("verdana",10), backgroun="#F5D0A9")
+		btn_filtrarMostrarTodo.place(x = 20, y = 270, width=110, height=30)
+
+	#TABLA -> LOTES
+	if(True):
+		sbr_lotes = Scrollbar(lbl_tabla)
+		sbr_lotes.pack(side=RIGHT, fill="y")
+
+		tabla_lotes = ttk.Treeview(lbl_tabla, columns=("productor", "cantidad", "categoria" , "pintura", "kg"), selectmode=tk.BROWSE, height=7) 
+		tabla_lotes.pack(side=LEFT, fill="both", expand=True)
+		sbr_lotes.config(command=tabla_lotes.yview)
+		tabla_lotes.config(yscrollcommand=sbr_lotes.set)
+
+		tabla_lotes.heading("#0", text="Corral")
+		tabla_lotes.heading("productor", text="Productor")
+		tabla_lotes.heading("cantidad", text="Cantidad")
+		tabla_lotes.heading("categoria", text="Categoria")
+		tabla_lotes.heading("pintura", text="Pintura")
+		tabla_lotes.heading("kg", text="Peso")
+
+		tabla_lotes.column("#0", width=30)
+		tabla_lotes.column("productor", width=50)
+		tabla_lotes.column("cantidad", width=30)
+		tabla_lotes.column("categoria", width=50)
+		tabla_lotes.column("pintura", width=30)
+		tabla_lotes.column("kg", width=30)
+
+	#CARGAR
+	if(True):
+		tk.Label(lbl_cargar, text="Cargar", font=("Helvetica Neue",12, "bold"), anchor="c", backgroun="#E0F8F1").place(x = 0, y = 2, width = 100)
+
+		
+
+		#select.get()
+		select = IntVar()
+		select.set(1)
+		rad1 = tk.Radiobutton(lbl_cargar,text='Corral', value=1,variable = select, font=("verdana",10), anchor="w", bg='#E0F8F1')
+		rad2 = tk.Radiobutton(lbl_cargar,text='Productor', value=2,variable = select, font=("verdana",10), anchor="w", bg='#E0F8F1')
+		rad3 = tk.Radiobutton(lbl_cargar,text='Cat. Hac.', value=3,variable = select, font=("verdana",10), anchor="w", bg='#E0F8F1')
+		rad4 = tk.Radiobutton(lbl_cargar,text='Kgs', value=4,variable = select, font=("verdana",10), anchor="w", bg='#E0F8F1')
+
+		mod_alt = 30
+
+		rad1.place(x=5, y=10+mod_alt, width = 95)
+		rad2.place(x=5, y=30+mod_alt, width = 95)
+		rad3.place(x=5, y=50+mod_alt, width = 95)
+		rad4.place(x=5, y=70+mod_alt, width = 95)
+
+
+		btn_cargarAscendente = tk.Button(lbl_cargar, text="Ascendente", font=("verdana",9, "bold"), backgroun="#CBF9E1")
+		btn_cargarAscendente.place(x = 5, y = 140, width=90, height=25)
+
+		btn_cargarDescendente = tk.Button(lbl_cargar, text="Descendente", font=("verdana",9, "bold"), backgroun="#CBF9E1")
+		btn_cargarDescendente.place(x = 5, y = 170, width=90, height=25)
+
+		btn_filtrarMostrarTodo = tk.Button(lbl_cargar, text="Borrar", font=("verdana",10, "bold"), backgroun="#EF9090")
+		btn_filtrarMostrarTodo.place(x = 5, y = 230, width=90, height=35)
+
+		btn_filtrarMostrarTodo = tk.Button(lbl_cargar, text="Borrar\nTodo", font=("verdana",10, "bold"), backgroun="#EF9090")
+		btn_filtrarMostrarTodo.place(x = 5, y = 270, width=90, height=35)
+
+	#TABLA -> LOTES CARGADOS
+	if(True):
+		sbr_lotesCargados = Scrollbar(lbl_tablaCargados)
+		sbr_lotesCargados.pack(side=RIGHT, fill="y")
+
+		tabla_lotesCargados = ttk.Treeview(lbl_tablaCargados, columns=("productor", "cantidad", "categoria" , "pintura", "kg"), selectmode=tk.BROWSE, height=7) 
+		tabla_lotesCargados.pack(side=LEFT, fill="both", expand=True)
+		sbr_lotesCargados.config(command=tabla_lotesCargados.yview)
+		tabla_lotesCargados.config(yscrollcommand=sbr_lotesCargados.set)
+
+		tabla_lotesCargados.heading("#0", text="Corral")
+		tabla_lotesCargados.heading("productor", text="Productor")
+		tabla_lotesCargados.heading("cantidad", text="Cantidad")
+		tabla_lotesCargados.heading("categoria", text="Categoria")
+		tabla_lotesCargados.heading("pintura", text="Pintura")
+		tabla_lotesCargados.heading("kg", text="Peso")
+
+		tabla_lotesCargados.column("#0", width=30)
+		tabla_lotesCargados.column("productor", width=50)
+		tabla_lotesCargados.column("cantidad", width=30)
+		tabla_lotesCargados.column("categoria", width=50)
+		tabla_lotesCargados.column("pintura", width=30)
+		tabla_lotesCargados.column("kg", width=30)
+
+	#MOVER -> TABLA CARGADOS
+	if(True):
+		btn_moverArribaCargados = tk.Button(lbl_tablaCargadosMover, text="↑", font=("verdana",15,"bold"), backgroun="#F5D0A9")
+		btn_moverArribaCargados.place(x = 25, y = 70, width=50, height=50)
+
+		btn_moverAbajoCargados = tk.Button(lbl_tablaCargadosMover, text="↓", font=("verdana",15,"bold"), backgroun="#F5D0A9")
+		btn_moverAbajoCargados.place(x = 25, y = 130, width=50, height=50)
+
+		btn_moverArribaTodoCargados = tk.Button(lbl_tablaCargadosMover, text="↑↑↑", font=("verdana",15,"bold"), backgroun="#F5A9A9")
+		btn_moverArribaTodoCargados.place(x = 25, y = 10, width=50, height=50)
+
+		btn_moverAbajoTodoCargados = tk.Button(lbl_tablaCargadosMover, text="↓↓↓", font=("verdana",15,"bold"), backgroun="#F5A9A9")
+		btn_moverAbajoTodoCargados.place(x = 25, y = 190, width=50, height=50)
+
+
 
 	#--Buscador
 	lbl_ventana_productor_buscador_entry = LabelFrame(lbl_ventana_productor_buscador, text="Filtrar")

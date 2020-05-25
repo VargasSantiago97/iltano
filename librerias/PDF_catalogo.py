@@ -59,21 +59,60 @@ entrada = {
 		"remata" : "J. L. Daniel Sada",
 		},
 	"lotes" : {
-		"ABASTO-CONSERVA" : {
+		"ABASTO-CONaSERVA" : {
+		"0" : {"corral" : "1", "vendedor" : "OOOOOOOOO0OOOOOOOOO0OO", "cantidad" : "54", "categoria" : "OOOOOOOOOOOOOO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		"1" : {"corral" : "2", "vendedor" : "OOOOOOOOO0OOOOOOOOO0OO5OOOOO", "cantidad" : "54", "categoria" : "OOOOOOOOOOOOOOO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		},
+		"ABASTO-sd" : {
+		"0" : {"corral" : "1", "vendedor" : "OOOOOOOOO0OOOOOOOOO0OO5OOOOO0", "cantidad" : "54", "categoria" : "OOOOOOOOOOOOOOOOOO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		"1" : {"corral" : "2", "vendedor" : "OOOOOOOOO0OOOOOOOOO0OO5OOOOO0OOOOOOOOO0OOOOOOOOO0OO5OOOOO0OOOOOOOOO0OOOOOOOOO0OO5OOOOO0OOOOOOOOO0OOOOOOOOO0OO5OOOOO0", "cantidad" : "54", "categoria" : "aOOOOOOOOOOOO123456789aa123456789bb123456789ss123456aaaaaaaaaaaa", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		},
+		"ABASTO-CONasSERVA" : {
+		"0" : {"corral" : "1", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		"1" : {"corral" : "2", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVINOVILLONOVILLONOVILLONOVILLOLLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		},
+		"ABASTO-COssNSERVA" : {
 		"0" : {"corral" : "1", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
 		"1" : {"corral" : "2", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
-		"2" : {"corral" : "3", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
-		"3" : {"corral" : "3BIS", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
-		"4" : {"corral" : "3TRI", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
 		},
-		"VACA INVERNADA" : {
-		"0" : {"corral" : "4", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
-		"1" : {"corral" : "5", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
-		"2" : {"corral" : "6", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
-		}
-}
-}
+		"ABASTO-COasdNSERVA" : {
+		"0" : {"corral" : "1", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		"1" : {"corral" : "2", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		},
+		"ABASTO-COdasNSERVA" : {
+		"0" : {"corral" : "1", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		"1" : {"corral" : "2", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		},
+		"ABASTsdasO-CONSERVA" : {
+		"0" : {"corral" : "1", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		"1" : {"corral" : "2", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		},
+		"ABAffsSTO-CONSERVA" : {
+		"0" : {"corral" : "1", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		"1" : {"corral" : "2", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		},
+		"ABASasdsTO-CONSERVA" : {
+		"0" : {"corral" : "1", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		"1" : {"corral" : "2", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		},
+		"gr-CONSERVA" : {
+		"0" : {"corral" : "1", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		"1" : {"corral" : "2", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		},
+		"ABASTrgrO-CONSERVA" : {
+		"0" : {"corral" : "1", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		"1" : {"corral" : "2", "vendedor" : "LA PROVIDENCIA DIVINA", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : "15", "peso" : "1801,4" ,"promedio" : "145,4"},
+		},
 
+}
+}
+entrada["lotes"]["OTRO TITULO"] = {}
+entrada["lotes"]["NUEVO"] = {}
+for i in range(0, 200):
+	entrada["lotes"]["OTRO TITULO"][str(i)] = {"corral" : str (i), "vendedor" : "LA PROVIDENCIA DIVINAo", "cantidad" : "54ot", "categoria" : "NOVILLO-CHORRIADO", "pintura" : str (i), "peso" : "1801,4" ,"promedio" : "145,4"}
+
+for i in range(0, 46):
+	entrada["lotes"]["NUEVO"][str(i)] = {"corral" : str (i+200), "vendedor" : "LA PROVIDENCIA DIVINAot", "cantidad" : "54ot", "categoria" : "NOVILLO-CHORRIADO", "pintura" : str (i), "peso" : "1801,4" ,"promedio" : "145,4"}
 
 
 def centrar(x, y, texto, font, size, c):
@@ -87,6 +126,7 @@ def centrar(x, y, texto, font, size, c):
 
 	c.setFont(font, size)
 	c.drawString(posx, posy, texto)
+
 
 def cuadroDeCabecera(x, y, largo, ancho, espacio_alto, texto, font, size, c):
 
@@ -146,20 +186,23 @@ def insertar_cabecera(c, entrada):
 
 	#Cuadros
 	c.setLineWidth(1)
-	c.rect(20, 750, 555, 70)
+	c.roundRect(20, 750, 555, 70, 3, stroke=1, fill=0)
+	#c.rect(20, 750, 555, 70)
 	c.setLineWidth(1)
 
 def insertar_titulo_categoria(c, y, texto):
 	PAGE_WIDTH  = defaultPageSize[0]
 
-	text_width = stringWidth(texto, "Helvetica-Bold", 16)
+	text_width = stringWidth(texto, "Helvetica-Bold", 14)
 
 	c.setFillColorRGB(0.93 , 0.93 , 0.93)
-	c.rect(20, y, 555, 20, fill=True)
+	#c.rect(20, y, 555, 20, fill=True)
+	c.roundRect(20, y, 555, 20, 4, stroke=1, fill=True)
+
 	c.setFillColorRGB(0,0,0)
 
-	c.setFont("Helvetica-Bold", 16)
-	c.drawString((PAGE_WIDTH/2)-(text_width/2), y+4, texto)
+	c.setFont("Helvetica-Bold", 14)
+	c.drawString((PAGE_WIDTH/2)-(text_width/2), y+5, texto)
 
 def insertar_titulo_lotes(c, i):
 
@@ -177,11 +220,35 @@ def insertar_titulo_lotes(c, i):
 def insertar_cuerpo_lotes(c, i, entrada):
 
 	#cuadroDeCabecera(x, y, largo, ancho, espacio_alto, texto, font, size, c)
-	cuadroDeCuerpo(20, i, 14, 30, 3, entrada["corral"], "Helvetica", 9, c)
-	cuadroDeCuerpo(50, i, 14, 150, 3, entrada["vendedor"], "Helvetica", 9, c)
+	cuadroDeCuerpo(20, i, 14, 30, 3, entrada["corral"], "Helvetica-Bold", 9, c)
+
+	if (len(entrada["vendedor"])<=22):
+		cuadroDeCuerpo(50, i, 14, 150, 3, entrada["vendedor"], "Helvetica", 9, c)
+	elif(len(entrada["vendedor"])<=28):
+		cuadroDeCuerpo(50, i, 14, 150, 3, entrada["vendedor"], "Helvetica", 7, c)
+	else:
+		cuadroDeCuerpo(50, i, 14, 150, 3, "", "Helvetica", 7, c)
+
+		centrar(125, i+7.5, entrada["vendedor"][0:32], "Helvetica", 6, c)
+		centrar(125, i+1.5, entrada["vendedor"][32:64], "Helvetica", 6, c)
+
+
+	#cuadroDeCuerpo(50, i, 14, 150, 3, entrada["vendedor"], "Helvetica", 9, c)
 	cuadroDeCuerpo(200, i, 14, 30, 3, entrada["cantidad"], "Helvetica", 9, c)
-	cuadroDeCuerpo(230, i, 14, 100, 3, entrada["categoria"], "Helvetica", 9, c)
-	cuadroDeCuerpo(330, i, 14, 30, 3, entrada["pintura"], "Helvetica", 9, c)
+
+
+	if (len(entrada["categoria"])<=14):
+		cuadroDeCuerpo(230, i, 14, 100, 3, entrada["categoria"], "Helvetica", 9, c)
+	elif(len(entrada["categoria"])<=18):
+		cuadroDeCuerpo(230, i, 14, 100, 3, entrada["categoria"], "Helvetica", 7, c)
+	else:
+		cuadroDeCuerpo(230, i, 14, 100, 3, "", "Helvetica", 7, c)
+
+		centrar(280, i+7.5, entrada["categoria"][0:24], "Helvetica", 6, c)
+		centrar(280, i+1.5, entrada["categoria"][24:53], "Helvetica", 6, c)
+
+
+	cuadroDeCuerpo(330, i, 14, 30, 3, entrada["pintura"], "Helvetica-Bold", 9, c)
 	cuadroDeCuerpo(360, i, 14, 40, 3, entrada["peso"], "Helvetica", 9, c)
 	cuadroDeCuerpo(400, i, 14, 40, 3, entrada["promedio"], "Helvetica", 9, c)
 	cuadroDeCuerpo(440, i, 14, 40, 3, "", "Helvetica", 9, c)
@@ -235,6 +302,24 @@ def numero(ent):
 		nuevoNumero = nuevoNumero + "0"
 	return nuevoNumero
 
+def insertar_totalIngresadosCorrales(c, y, ingresados, corrales):
+	PAGE_WIDTH  = defaultPageSize[0]
+
+	#text_width = stringWidth(texto, "Helvetica-Bold", 14)
+
+	c.setFillColorRGB(0.93 , 0.93 , 0.93)
+	#c.rect(20, y, 555, 20, fill=True)
+	c.roundRect(20, y, 275, 30, 4, stroke=1, fill=True)
+	c.roundRect(300, y, 275, 30, 4, stroke=1, fill=True)
+
+	c.setFillColorRGB(0,0,0)
+
+	c.setFont("Helvetica-Bold", 17)
+	c.drawString(30, y+8, "TOTAL INGRESADOS:")
+	c.drawString(310, y+8, "TOTAL CORRALES:")
+
+	centrar(260, y+8, ingresados, "Helvetica-Bold", 19, c)
+	centrar(530, y+8, corrales, "Helvetica-Bold", 19, c)
 
 def insertar_npag(c, pag, depag):
 	c.setFont("Helvetica", 9)
@@ -252,18 +337,75 @@ def preliquidacionPDF(entrada):
 
 	i=0
 	j=0
+	var = 0
+	vari = 0
+	cant_titulosxpag = 0
+
+	cant_pag = 1
 
 	for i in range(0, cant_categorias):
-		insertar_titulo_categoria(c, 718-(i*30)-(j*30), categorias[i])
-		insertar_titulo_lotes(c, 700-())
-
+		cant_titulosxpag = cant_titulosxpag + 1
 		cant_lotes = len(entrada["lotes"][categorias[i]])
-		print(cant_lotes)
 
 		for j in range(0, cant_lotes):
-			insertar_cuerpo_lotes(c, 686-(j*14), entrada["lotes"][categorias[i]][str(j)])
+			var = var + 1
+			if (var>45-(cant_titulosxpag*2)):
+				cant_pag = cant_pag + 1
+				var=0
+				vari=0
+				cant_titulosxpag = 0
+
+		var = var + 2
+		vari = vari + 1
 
 
+
+
+	n_pag = 1
+	insertar_npag(c, str(n_pag), str(cant_pag))
+
+	i=0
+	j=0
+	var = 0
+	vari = 0
+	cant_titulosxpag = 0
+
+	for i in range(0, cant_categorias):
+		insertar_titulo_categoria(c, 718-(14*var)-(vari*30), categorias[i])
+		insertar_titulo_lotes(c, 700-(14*var)-(vari*30))
+
+		cant_titulosxpag = cant_titulosxpag + 1
+
+		cant_lotes = len(entrada["lotes"][categorias[i]])
+
+
+		for j in range(0, cant_lotes):
+			insertar_cuerpo_lotes(c, 686-(var*14)-(vari*30), entrada["lotes"][categorias[i]][str(j)])
+			var = var + 1
+			if (var>45-(cant_titulosxpag*2)):
+				c.showPage()
+				n_pag = n_pag + 1
+				insertar_npag(c, str(n_pag), str(cant_pag))
+				var=0
+				vari=0
+				insertar_cabecera(c, entrada)
+				insertar_titulo_categoria(c, 718-(14*var)-(vari*30), categorias[i])
+				insertar_titulo_lotes(c, 700-(14*var)-(vari*30))
+				cant_titulosxpag = 0
+		totalEnHoja = var
+		var = var + 2
+		vari = vari + 1
+
+	#print(totalEnHoja)
+	#print(defaultPageSize[1])
+
+
+	if(totalEnHoja<=42):
+		insertar_totalIngresadosCorrales(c, 50, str(27786), str(5455840))
+	else:
+		c.showPage()
+		insertar_cabecera(c, entrada)
+		insertar_totalIngresadosCorrales(c, 700, str(27786), str(5455840))
 
 
 	#cant_gastos = len(entrada["gastos"])
@@ -283,13 +425,12 @@ def preliquidacionPDF(entrada):
 
 	#insertar_totales(c, entrada)
 	#insertar_firmas(c, entrada)
-	insertar_npag(c, "1", "1")
 
 	c.setTitle(entrada["datos"]["titulo"])
 	c.save()
 	archivo = os.popen(entrada["datos"]["ruta"])
 
-preliquidacionPDF(entrada)
+#preliquidacionPDF(entrada)
 
 
 #TERMINAR DOMICILIO
