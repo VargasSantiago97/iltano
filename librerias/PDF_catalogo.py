@@ -401,11 +401,11 @@ def preliquidacionPDF(entrada):
 
 
 	if(totalEnHoja<=42):
-		insertar_totalIngresadosCorrales(c, 50, str(27786), str(5455840))
+		insertar_totalIngresadosCorrales(c, 50, entrada["datos"]["totalIngresados"], entrada["datos"]["totalCorrales"])
 	else:
 		c.showPage()
 		insertar_cabecera(c, entrada)
-		insertar_totalIngresadosCorrales(c, 700, str(27786), str(5455840))
+		insertar_totalIngresadosCorrales(c, 700, entrada["datos"]["totalIngresados"], entrada["datos"]["totalCorrales"])
 
 
 	#cant_gastos = len(entrada["gastos"])
