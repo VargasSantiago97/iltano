@@ -200,9 +200,6 @@ def actualizarLotes():
 def cargarDatosLotes():
 	tabla = diccionario_objetos["tabla_lotesCargados"]
 
-	tabla = diccionario_objetos["tabla_lotesCargados"]
-
-
 	id_cat = str(diccionario_objetos["texto_cat_id"].get())
 
 	dicc = dicLotes[id_cat]
@@ -452,7 +449,13 @@ def crearDiccionarioExportar():
 
 	name = str(time.strftime("%d-%m-%y")) + " " + remate + " creado a las " + str(time.strftime("%H-%M-%S")) + "hs.pdf"
 	file = filedialog.askdirectory()
+
+	if (file==""):
+		return 0
+
 	file = file + "/" + name
+
+
 
 	dicc["datos"] = {
 	"ruta":file,
@@ -487,9 +490,10 @@ def crearDiccionarioExportar():
 	return dicc
 def exportar():
 	dicc = crearDiccionarioExportar()
+	if(dicc==0):
+		messagebox.showerror("ERROR", "Seleccione un directorio.\nPDF NO EXPORTADO")
+		return 0
 	PDF_catalogo.preliquidacionPDF(dicc)
-
-
 
 
 def catalogo(window):
@@ -789,11 +793,6 @@ def catalogo(window):
 	tabla_lotesCargados.bind('<Double-1>', (lambda event: seleccionarTablaLotes()))
 	tabla_lotesCargados.bind('<Control-Up>', (lambda event: moverLotArriba()))
 	tabla_lotesCargados.bind('<Control-Down>', (lambda event: moverLotAbajo()))
-
-
-
-
-
 
 
 

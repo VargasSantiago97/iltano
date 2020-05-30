@@ -5,6 +5,8 @@
 #from librerias import crearVentanaProductor
 #from librerias import crearVentanaIngreso
 
+from librerias import crearVentanaExportacion
+
 import time
 
 import logging
@@ -76,7 +78,7 @@ label_ingreso = Label(window, backgroun="#E8F6FA") #bg='#2C4D4F'
 
 pestañas.add(label_movimientos, text="Movimientos", padding = 20)
 pestañas.add(label_productores, text="Productores", padding = 0)
-pestañas.add(label_ingreso, text="Ingreso", padding = 20)
+pestañas.add(label_ingreso, text="Ingreso", padding = 0)
 pestañas.add(label_preferencias, text="Preferencias", padding = 20)
 pestañas.add(label_configuracion, text="Configuracion", padding = 0)
 
@@ -442,6 +444,6 @@ tabla_productor.bind("<Double-1>", (lambda event: selec()))
 #--------------------------------------------------------
 
 #crearVentanaProductor.ventanaProductor(label_productores)
-#crearVentanaIngreso.ventanaIngreso(label_ingreso)
+crearVentanaExportacion.exportacion(label_ingreso)
 
 window.mainloop()
