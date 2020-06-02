@@ -822,16 +822,18 @@ def guardarLote():
 		x_precio = str(float(diccionario_objetos["calculos_texto_kg"].get()))
 		x_estado = "activo"
 		x_remate = rematename
+		x_vendedor = str(diccionario_objetos["texto_cuitVendedor"].get())
 
 		entities = [x_lote,
 		x_comprador,
 		x_precio,
 		x_remate,
-		x_estado]
+		x_estado,
+		x_vendedor]
 
 		con = sql_connection()
 		cursorObj = con.cursor()
-		cursorObj.execute("INSERT INTO compraventa VALUES(NULL, ?, ?, ?, ?, ?)", entities)
+		cursorObj.execute("INSERT INTO compraventa VALUES(NULL, ?, ?, ?, ?, ?, ?)", entities)
 		con.commit()
 		messagebox.showinfo("Éxito", "Productor ingresado con éxito!")
 		borrarDatosComprador()
