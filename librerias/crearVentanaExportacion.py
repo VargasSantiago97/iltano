@@ -155,8 +155,9 @@ def cargarTablaProductores(rows):
 			texto_alias = str(row[1])
 			texto_cuit = str(row[3])
 
-			tabla.insert("", tk.END, tags=(str(row[0]), str(row[3])), values = (texto_alias,
+			tabla.insert("", tk.END, tags=(str(row[0]), str(row[3]),"oddrow",), values = (texto_alias,
 				texto_cuit,))
+		tabla.tag_configure('oddrow', background='orange')
 	except:
 		messagebox.showerror("ERROR", "Error al cargar")
 
@@ -372,7 +373,93 @@ def borrarTablaObservaciones():
 	for j in tabla.get_children():
 		tabla.delete(j)
 
+def agregarGasto():
+	windowGasto = Tk()
+	windowGasto.geometry("500x500")
 
+	tk.Label(windowGasto, text="Gasto:", font=("Helvetica Neue", 14), anchor="e").place(x=10, y=20, width=200)
+	tk.Label(windowGasto, text="Base imponible $:", font=("Helvetica Neue", 14), anchor="e").place(x=10, y=70, width=200)
+	tk.Label(windowGasto, text="Alicuota:", font=("Helvetica Neue", 14), anchor="e").place(x=10, y=120, width=200)
+	tk.Label(windowGasto, text="Importe:", font=("Helvetica Neue", 14), anchor="e").place(x=10, y=170, width=200)
+	tk.Label(windowGasto, text="IVA %:", font=("Helvetica Neue", 14), anchor="e").place(x=10, y=220, width=200)
+	tk.Label(windowGasto, text="IVA $:", font=("Helvetica Neue", 14), anchor="e").place(x=10, y=270, width=200)
+
+	entry_gasto = Entry(windowGasto, font=("Helvetica Neue", 14))
+	entry_baseImponible = Entry(windowGasto, font=("Helvetica Neue", 14))
+	entry_alicuota = Entry(windowGasto, font=("Helvetica Neue", 14))
+	entry_importe = Entry(windowGasto, font=("Helvetica Neue", 14))
+	entry_ivaPorcentaje = Entry(windowGasto, font=("Helvetica Neue", 14))
+	entry_ivaImporte = Entry(windowGasto, font=("Helvetica Neue", 14))
+
+	entry_gasto.place(x=220, y=20, width=200)
+	entry_baseImponible.place(x=220, y=70, width=200)
+	entry_alicuota.place(x=220, y=120, width=200)
+	entry_importe.place(x=220, y=170, width=200)
+	entry_ivaPorcentaje.place(x=220, y=220, width=200)
+	entry_ivaImporte.place(x=220, y=270, width=200)
+
+	entry_ivaPorcentaje.insert(0, 21.0)
+
+	def guardarAgregarGasto():
+		gasto = str(entry_gasto.get())
+		baseImponible = str(entry_baseImponible.get())
+		alicuota = str(entry_alicuota.get())
+		importe = str(entry_importe.get())
+		porcentajeIva = str(entry_ivaPorcentaje.get())
+		precioIva = str(entry_ivaImporte.get())
+
+		tabla = diccionario_objetos["tabla_comprasGastos"]
+
+		tabla.insert("", tk.END, values=(gasto, baseImponible, alicuota, importe, porcentajeIva, precioIva))
+
+		windowGasto.destroy()
+
+	btn_guardar = tk.Button(windowGasto, text="GUARDAR", font=("Helvetica Neue", 15), command = guardarAgregarGasto, backgroun="#a4ff9e")
+	btn_guardar.place(x=165, y=350, width=150, height=70)
+
+	def enter_entry_gasto():
+		entry_baseImponible.focus()
+
+	def enter_entry_baseImponible():
+		entry_alicuota.focus()
+
+	def enter_entry_alicuota():
+		entry_importe.focus()
+		entry_importe.delete(0, tk.END)
+		entry_ivaImporte.delete(0, tk.END)
+
+		importe = float(entry_alicuota.get())/100*float(entry_baseImponible.get())
+		iva = float(entry_ivaPorcentaje.get())/100*importe
+
+		entry_importe.insert(0, importe)
+		entry_ivaImporte.insert(0, iva)
+
+	def enter_entry_importe():
+		entry_ivaImporte.delete(0, tk.END)
+
+		iva = float(entry_ivaPorcentaje.get())/100*float(entry_importe.get())
+
+		entry_ivaImporte.insert(0, iva)
+		entry_ivaPorcentaje.focus()
+
+	def enter_entry_ivaPorcentaje():
+		entry_ivaImporte.focus()
+		entry_ivaImporte.delete(0, tk.END)
+
+		iva = float(entry_ivaPorcentaje.get())/100*float(entry_importe.get())
+
+		entry_ivaImporte.insert(0, iva)
+	def enter_entry_ivaImporte():
+		guardarAgregarGasto()
+	
+	entry_gasto.bind('<Return>', (lambda event: enter_entry_gasto()))
+	entry_baseImponible.bind('<Return>', (lambda event: enter_entry_baseImponible()))
+	entry_alicuota.bind('<Return>', (lambda event: enter_entry_alicuota()))
+	entry_importe.bind('<Return>', (lambda event: enter_entry_importe()))
+	entry_ivaPorcentaje.bind('<Return>', (lambda event: enter_entry_ivaPorcentaje()))
+	entry_ivaImporte.bind('<Return>', (lambda event: enter_entry_ivaImporte()))
+
+	windowGasto.mainloop()
 
 
 #CONSTRUCTORES
@@ -440,6 +527,7 @@ def labelProductorBuscador(lbl_productor):
 	sbr_productor = Scrollbar(lbl_ventana_productor_buscador_tabla)
 	sbr_productor.pack(side=RIGHT, fill="y")
 
+
 	tabla_productor = ttk.Treeview(lbl_ventana_productor_buscador_tabla, columns=("cliente", "doc"), selectmode=tk.BROWSE, height=19, show='headings') 
 	tabla_productor.pack(side=LEFT, fill="both", expand=True)
 	sbr_productor.config(command=tabla_productor.yview)
@@ -465,7 +553,7 @@ def labelCompras(label_compras):
 	lbl_tablaGastos = tk.LabelFrame(label_compras, text="GASTOS", backgroun="#E0F8F1")
 	lbl_tablaGastos.place(x = 5, y = 210, width = 955, height = 200)
 
-	lbl_tablaObservaciones = tk.LabelFrame(label_compras, text="OBSERVACIONES", backgroun="#E0F8F1")
+	lbl_tablaObservaciones = tk.LabelFrame(label_compras, text="Financiacion", backgroun="#E0F8F1")
 	lbl_tablaObservaciones.place(x = 5, y = 415, width = 300, height = 160)
 
 	lbl_totales = tk.LabelFrame(label_compras, text="TOTALES", backgroun="#E0F8F1")
@@ -532,7 +620,7 @@ def labelCompras(label_compras):
 
 		diccionario_objetos["tabla_comprasGastos"] = tabla_comprasGastos
 
-	#TABLA OBSERVACIONES
+	#TABLA Financiacion
 	if(True):
 		sbr_comprasObservaciones = Scrollbar(lbl_tablaObservaciones)
 		sbr_comprasObservaciones.pack(side=RIGHT, fill="y")
@@ -688,17 +776,11 @@ def labelCompras(label_compras):
 		btn_firmaLiquidacionCompra.place(x = 120, y = 55, width = 110, height = 20)
 
 
-		btn_imprimirLiquidacionCompra = tk.Button(lbl_acciones, text="Pre-Liquidacion\nde COMPRAS", font=("Helvetica Neue",10, "bold"), backgroun="#a4ff9e", command= lambda: preLiquidacionDeCompra())
+		btn_imprimirLiquidacionCompra = tk.Button(lbl_acciones, text="Exportar\nPre-Liquidacion\nde COMPRAS", font=("Helvetica Neue",10, "bold"), backgroun="#a4ff9e", command= lambda: preLiquidacionDeCompra())
 		btn_imprimirLiquidacionCompra.place(x = 235, y = 5, width = 110, height = 70)
 
-		def jia():
-			tabla = diccionario_objetos["tabla_compras"]
-			for i in tabla.get_children():
-				print(tabla.item(i))
-
-
-		btn_jia = tk.Button(lbl_acciones, text="jiaa", font=("Helvetica Neue",10, "bold"), backgroun="#a4ff9e", command= lambda: jia())
-		btn_jia.place(x = 350, y = 5, width = 110, height = 70)
+		btn_agregarGasto = tk.Button(lbl_acciones, text="Agregar\nGasto", font=("Helvetica Neue",10, "bold"), backgroun="#a4ff9e", command= lambda: agregarGasto())
+		btn_agregarGasto.place(x = 350, y = 5, width = 110, height = 70)
 
 def labelCompradorMontos(lbl_montos):
 	lbl_montos = tk.LabelFrame(lbl_montos, text="Montos", backgroun="#E0F8F1")

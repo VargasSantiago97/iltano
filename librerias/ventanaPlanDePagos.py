@@ -29,37 +29,24 @@ import shutil
 
 diccionario_objetos = {}
 
-def cargarTablaObservaciones(nuevoDic, tabla_comprasObservaciones):
-	tabla = tabla_comprasObservaciones
 
-	for j in tabla.get_children():
-		tabla.delete(j)
-
-	try:
-		for i in range(0, len(nuevoDic)):
-			texto_cuota = nuevoDic[str(i)]["cuota"]
-			texto_fecha = nuevoDic[str(i)]["fecha"]
-			texto_monto = nuevoDic[str(i)]["monto"]
-
-			tabla.insert("", tk.END, values = (texto_cuota,
-				texto_fecha, texto_monto))
-	except:
-		messagebox.showerror("ERROR", "Error al cargar")
-
-def guardar(tabla_comprasObservaciones):
-	nuevoDic = {}
+def guardar(diccionario_observaciones, window, cargarTablaObservaciones):
+	diccionario_observaciones.clear()
 	j=0
 	for i in range(0, 12):
 		if (diccionario_objetos["entry" + str(i+1) + "_monto"].get() != ""):
-			nuevoDic[str(j)] = {
+			diccionario_observaciones[str(j)] = {
 			"cuota" : str(diccionario_objetos["entry" + str(i+1) + "_cuota"].get()),
 			"fecha" : str(diccionario_objetos["entry" + str(i+1) + "_fecha"].get()),
 			"monto" : str(diccionario_objetos["entry" + str(i+1) + "_monto"].get()),
 			}
 			j+=1
-	cargarTablaObservaciones(nuevoDic, tabla_comprasObservaciones)
 
-def planDePagos(tabla_comprasObservaciones, fecha_actual):
+	cargarTablaObservaciones()
+	window.destroy()
+
+
+def planDePagos(diccionario_observaciones, cargarTablaObservaciones, fecha_actual):
 
 	window = Tk()
 	window.title("Plan de pagos")
@@ -207,8 +194,10 @@ def planDePagos(tabla_comprasObservaciones, fecha_actual):
 	diccionario_objetos["entry12_cuota"] = entry12_cuota
 
 
-	btn_guardar = tk.Button(window, text="GUARDAR", backgroun="#a4ff9e", font=("Helvetica Neue",12,"bold"), command= lambda: guardar(tabla_comprasObservaciones))
+	btn_guardar = tk.Button(window, text="GUARDAR", backgroun="#a4ff9e", font=("Helvetica Neue",12,"bold"), command= lambda: guardar(diccionario_observaciones, window, cargarTablaObservaciones))
 	btn_guardar.place(x = 70, y = 380, width = 130, height = 50)
+
+
 
 
 	window.mainloop()
