@@ -98,6 +98,7 @@ padX = 5
 padY = 5
 
 
+
 def treeview_sort_column(tv, col, reverse):
 	l = [(tv.set(k, col), k) for k in tv.get_children('')]
 	l.sort(reverse=reverse)
@@ -183,6 +184,7 @@ def cargarTablaProductores(rows):
 	except:
 		messagebox.showerror("ERROR", "Error al cargar")
 def seleccionarTablaProductor():
+
 	tabla = diccionario_objetos["tabla_productores"]
 
 	seleccion = tabla.item(tabla.selection())
@@ -647,6 +649,8 @@ def crearComisionVentas():
 		x_importe = str(round(baseImponible*x_alicuota/100, 2))
 		x_porcentajeIva = str("10.5")
 		x_precioIva = str(round(baseImponible*x_alicuota*0.105/100, 2))
+
+		diccionario_objetos["TEXTOCOMISION"].set(baseImponible-float(x_importe))
 
 		diccionario_gastosVentas["0"] = {
 		"id" : "comision",
@@ -1328,6 +1332,7 @@ def labelVentas(label_ventas):
 		texto_alicuotaComision = StringVar()
 		texto_gastos = StringVar()
 		texto_gastosIva = StringVar()
+		TEXTOCOMISION = StringVar()
 
 
 		texto_martillo.set("")
@@ -1435,6 +1440,8 @@ def labelVentas(label_ventas):
 		diccionario_objetos["ventas_texto_alicuotaInteres"] = texto_alicuotaInteres
 		diccionario_objetos["ventas_texto_alicuotaInteresDias"] = texto_alicuotaInteresDias
 		diccionario_objetos["ventas_texto_alicuotaComision"] = texto_alicuotaComision
+		diccionario_objetos["TEXTOCOMISION"] = TEXTOCOMISION
+		
 
 	#ACCIONES
 	if(True):
@@ -1463,6 +1470,9 @@ def labelVentas(label_ventas):
 
 		btn_alicuotas = tk.Button(lbl_acciones, text="Alicuotas\nde Ventas", font=("Helvetica Neue",10, "bold"), backgroun="#a4ff9e", command= lambda: alicuotasVentas())
 		btn_alicuotas.place(x = 580, y = 5, width = 110, height = 70)
+
+		btn_retencion = tk.Button(lbl_acciones, text="Agregar\nretención\nIIBB", font=("Helvetica Neue",10, "bold"), backgroun="#a4ff9e", command= lambda: retencionVentas(float(TEXTOCOMISION.get())))
+		btn_retencion.place(x = 695, y = 5, width = 110, height = 70)
 
 
 #OTROS
@@ -2207,6 +2217,21 @@ def exportacion(window):
 	actualizarProductores()
 	actualizarDatosRemate()
 
+	#MENU
+	if(True):
+		barraMenu = Menu(window)
+
+		mnuArchivo = Menu(barraMenu)
+		mnuArchivo.add_command(label="Abrir")
+		mnuArchivo.add_command(label="Nuevo")
+		mnuArchivo.add_command(label="Guardar")
+		mnuArchivo.add_command(label="Cerrar")
+		mnuArchivo.add_command(label="Salir")
+
+		barraMenu.add_cascade(label="Archivo", menu = mnuArchivo)
+
+		window.config(menu = barraMenu)
+
 def guardarLiquidaciones():
 	con = sql_connection()
 	condiciones = " WHERE productor = '" + str(diccionario_objetos["texto_cuit"].get()) + "' AND remate = '" + str(rematename) + "'"
@@ -2219,7 +2244,7 @@ def guardarLiquidaciones():
 	else:
 		MsgBox = messagebox.askquestion('ATENCION', '¿Desea editar estas liquidaciones?', icon = 'warning')
 		if(MsgBox == 'yes'):
-			return 0#guardarLiquidacionesEditar(rows[0][])
+			guardarLiquidacionesNuevo()
 def guardarLiquidacionesNuevo():
 	HoraMinutosSegundos = str(time.strftime("%H-%M-%S"))
 	codigoUnico = str(diccionario_objetos["texto_cuit"].get()) + "_" + str(rematename) + "_" + HoraMinutosSegundos
@@ -2547,10 +2572,6 @@ def guardarLiquidacionesNuevo():
 
 
 
-#def guardarLiquidacionesEditar(codigoUnico):
-
-
-
 
 
 def alicuotas():
@@ -2669,6 +2690,130 @@ def alicuotasVentas():
 
 
 	windowAlicuotasVentas.mainloop()
+def retencionVentas(baseImponible):
+	windowsRetencionVentas = Tk()
+	windowsRetencionVentas.geometry("800x300")
+	windowsRetencionVentas.title("RETENCION IIBB")
+
+	varx=20
+
+	tk.Label(windowsRetencionVentas, text="RET IIBB CHACO", font=("Helvetica Neue",10, "bold"), anchor="c", backgroun="#d5e5f7").place(x = 20+varx, y = 70, width = 150)
+	tk.Label(windowsRetencionVentas, text="ADICIONAL 10%", font=("Helvetica Neue",10, "bold"), anchor="c", backgroun="#d5e5f7").place(x = 20+varx, y = 120, width = 150)
+
+	tk.Label(windowsRetencionVentas, text="Base Imponible $", font=("Helvetica Neue",8, "bold"), anchor="c", backgroun="#d5e5f7").place(x = 180+varx, y = 45, width = 100)
+	tk.Label(windowsRetencionVentas, text="Alicuota %", font=("Helvetica Neue",8, "bold"), anchor="c", backgroun="#d5e5f7").place(x = 290+varx, y = 45, width = 100)
+	tk.Label(windowsRetencionVentas, text="Importe $", font=("Helvetica Neue",8, "bold"), anchor="c", backgroun="#d5e5f7").place(x = 400+varx, y = 45, width = 100)
+	tk.Label(windowsRetencionVentas, text="IVA %", font=("Helvetica Neue",8, "bold"), anchor="c", backgroun="#d5e5f7").place(x = 510+varx, y = 45, width = 100)
+	tk.Label(windowsRetencionVentas, text="IVA $", font=("Helvetica Neue",8, "bold"), anchor="c", backgroun="#d5e5f7").place(x = 620+varx, y = 45, width = 100)
+
+
+	entry_baseRetencion = Entry(windowsRetencionVentas, font = ("Helvetica Neue", 12))
+	entry_baseRetencion.place(x = 180+varx, y =70, width = 100)
+
+	entry_baseAdicional = Entry(windowsRetencionVentas, font = ("Helvetica Neue", 12))
+	entry_baseAdicional.place(x = 180+varx, y = 120, width = 100)
+
+
+	entry_alicuotaRetencion = Entry(windowsRetencionVentas, font = ("Helvetica Neue", 12))
+	entry_alicuotaRetencion.place(x = 290+varx, y =70, width = 100)
+
+	entry_alicuotaAdicional = Entry(windowsRetencionVentas, font = ("Helvetica Neue", 12))
+	entry_alicuotaAdicional.place(x = 290+varx, y = 120, width = 100)
+
+
+	entry_importeRetencion = Entry(windowsRetencionVentas, font = ("Helvetica Neue", 12))
+	entry_importeRetencion.place(x = 400+varx, y =70, width = 100)
+
+	entry_importeAdicional = Entry(windowsRetencionVentas, font = ("Helvetica Neue", 12))
+	entry_importeAdicional.place(x = 400+varx, y = 120, width = 100)
+
+
+	entry_ivaRetencion = Entry(windowsRetencionVentas, font = ("Helvetica Neue", 12))
+	entry_ivaRetencion.place(x = 510+varx, y =70, width = 100)
+
+	entry_ivaAdicional = Entry(windowsRetencionVentas, font = ("Helvetica Neue", 12))
+	entry_ivaAdicional.place(x = 510+varx, y = 120, width = 100)
+
+
+	entry_precioIvaRetencion = Entry(windowsRetencionVentas, font = ("Helvetica Neue", 12))
+	entry_precioIvaRetencion.place(x = 620+varx, y =70, width = 100)
+
+	entry_precioIvaAdicional = Entry(windowsRetencionVentas, font = ("Helvetica Neue", 12))
+	entry_precioIvaAdicional.place(x = 620+varx, y = 120, width = 100)
+
+
+	entry_baseRetencion.delete(0, tk.END)
+	entry_baseAdicional.delete(0, tk.END)
+	entry_alicuotaRetencion.delete(0, tk.END)
+	entry_alicuotaAdicional.delete(0, tk.END)
+	entry_importeRetencion.delete(0, tk.END)
+	entry_importeAdicional.delete(0, tk.END)
+	entry_ivaRetencion.delete(0, tk.END)
+	entry_ivaAdicional.delete(0, tk.END)
+	entry_precioIvaRetencion.delete(0, tk.END)
+	entry_precioIvaAdicional.delete(0, tk.END)
+
+
+	entry_baseRetencion.insert(0, baseImponible)
+	entry_baseAdicional.insert(0, baseImponible)
+	entry_alicuotaRetencion.insert(0, 0.750)
+	entry_alicuotaAdicional.insert(0, 0.075)
+	entry_importeRetencion.insert(0, round(baseImponible*float(entry_alicuotaRetencion.get())/100, 2))
+	entry_importeAdicional.insert(0, round(baseImponible*float(entry_alicuotaAdicional.get())/100, 2))
+	entry_ivaRetencion.insert(0, 0.0)
+	entry_ivaAdicional.insert(0, 0.0)
+	entry_precioIvaRetencion.insert(0, 0.0)
+	entry_precioIvaAdicional.insert(0, 0.0)
+
+	def guardarIIBB():
+		gasto = "RET IIBB CHACO"
+		baseImponible = str(entry_baseRetencion.get())
+		alicuota = str(entry_alicuotaRetencion.get())
+		importe = str(entry_importeRetencion.get())
+		porcentajeIva = str(entry_ivaRetencion.get())
+		precioIva = str(entry_precioIvaRetencion.get())
+
+		diccionario_gastosVentas[str(len(diccionario_gastosVentas))] = {
+		"id" : str(len(diccionario_gastosVentas)),
+		"gasto" : gasto,
+		"base" : baseImponible,
+		"alicuota" : alicuota,
+		"importe" : importe,
+		"porcentajeIva" : porcentajeIva,
+		"precioIva" : precioIva,
+		}
+		#------------------------------------------------
+		gasto = "ADICIONAL CHACO 10% LEY 666 K"
+		baseImponible = str(entry_baseAdicional.get())
+		alicuota = str(entry_alicuotaAdicional.get())
+		importe = str(entry_importeAdicional.get())
+		porcentajeIva = str(entry_ivaAdicional.get())
+		precioIva = str(entry_precioIvaAdicional.get())
+
+		diccionario_gastosVentas[str(len(diccionario_gastosVentas))] = {
+		"id" : str(len(diccionario_gastosVentas)),
+		"gasto" : gasto,
+		"base" : baseImponible,
+		"alicuota" : alicuota,
+		"importe" : importe,
+		"porcentajeIva" : porcentajeIva,
+		"precioIva" : precioIva,
+		}
+
+		cargarGastosVentas()
+		windowsRetencionVentas.destroy()
+
+
+
+	btn_guardar = tk.Button(windowsRetencionVentas, text="GUARDAR", font=("Helvetica Neue",15, "bold"), backgroun="#a4ff9e", command= lambda: guardarIIBB())
+	btn_guardar.place(x = 350, y = 200, width = 110, height = 70)
+
+
+
+	windowsRetencionVentas.mainloop()
+
+
+
 
 def buscarDatosGuardados(codigo):
 	#Obtener datos guardados
@@ -2749,6 +2894,9 @@ def buscarDatosGuardados(codigo):
 	rows_ventasTotales
 	"""
 	messagebox.showinfo("ATENCION", "Funcion no disponible, se puede ver lo guardado en la pestaña 'Exportacion', o volver a guardar")
+
+
+
 
 window1 = Tk()
 window1.title("PRE-LIQUIDACIONES")

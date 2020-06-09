@@ -566,6 +566,8 @@ def ingreso(cuit, lote, remate, cargarTablaLotes, limpiarLote, cargarTabla):
 		rad2.place(x=200, y=30, width = 100)
 		rad3.place(x=200, y=50, width = 100)
 
+		select.set(2)
+
 
 
 
@@ -597,4 +599,4 @@ def func2():
 def func3():
 	print("Func 3")
 
-#ingreso(cuit, lote, remate, func, func2, func3)
+ingreso(cuit, lote, remate, func, func2, func3)
