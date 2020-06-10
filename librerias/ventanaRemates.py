@@ -27,6 +27,8 @@ from sqlite3 import Error
 
 import shutil
 
+diccionarioObjetos = {}
+
 
 def bodyRemate(window):
 	#ID
@@ -46,6 +48,7 @@ def bodyRemate(window):
 	tk.Label(window, text = "Localidad", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 5, padx=10, pady=10)
 	tk.Label(window, text = "Martillo", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 6, padx=10, pady=10)
 	tk.Label(window, text = "Observaciones", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 7, padx=10, pady=10)
+	tk.Label(window, text = "Comentarios", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 8, padx=10, pady=10)
 
 	entryNombre = Entry(window, font=("Helvetica Neue",14))
 	entryFecha = Entry(window, font=("Helvetica Neue",14), state="disabled")
@@ -65,8 +68,14 @@ def bodyRemate(window):
 	entryObservaciones.grid(sticky = "w", column = 1, row = 7, padx=0, pady=10)
 	entryComentarios.grid(sticky = "w", column = 1, row = 8, padx=0, pady=10)
 
-	entryNombre.focus()
+	#diccionarioObjetos["botGuardar"]
+	#diccionarioObjetos["botBorrar"] 
+	#diccionarioObjetos["botEditar"] 
+	diccionarioObjetos["botBuscar"]["state"] = "normal"
 
+	entryNombre.focus()
+def ayuda():
+	messagebox.showinfo("Atencion", "Ayuda no disponible")
 def ventana1(idRemate):
 
 	def cerrarVentana():
@@ -106,7 +115,7 @@ def ventana1(idRemate):
 	botBorrar = tk.Button(barraherr, image=iconBorrar, compound="top", backgroun="#FFaba8")
 	botEditar = tk.Button(barraherr, image=iconEditar, compound="top")
 	botBuscar = tk.Button(barraherr, image=iconBuscar, compound="top")
-	botAyuda = tk.Button(barraherr, image=iconAyuda, compound="top")
+	botAyuda = tk.Button(barraherr, image=iconAyuda, compound="top", command=ayuda)
 	botCerrar = tk.Button(barraherr, image=iconCerrar, compound="top", command=cerrarVentana, backgroun="#FF6E6E")
 
 	padX=3
@@ -130,6 +139,11 @@ def ventana1(idRemate):
 	lbl_titulo = tk.Label(barraTitulo, font=("Helvetica Neue",10,"bold"), anchor="n", backgroun="#BAE7FF")
 	lbl_titulo.pack()
 	lbl_titulo.config(textvariable=textTitulo)
+
+	diccionarioObjetos["botGuardar"] = botGuardar
+	diccionarioObjetos["botBorrar"] = botBorrar
+	diccionarioObjetos["botEditar"] = botEditar
+	diccionarioObjetos["botBuscar"] = botBuscar
 
 
 

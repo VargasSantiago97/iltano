@@ -887,6 +887,6 @@ def abrir_ventana(mov, productor, cod):
 	window_comprobante.bind("<Escape>", (lambda event: cerrar_ventana_principal()))
 	window_comprobante.mainloop()
 
-#abrir_ventana("compra", "2", "asd")
+abrir_ventana("compra", "2", "asd")
 #txt_descripcion.get("1.0", tk.END)
 #Falta la parte de comprobantes asociados
