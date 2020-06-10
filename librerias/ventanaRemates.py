@@ -6,6 +6,7 @@ import time
 import logging
 import datetime
 
+import tablaElegir
 
 from tkinter import *
 from tkinter.ttk import *
@@ -28,7 +29,94 @@ from sqlite3 import Error
 import shutil
 
 diccionarioObjetos = {}
+direccionBaseDeDatos = 'database/iltanohacienda.db'
 
+def sql_connection():
+	try:
+		con = sqlite3.connect(direccionBaseDeDatos)
+		return con
+	except Error:
+		messagebox.showerror("ERROR", "Error conectando a la base de datos")
+def actualizar_db(con, tabla, condiciones):
+	cursorObj = con.cursor()
+	cursorObj.execute("SELECT * FROM " + str(tabla) + condiciones)
+	rows = cursorObj.fetchall()
+
+	return rows
+
+def ayuda():
+	messagebox.showinfo("Atencion", "Ayuda no disponible")
+	pass
+def buscar():
+	def funcsalirr(ssss):
+
+		con = sql_connection()
+		condiciones = " WHERE id = " + str(ssss)
+		rows = actualizar_db(con, "remate", condiciones)
+
+		diccionarioObjetos["entryNombre"].delete(0, tk.END)
+		diccionarioObjetos["entryNombre"].insert(0, rows[0][1])
+
+		verificar()
+
+	dicc_buscar = {"seleccionar" : "remate",
+	"columnas" : {"0":{"id" : "nombre", "cabeza" : "Remate", "ancho" : 180, "row" : 1}, "1":{"id" : "fecha", "cabeza" : "Fecha", "ancho" : 60, "row" : 2}, "2":{"id" : "tipo", "cabeza" : "Tipo", "ancho" : 70, "row" : 3}},
+	"db" : direccionBaseDeDatos,
+	"tabla" : "remate",
+	"condiciones" : ' WHERE nombre LIKE  "%' + str(diccionarioObjetos["entryNombre"].get()) + '%" OR fecha LIKE "%' + str(diccionarioObjetos["entryNombre"].get()) + '%" OR tipo LIKE "%' + str(diccionarioObjetos["entryNombre"].get()) + '%"'}
+	tablaElegir.tabla_elegir(dicc_buscar, funcsalirr)
+
+def verificar():
+	remateNombre = diccionarioObjetos["entryNombre"].get()
+
+	con = sql_connection()
+	condiciones = " WHERE nombre = '" + str(remateNombre) + "'"
+	rows = actualizar_db(con, "remate", condiciones)
+
+	if len(rows) == 1:
+		activarCampos()
+		borrarCampos()
+		cargarDatosRemate(rows[0])
+	else:
+		activarCampos()
+		borrarCampos()
+
+def activarCampos():
+	diccionarioObjetos["entryFecha"].config(state="normal")
+	diccionarioObjetos["entryTipo"].config(state="normal")
+	diccionarioObjetos["entryPredio"].config(state="normal")
+	diccionarioObjetos["entryLocalidad"].config(state="normal")
+	diccionarioObjetos["entryMartillo"].config(state="normal")
+	diccionarioObjetos["entryObservaciones"].config(state="normal")
+	diccionarioObjetos["entryComentarios"].config(state="normal")
+def borrarCampos():
+	diccionarioObjetos["entryNombre"].delete(0, tk.END)
+	diccionarioObjetos["entryFecha"].delete(0, tk.END)
+	diccionarioObjetos["entryTipo"].delete(0, tk.END)
+	diccionarioObjetos["entryPredio"].delete(0, tk.END)
+	diccionarioObjetos["entryLocalidad"].delete(0, tk.END)
+	diccionarioObjetos["entryMartillo"].delete(0, tk.END)
+	diccionarioObjetos["entryObservaciones"].delete(0, tk.END)
+	diccionarioObjetos["entryComentarios"].delete(0, tk.END)
+def cargarDatosRemate(row):
+	idd = str(row[0])
+	nombre = str(row[1])
+	fecha = str(row[2])
+	tipo = str(row[3])
+	predio = str(row[4])
+	localidad = str(row[5])
+	martillo = str(row[6])
+	observaciones = str(row[7])
+	comentarios = str(row[8])
+
+	diccionarioObjetos["entryNombre"].insert(0, nombre)
+	diccionarioObjetos["entryFecha"].insert(0, fecha)
+	diccionarioObjetos["entryTipo"].insert(0, tipo)
+	diccionarioObjetos["entryPredio"].insert(0, predio)
+	diccionarioObjetos["entryLocalidad"].insert(0, localidad)
+	diccionarioObjetos["entryMartillo"].insert(0, martillo)
+	diccionarioObjetos["entryObservaciones"].insert(0, observaciones)
+	diccionarioObjetos["entryComentarios"].insert(0, comentarios)
 
 def bodyRemate(window):
 	#ID
@@ -68,14 +156,21 @@ def bodyRemate(window):
 	entryObservaciones.grid(sticky = "w", column = 1, row = 7, padx=0, pady=10)
 	entryComentarios.grid(sticky = "w", column = 1, row = 8, padx=0, pady=10)
 
-	#diccionarioObjetos["botGuardar"]
+	diccionarioObjetos["entryNombre"] = entryNombre
+	diccionarioObjetos["entryFecha"] = entryFecha
+	diccionarioObjetos["entryTipo"] = entryTipo
+	diccionarioObjetos["entryPredio"] = entryPredio
+	diccionarioObjetos["entryLocalidad"] = entryLocalidad
+	diccionarioObjetos["entryMartillo"] = entryMartillo
+	diccionarioObjetos["entryObservaciones"] = entryObservaciones
+	diccionarioObjetos["entryComentarios"] = entryComentarios
+
 	#diccionarioObjetos["botBorrar"] 
 	#diccionarioObjetos["botEditar"] 
 	diccionarioObjetos["botBuscar"]["state"] = "normal"
 
 	entryNombre.focus()
-def ayuda():
-	messagebox.showinfo("Atencion", "Ayuda no disponible")
+	entryNombre.bind('<Return>', (lambda event: verificar()))
 def ventana1(idRemate):
 
 	def cerrarVentana():
@@ -114,7 +209,7 @@ def ventana1(idRemate):
 	botGuardar = tk.Button(barraherr, image=iconGuardar, compound="top", backgroun="#b3f2bc")
 	botBorrar = tk.Button(barraherr, image=iconBorrar, compound="top", backgroun="#FFaba8")
 	botEditar = tk.Button(barraherr, image=iconEditar, compound="top")
-	botBuscar = tk.Button(barraherr, image=iconBuscar, compound="top")
+	botBuscar = tk.Button(barraherr, image=iconBuscar, compound="top", command = buscar)
 	botAyuda = tk.Button(barraherr, image=iconAyuda, compound="top", command=ayuda)
 	botCerrar = tk.Button(barraherr, image=iconCerrar, compound="top", command=cerrarVentana, backgroun="#FF6E6E")
 

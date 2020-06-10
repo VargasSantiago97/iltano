@@ -40,9 +40,25 @@ def treeview_sort_column(tv, col, reverse):
 	treeview_sort_column(tv, col, not reverse))
 
 
-def tabla_elegir(dicc):
+def tabla_elegir(dicc, funcion_salida):
+	try:
+		con = sqlite3.connect(dicc["db"])
+	except Error:
+		messagebox.showerror("ERROR", "Error conectando a la base de datos")
+		return 0
 
-	window_new = Tk()
+	cursorObj = con.cursor()
+	cursorObj.execute("SELECT * FROM " + dicc["tabla"] + dicc["condiciones"])
+	rows = cursorObj.fetchall()
+
+	if (len(rows)==0):
+		messagebox.showerror("ERROR", "No se encontraron coincidencias")
+		return 0
+	if(len(rows)==1):
+		funcion_salida(rows[0][0])
+		return 0
+
+	window_new = tk.Toplevel()
 	window_new.geometry("336x400")
 	window_new.title("Seleccionar " + dicc["seleccionar"])
 	#window_new.resizable(0,0)
@@ -69,42 +85,17 @@ def tabla_elegir(dicc):
 		tabla_elegir.column(dicc["columnas"][str(i)]["id"], width=dicc["columnas"][str(i)]["ancho"])
 
 
-
-	try:
-		con = sqlite3.connect(dicc["db"])
-	except Error:
-		messagebox.showerror("ERROR", "Error conectando a la base de datos")
-		return 0
-
-	cursorObj = con.cursor()
-	cursorObj.execute("SELECT * FROM " + dicc["tabla"] + dicc["condiciones"])
-	rows = cursorObj.fetchall()
-
-	if (len(rows)==0):
-		messagebox.showerror("ERROR", "No se encontraron coincidencias")
-		window_new.destroy()
-		return 0
-	elif(len(rows)==1):
-		funcion_salida(rows[0])
-		window_new.destroy()
-	else:
-		for i in tabla_elegir.get_children():
-			tabla_elegir.delete(i)
-
-	
+	for i in tabla_elegir.get_children():
+		tabla_elegir.delete(i)
 
 
-
-
-
-
-
-
-
-	i = 0
 	for row in rows:
-		tabla_elegir.insert("", tk.END,  text = str(row[0]), iid=i, values = (row[1], row[2]))
-		i = i+1
+		entities = []
+		for j in range(0, len(dicc["columnas"])):
+			entities.append(row[dicc["columnas"][str(j)]["row"]])
+		entities = tuple(entities)
+
+		tabla_elegir.insert("", tk.END, iid=str(row[0]), values = entities)
 
 
 
@@ -112,10 +103,14 @@ def tabla_elegir(dicc):
 		window_new.destroy()
 
 	def elegir():
-		diccionario_respuesta["respuesta"] = (tabla_elegir.item(tabla_elegir.selection()[0]))['values']
-		diccionario_respuesta["respuesta_codigo"] = (tabla_elegir.item(tabla_elegir.selection()[0], option = "text"))
-		funcion_salida()
-
+		#diccionario_respuesta["respuesta"] = (tabla_elegir.item(tabla_elegir.selection()[0]))['values']
+		#diccionario_respuesta["respuesta_codigo"] = (tabla_elegir.item(tabla_elegir.selection()[0], option = "text"))
+		try:
+			enviar = tabla_elegir.selection()[0]
+		except:
+			return 0
+		funcion_salida(enviar)
+		window_new.destroy()
 		#str((tabla_elegir.item(tabla_elegir.selection()[0]))['values'])
 
 	tabla_elegir.bind("<Double-1>", (lambda event: elegir()))
@@ -123,12 +118,16 @@ def tabla_elegir(dicc):
 	window_new.bind("<Escape>", (lambda event: cerrar_window_elegir()))
 	window_new.mainloop()
 
+"""
 diccionario_respuesta = {"seleccionar" : "remate",
-"columnas" : {"0":{"id" : "num1", "cabeza" : "HOLA", "ancho" : 200}, "1":{"id" : "num2", "cabeza" : "CHAU", "ancho" : 200}},
+"columnas" : {"0":{"id" : "num1", "cabeza" : "Cuit", "ancho" : 110, "row" : 3}, "1":{"id" : "num2", "cabeza" : "CHAU", "ancho" : 200, "row" : 2}},
 "db" : 'database/iltanohacienda.db',
 "tabla" : "productores",
-"condiciones" : ' WHERE nombre LIKE  "%carlos%"'}
+"condiciones" : ' WHERE nombre LIKE  "%and%"'}
 
 
+def funcsalirr(params):
+	print("Jiaa ", params)
 
-tabla_elegir(diccionario_respuesta)
+tabla_elegir(diccionario_respuesta, funcsalirr)
+"""
