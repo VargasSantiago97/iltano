@@ -61,7 +61,7 @@ def tabla_elegir(dicc, funcion_salida):
 	window_new = tk.Toplevel()
 	window_new.geometry("336x400")
 	window_new.title("Seleccionar " + dicc["seleccionar"])
-	#window_new.resizable(0,0)
+	window_new.resizable(0,0)
 
 	lbl_tabla_elegir = Label(window_new)
 	lbl_tabla_elegir.grid(column = 0, row = 0, padx=5, pady=5)

@@ -63,7 +63,7 @@ def buscar():
 	"columnas" : {"0":{"id" : "nombre", "cabeza" : "Remate", "ancho" : 180, "row" : 1}, "1":{"id" : "fecha", "cabeza" : "Fecha", "ancho" : 60, "row" : 2}, "2":{"id" : "tipo", "cabeza" : "Tipo", "ancho" : 70, "row" : 3}},
 	"db" : direccionBaseDeDatos,
 	"tabla" : "remate",
-	"condiciones" : ' WHERE nombre LIKE  "%' + str(diccionarioObjetos["entryNombre"].get()) + '%" OR fecha LIKE "%' + str(diccionarioObjetos["entryNombre"].get()) + '%" OR tipo LIKE "%' + str(diccionarioObjetos["entryNombre"].get()) + '%"'}
+	"condiciones" : ' WHERE (nombre LIKE  "%' + str(diccionarioObjetos["entryNombre"].get()) + '%" OR fecha LIKE "%' + str(diccionarioObjetos["entryNombre"].get()) + '%" OR tipo LIKE "%' + str(diccionarioObjetos["entryNombre"].get()) + '%") AND estado = "activo"'}
 	tablaElegir.tabla_elegir(dicc_buscar, funcsalirr)
 
 def verificar():
@@ -76,10 +76,15 @@ def verificar():
 	if len(rows) == 1:
 		activarCampos()
 		borrarCampos()
+		diccionarioObjetos["entryNombre"].delete(0, tk.END)
 		cargarDatosRemate(rows[0])
+		botonesEditar()
+		diccionarioObjetos["entryFecha"].focus()
 	else:
 		activarCampos()
 		borrarCampos()
+		botonesNuevo()
+		diccionarioObjetos["entryFecha"].focus()
 
 def activarCampos():
 	diccionarioObjetos["entryFecha"].config(state="normal")
@@ -90,7 +95,6 @@ def activarCampos():
 	diccionarioObjetos["entryObservaciones"].config(state="normal")
 	diccionarioObjetos["entryComentarios"].config(state="normal")
 def borrarCampos():
-	diccionarioObjetos["entryNombre"].delete(0, tk.END)
 	diccionarioObjetos["entryFecha"].delete(0, tk.END)
 	diccionarioObjetos["entryTipo"].delete(0, tk.END)
 	diccionarioObjetos["entryPredio"].delete(0, tk.END)
@@ -109,6 +113,9 @@ def cargarDatosRemate(row):
 	observaciones = str(row[7])
 	comentarios = str(row[8])
 
+	diccionarioObjetos["textID"].set(idd)
+	diccionarioObjetos["textTitulo"].set(nombre)
+
 	diccionarioObjetos["entryNombre"].insert(0, nombre)
 	diccionarioObjetos["entryFecha"].insert(0, fecha)
 	diccionarioObjetos["entryTipo"].insert(0, tipo)
@@ -118,6 +125,22 @@ def cargarDatosRemate(row):
 	diccionarioObjetos["entryObservaciones"].insert(0, observaciones)
 	diccionarioObjetos["entryComentarios"].insert(0, comentarios)
 
+def botonesNuevo():
+	diccionarioObjetos["botGuardar"]["state"] = "normal"
+	diccionarioObjetos["botBorrar"]["state"] = "disabled"
+	diccionarioObjetos["botEditar"]["state"] = "disabled"
+	diccionarioObjetos["botBuscar"]["state"] = "disabled"
+def botonesEditar():
+	diccionarioObjetos["botGuardar"]["state"] = "disabled"
+	diccionarioObjetos["botBorrar"]["state"] = "normal"
+	diccionarioObjetos["botEditar"]["state"] = "normal"
+	diccionarioObjetos["botBuscar"]["state"] = "disabled"
+def activarBuscar():
+	diccionarioObjetos["botBuscar"]["state"] = "normal"
+	pass
+def desactivarBuscar():
+	diccionarioObjetos["botBuscar"]["state"] = "disabled"
+	pass
 def bodyRemate(window):
 	#ID
 	#NOMBRE
@@ -165,12 +188,29 @@ def bodyRemate(window):
 	diccionarioObjetos["entryObservaciones"] = entryObservaciones
 	diccionarioObjetos["entryComentarios"] = entryComentarios
 
-	#diccionarioObjetos["botBorrar"] 
-	#diccionarioObjetos["botEditar"] 
+
 	diccionarioObjetos["botBuscar"]["state"] = "normal"
 
 	entryNombre.focus()
 	entryNombre.bind('<Return>', (lambda event: verificar()))
+
+	entryNombre.bind('<Button-1>', (lambda event: activarBuscar()))
+	entryFecha.bind('<Button-1>', (lambda event: desactivarBuscar()))
+	entryTipo.bind('<Button-1>', (lambda event: desactivarBuscar()))
+	entryPredio.bind('<Button-1>', (lambda event: desactivarBuscar()))
+	entryLocalidad.bind('<Button-1>', (lambda event: desactivarBuscar()))
+	entryMartillo.bind('<Button-1>', (lambda event: desactivarBuscar()))
+	entryObservaciones.bind('<Button-1>', (lambda event: desactivarBuscar()))
+	entryComentarios.bind('<Button-1>', (lambda event: desactivarBuscar()))
+
+	entryFecha.bind('<Return>', (lambda event: entryTipo.focus()))
+	entryTipo.bind('<Return>', (lambda event: entryPredio.focus()))
+	entryPredio.bind('<Return>', (lambda event: entryLocalidad.focus()))
+	entryLocalidad.bind('<Return>', (lambda event: entryMartillo.focus()))
+	entryMartillo.bind('<Return>', (lambda event: entryObservaciones.focus()))
+	entryObservaciones.bind('<Return>', (lambda event: entryComentarios.focus()))
+
+
 def ventana1(idRemate):
 
 	def cerrarVentana():
@@ -182,6 +222,7 @@ def ventana1(idRemate):
 	window.title("REMATE")
 	window.geometry("700x500+200+50")
 	window.configure(backgroun="#E6F5FF") #E8F6FA
+	window.resizable(0,0)
 
 	iconGuardar = Image.open('iconos/guardar.png')
 	iconBorrar = Image.open('iconos/borrar.png')
@@ -208,9 +249,9 @@ def ventana1(idRemate):
 
 	botGuardar = tk.Button(barraherr, image=iconGuardar, compound="top", backgroun="#b3f2bc")
 	botBorrar = tk.Button(barraherr, image=iconBorrar, compound="top", backgroun="#FFaba8")
-	botEditar = tk.Button(barraherr, image=iconEditar, compound="top")
-	botBuscar = tk.Button(barraherr, image=iconBuscar, compound="top", command = buscar)
-	botAyuda = tk.Button(barraherr, image=iconAyuda, compound="top", command=ayuda)
+	botEditar = tk.Button(barraherr, image=iconEditar, compound="top", backgroun="#f2f0b3")
+	botBuscar = tk.Button(barraherr, image=iconBuscar, compound="top", command = buscar, backgroun="#b1fae3")
+	botAyuda = tk.Button(barraherr, image=iconAyuda, compound="top", command=ayuda, backgroun="#f2f0b3")
 	botCerrar = tk.Button(barraherr, image=iconCerrar, compound="top", command=cerrarVentana, backgroun="#FF6E6E")
 
 	padX=3
@@ -230,6 +271,8 @@ def ventana1(idRemate):
 
 	textTitulo = StringVar()
 	textTitulo.set("REMATE")
+	textID = StringVar()
+	textID.set("")
 
 	lbl_titulo = tk.Label(barraTitulo, font=("Helvetica Neue",10,"bold"), anchor="n", backgroun="#BAE7FF")
 	lbl_titulo.pack()
@@ -240,7 +283,11 @@ def ventana1(idRemate):
 	diccionarioObjetos["botEditar"] = botEditar
 	diccionarioObjetos["botBuscar"] = botBuscar
 
+	diccionarioObjetos["textTitulo"] = textTitulo
+	diccionarioObjetos["textID"] = textID
+	
 
+	window.bind("<Escape>", (lambda event: cerrarVentana()))
 
 	bodyRemate(lblBody)
 
