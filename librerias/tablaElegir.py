@@ -59,7 +59,7 @@ def tabla_elegir(dicc, funcion_salida):
 		return 0
 
 	window_new = tk.Toplevel()
-	window_new.geometry("336x400")
+	window_new.geometry(dicc["dimensionesVentana"])
 	window_new.title("Seleccionar " + dicc["seleccionar"])
 	window_new.resizable(0,0)
 

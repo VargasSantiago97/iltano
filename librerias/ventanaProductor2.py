@@ -53,32 +53,32 @@ def buscar():
 
 		con = sql_connection()
 		condiciones = " WHERE id = " + str(ssss)
-		rows = actualizar_db(con, "remate", condiciones)
+		rows = actualizar_db(con, "productores", condiciones)
 
-		diccionarioObjetos["entryNombre"].delete(0, tk.END)
-		diccionarioObjetos["entryNombre"].insert(0, rows[0][1])
+		diccionarioObjetos["entryAlias"].delete(0, tk.END)
+		diccionarioObjetos["entryAlias"].insert(0, rows[0][1])
 
 		verificar()
 
-	dicc_buscar = {"seleccionar" : "remate",
-	"columnas" : {"0":{"id" : "nombre", "cabeza" : "Remate", "ancho" : 180, "row" : 1}, "1":{"id" : "fecha", "cabeza" : "Fecha", "ancho" : 60, "row" : 2}, "2":{"id" : "tipo", "cabeza" : "Tipo", "ancho" : 70, "row" : 3}},
+	dicc_buscar = {"seleccionar" : "productor",
+	"columnas" : {"0":{"id" : "alias", "cabeza" : "Alias", "ancho" : 180, "row" : 1}, "1":{"id" : "razon", "cabeza" : "Razon Social", "ancho" : 180, "row" : 2}, "2":{"id" : "cuit", "cabeza" : "CUIT", "ancho" : 110, "row" : 3}},
 	"db" : direccionBaseDeDatos,
-	"tabla" : "remate",
-	"condiciones" : ' WHERE (nombre LIKE  "%' + str(diccionarioObjetos["entryNombre"].get()) + '%" OR fecha LIKE "%' + str(diccionarioObjetos["entryNombre"].get()) + '%" OR tipo LIKE "%' + str(diccionarioObjetos["entryNombre"].get()) + '%") AND estado = "activo"',
-	"dimensionesVentana" : "336x400"}
+	"tabla" : "productores",
+	"condiciones" : ' WHERE (nombre LIKE  "%' + str(diccionarioObjetos["entryAlias"].get()) + '%" OR razon LIKE "%' + str(diccionarioObjetos["entryAlias"].get()) + '%" OR ndoc LIKE "%' + str(diccionarioObjetos["entryAlias"].get()) + '%") AND estado = "activo"',
+	"dimensionesVentana" : "500x400"}
 	tablaElegir.tabla_elegir(dicc_buscar, funcsalirr)
 
 def verificar():
-	remateNombre = diccionarioObjetos["entryNombre"].get()
+	remateNombre = diccionarioObjetos["entryAlias"].get()
 
 	con = sql_connection()
 	condiciones = " WHERE nombre = '" + str(remateNombre) + "'"
-	rows = actualizar_db(con, "remate", condiciones)
+	rows = actualizar_db(con, "productores", condiciones)
 
 	if len(rows) == 1:
 		activarCampos()
 		borrarCampos()
-		diccionarioObjetos["entryNombre"].delete(0, tk.END)
+		diccionarioObjetos["entryAlias"].delete(0, tk.END)
 		cargarDatosRemate(rows[0])
 		botonesEditar()
 		diccionarioObjetos["entryFecha"].focus()
@@ -86,17 +86,17 @@ def verificar():
 		activarCampos()
 		borrarCampos()
 		botonesNuevo()
-		diccionarioObjetos["entryFecha"].focus()
+		diccionarioObjetos["entryRazon"].focus()
 
 
 def activarCampos():
-	diccionarioObjetos["entryFecha"].config(state="normal")
-	diccionarioObjetos["entryTipo"].config(state="normal")
-	diccionarioObjetos["entryPredio"].config(state="normal")
-	diccionarioObjetos["entryLocalidad"].config(state="normal")
-	diccionarioObjetos["entryMartillo"].config(state="normal")
-	diccionarioObjetos["entryObservaciones"].config(state="normal")
-	diccionarioObjetos["entryComentarios"].config(state="normal")
+	diccionarioObjetos["entryRazon"].config(state="normal")
+	diccionarioObjetos["entryDocumento"].config(state="normal")
+	diccionarioObjetos["comboTipo"].config(state="normal")
+	diccionarioObjetos["comboIva"].config(state="normal")
+	diccionarioObjetos["entryRuca"].config(state="normal")
+	diccionarioObjetos["entryEstablecimiento"].config(state="normal")
+
 def desactivarCarga():
 	diccionarioObjetos["entryFecha"].config(state="disabled")
 	diccionarioObjetos["entryTipo"].config(state="disabled")
@@ -114,13 +114,11 @@ def desactivarCarga():
 	diccionarioObjetos["entryNombre"].delete(0, tk.END)
 	diccionarioObjetos["entryNombre"].focus()
 def borrarCampos():
-	diccionarioObjetos["entryFecha"].delete(0, tk.END)
-	diccionarioObjetos["entryTipo"].delete(0, tk.END)
-	diccionarioObjetos["entryPredio"].delete(0, tk.END)
-	diccionarioObjetos["entryLocalidad"].delete(0, tk.END)
-	diccionarioObjetos["entryMartillo"].delete(0, tk.END)
-	diccionarioObjetos["entryObservaciones"].delete(0, tk.END)
-	diccionarioObjetos["entryComentarios"].delete(0, tk.END)
+	diccionarioObjetos["entryRazon"].delete(0, tk.END)
+	diccionarioObjetos["entryDocumento"].delete(0, tk.END)
+	diccionarioObjetos["entryRuca"].delete(0, tk.END)
+	diccionarioObjetos["entryEstablecimiento"].delete(0, tk.END)
+
 def cargarDatosRemate(row):
 	idd = str(row[0])
 	nombre = str(row[1])
@@ -249,79 +247,142 @@ def activarBuscar():
 def desactivarBuscar():
 	diccionarioObjetos["botBuscar"]["state"] = "disabled"
 	pass
-def bodyRemate(window):
-	#ID
-	#NOMBRE
-	#FECHA
-	#TIPO
-	#PREDIO
-	#LOCALIDAD
-	#MARTILLO
-	#OBSERVACIONES
-	#COMENTARIOS
+def bodyProductor(window):
+	"""
+	#pestaña 1
+	alias
+	razon social
+	documento
+	tipo
+	con iva
+	establecimiento
+	ruca
 
-	tk.Label(window, text = "Remate", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 1, padx=10, pady=10)
-	tk.Label(window, text = "Fecha", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 2, padx=10, pady=10)
-	tk.Label(window, text = "Tipo", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 3, padx=10, pady=10)
-	tk.Label(window, text = "Predio", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 4, padx=10, pady=10)
-	tk.Label(window, text = "Localidad", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 5, padx=10, pady=10)
-	tk.Label(window, text = "Martillo", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 6, padx=10, pady=10)
-	tk.Label(window, text = "Observaciones", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 7, padx=10, pady=10)
-	tk.Label(window, text = "Comentarios", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 8, padx=10, pady=10)
+	#pestaña 2
+	direccion
+	localidad
+	provicia
+	c postal
 
-	entryNombre = Entry(window, font=("Helvetica Neue",14))
-	entryFecha = Entry(window, font=("Helvetica Neue",14), state="disabled")
-	entryTipo = Entry(window, font=("Helvetica Neue",14), state="disabled")
-	entryPredio = Entry(window, font=("Helvetica Neue",14), state="disabled")
-	entryLocalidad = Entry(window, font=("Helvetica Neue",14), state="disabled")
-	entryMartillo = Entry(window, font=("Helvetica Neue",14), state="disabled")
-	entryObservaciones = Entry(window, font=("Helvetica Neue",14), state="disabled")
-	entryComentarios = Entry(window, font=("Helvetica Neue",14), state="disabled")
+	#pestaña 3
+	telefono
+	correo
+	cbu
 
-	entryNombre.grid(sticky = "w", column = 1, row = 1, padx=0, pady=10)
-	entryFecha.grid(sticky = "w", column = 1, row = 2, padx=0, pady=10)
-	entryTipo.grid(sticky = "w", column = 1, row = 3, padx=0, pady=10)
-	entryPredio.grid(sticky = "w", column = 1, row = 4, padx=0, pady=10)
-	entryLocalidad.grid(sticky = "w", column = 1, row = 5, padx=0, pady=10)
-	entryMartillo.grid(sticky = "w", column = 1, row = 6, padx=0, pady=10)
-	entryObservaciones.grid(sticky = "w", column = 1, row = 7, padx=0, pady=10)
-	entryComentarios.grid(sticky = "w", column = 1, row = 8, padx=0, pady=10)
+	#pestaña 4
+	renspa
 
-	diccionarioObjetos["entryNombre"] = entryNombre
-	diccionarioObjetos["entryFecha"] = entryFecha
-	diccionarioObjetos["entryTipo"] = entryTipo
-	diccionarioObjetos["entryPredio"] = entryPredio
-	diccionarioObjetos["entryLocalidad"] = entryLocalidad
-	diccionarioObjetos["entryMartillo"] = entryMartillo
-	diccionarioObjetos["entryObservaciones"] = entryObservaciones
-	diccionarioObjetos["entryComentarios"] = entryComentarios
+	#pestaña5
+	fac compra
+	fac ventas
 
+
+
+
+	"id"	integer,
+	"nombre"	text,
+	"razon"	text,
+	"ndoc"	text,
+	"tipo"	text,
+	"grupo"	text,
+	"con_iva"	text,
+	"direccion"	text,
+	"localidad"	text,
+	"provincia"	text,
+	"cod_postal"	text,
+	"comprobante_defecto"	text,
+	"punto_defecto"	text,
+	"observaciones"	text,
+	"creado_el"	text,
+	"creado_por"	text,
+	"cbu"	text,
+	"telefono"	text,
+	"correo"	text,
+	"ruca"	TEXT,
+	"renspa"	TEXT,
+	"compra"	TEXT,
+	"venta"	TEXT,
+	"establecimiento"	TEXT,
+	"estado"	TEXT,
+	"""	
+	#parPes
+	pestañas = ttk.Notebook(window)
+
+	label_productor = Label(window, backgroun="#E6F5FF")
+	label_direccion = Label(window, backgroun="#E6F5FF")
+	label_renspa = Label(window, backgroun="#E6F5FF")
+	label_otros = Label(window, backgroun="#E6F5FF")
+	label_facturacion = Label(window, backgroun="#E6F5FF")
+
+	pestañas.add(label_productor, text="Productor", padding = 20)
+	pestañas.add(label_direccion, text="Direccion", padding = 20)
+	pestañas.add(label_renspa, text="RENSPA", padding = 20)
+	pestañas.add(label_otros, text="Otros", padding = 20)
+	pestañas.add(label_facturacion, text="Facturacion", padding = 20)
+
+	#pestañas.place(x = 0, y = 0, relwidth = 1, relheight = 1)
+	pestañas.pack()
+
+	#pestaña 1
+	tk.Label(label_productor, text = "Alias", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 1, padx=10, pady=10)
+	tk.Label(label_productor, text = "Razon social", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 2, padx=10, pady=10)
+	tk.Label(label_productor, text = "Documento", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 3, padx=10, pady=10)
+	tk.Label(label_productor, text = "Tipo", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 4, padx=10, pady=10)
+	tk.Label(label_productor, text = "Condicion IVA", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 5, padx=10, pady=10)
+	tk.Label(label_productor, text = "RUCA", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 6, padx=10, pady=10)
+	tk.Label(label_productor, text = "Establecimiento", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 7, padx=10, pady=10)
+
+	entryAlias = Entry(label_productor, font=("Helvetica Neue",14))
+	entryRazon = Entry(label_productor, font=("Helvetica Neue",14), state="disabled")
+	entryDocumento = Entry(label_productor, font=("Helvetica Neue",14), state="disabled")
+	comboTipo = Combobox(label_productor, font=("Helvetica Neue",14), state="disabled")
+	comboIva = Combobox(label_productor, font=("Helvetica Neue",14), state="disabled")
+	entryRuca = Entry(label_productor, font=("Helvetica Neue",14), state="disabled")
+	entryEstablecimiento = Entry(label_productor, font=("Helvetica Neue",14), state="disabled")
+
+	entryAlias.grid(sticky = "w", column = 1, row = 1, padx=0, pady=10)
+	entryRazon.grid(sticky = "w", column = 1, row = 2, padx=0, pady=10)
+	entryDocumento.grid(sticky = "w", column = 1, row = 3, padx=0, pady=10)
+	comboTipo.grid(sticky = "w", column = 1, row = 4, padx=0, pady=10)
+	comboIva.grid(sticky = "w", column = 1, row = 5, padx=0, pady=10)
+	entryRuca.grid(sticky = "w", column = 1, row = 6, padx=0, pady=10)
+	entryEstablecimiento.grid(sticky = "w", column = 1, row = 7, padx=0, pady=10)
+
+	diccionarioObjetos["entryAlias"] = entryAlias
+	diccionarioObjetos["entryRazon"] = entryRazon
+	diccionarioObjetos["entryDocumento"] = entryDocumento
+	diccionarioObjetos["comboTipo"] = comboTipo
+	diccionarioObjetos["comboIva"] = comboIva
+	diccionarioObjetos["entryRuca"] = entryRuca
+	diccionarioObjetos["entryEstablecimiento"] = entryEstablecimiento
+
+	comboTipo["values"] = ["DNI", "CUIT", "OTRO"]
+	comboIva["values"] = ["Responsable inscripto", "Monotributista", "Excento", "Consumidor final", "Otro"]
+	comboTipo.current(1)
+	comboIva.current(0)
 
 	diccionarioObjetos["botBuscar"]["state"] = "normal"
 
-	entryNombre.focus()
-	entryNombre.bind('<Return>', (lambda event: verificar()))
+	entryAlias.focus()
+	entryAlias.bind('<Return>', (lambda event: verificar()))
+	entryAlias.bind('<Button-1>', (lambda event: activarBuscar()))
+	entryAlias.bind('<F5>', (lambda event: buscar()))
 
-	entryNombre.bind('<Button-1>', (lambda event: activarBuscar()))
-	entryFecha.bind('<Button-1>', (lambda event: desactivarBuscar()))
-	entryTipo.bind('<Button-1>', (lambda event: desactivarBuscar()))
-	entryPredio.bind('<Button-1>', (lambda event: desactivarBuscar()))
-	entryLocalidad.bind('<Button-1>', (lambda event: desactivarBuscar()))
-	entryMartillo.bind('<Button-1>', (lambda event: desactivarBuscar()))
-	entryObservaciones.bind('<Button-1>', (lambda event: desactivarBuscar()))
-	entryComentarios.bind('<Button-1>', (lambda event: desactivarBuscar()))
+	entryRazon.bind('<Button-1>', (lambda event: desactivarBuscar()))
+	entryDocumento.bind('<Button-1>', (lambda event: desactivarBuscar()))
+	comboTipo.bind('<Button-1>', (lambda event: desactivarBuscar()))
+	comboIva.bind('<Button-1>', (lambda event: desactivarBuscar()))
+	entryRuca.bind('<Button-1>', (lambda event: desactivarBuscar()))
+	entryEstablecimiento.bind('<Button-1>', (lambda event: desactivarBuscar()))
 
-	entryFecha.bind('<Return>', (lambda event: entryTipo.focus()))
-	entryTipo.bind('<Return>', (lambda event: entryPredio.focus()))
-	entryPredio.bind('<Return>', (lambda event: entryLocalidad.focus()))
-	entryLocalidad.bind('<Return>', (lambda event: entryMartillo.focus()))
-	entryMartillo.bind('<Return>', (lambda event: entryObservaciones.focus()))
-	entryObservaciones.bind('<Return>', (lambda event: entryComentarios.focus()))
-
-	entryNombre.bind('<F5>', (lambda event: buscar()))
+	entryRazon.bind('<Return>', (lambda event: entryDocumento.focus()))
+	entryDocumento.bind('<Return>', (lambda event: comboTipo.focus()))
+	comboTipo.bind('<Return>', (lambda event: comboIva.focus()))
+	comboIva.bind('<Return>', (lambda event: entryRuca.focus()))
+	entryRuca.bind('<Return>', (lambda event: entryEstablecimiento.focus()))
 
 
-def ventana1(idRemate):
+def ventana1(idProductor):
 
 	def cerrarVentana():
 		window.destroy()
@@ -329,7 +390,7 @@ def ventana1(idRemate):
 	dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : True}
 
 	window = Tk()
-	window.title("REMATE")
+	window.title("PRODUCTOR")
 	window.geometry("700x500+200+50")
 	window.configure(backgroun="#E6F5FF") #E8F6FA
 	window.resizable(0,0)
@@ -355,7 +416,7 @@ def ventana1(idRemate):
 	barraTitulo.pack(side=TOP, fill=X)
 
 	lblBody = tk.Label(window, backgroun="#E6F5FF")
-	lblBody.pack(side=TOP, fill=X, padx=150)
+	lblBody.pack(side=TOP, fill=X, padx=10)
 
 	botGuardar = tk.Button(barraherr, image=iconGuardar, compound="top", backgroun="#b3f2bc", command=guardar)
 	botBorrar = tk.Button(barraherr, image=iconBorrar, compound="top", backgroun="#FFaba8", command = borrar)
@@ -382,7 +443,7 @@ def ventana1(idRemate):
 	botBuscar["state"] = "disabled"
 
 	textTitulo = StringVar()
-	textTitulo.set("REMATE")
+	textTitulo.set("PRODUCTOR")
 	textID = StringVar()
 	textID.set("")
 
@@ -401,7 +462,7 @@ def ventana1(idRemate):
 
 	window.bind("<Escape>", (lambda event: cerrarVentana()))
 
-	bodyRemate(lblBody)
+	bodyProductor(lblBody)
 
 	window.mainloop()
 
