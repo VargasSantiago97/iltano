@@ -65,6 +65,7 @@ def guardar(accion, dicc, borrarCampos, entry_alias, cargarCampos):
 		dicc["estado"]]
 	except:
 		messagebox.showerror("ERROR", "Error al obtener los datos")
+		return 0
 
 	rows = ["NULL"]
 
@@ -73,6 +74,7 @@ def guardar(accion, dicc, borrarCampos, entry_alias, cargarCampos):
 		rows = actualizar_db(con, "productores", " WHERE ndoc = '" + dicc["ndoc"] + "'")
 	except:
 		messagebox.showerror("ERROR", "Error al verificar los datos")
+		return 0
 
 
 	if(rows == []):
@@ -84,6 +86,7 @@ def guardar(accion, dicc, borrarCampos, entry_alias, cargarCampos):
 			messagebox.showinfo("Éxito", "Productor ingresado con éxito!")
 		except:
 			messagebox.showerror("ERROR", "Error al cargar los datos a la DB")
+			return 0
 
 			
 		borrarCampos()

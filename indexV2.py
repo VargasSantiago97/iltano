@@ -6,6 +6,7 @@ import time
 import logging
 import datetime
 
+from librerias import ventanaRemates
 
 from tkinter import *
 from tkinter.ttk import *
@@ -79,7 +80,7 @@ if(True):
 	mnuArchivo.add_command(label="Salir", command = salirWindow)
 
 	mnuRemate = Menu(barraMenu)
-	mnuRemate.add_command(label="Remate")
+	mnuRemate.add_command(label="Remate", command = lambda: ventanaRemates.ventana1("NULL"))
 	mnuRemate.add_command(label="Listado de remates")
 	mnuRemate.add_separator()
 	mnuRemate.add_command(label="Cambiar")

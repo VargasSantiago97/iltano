@@ -7,6 +7,7 @@ import logging
 import datetime
 
 import tablaElegir
+#from librerias import tablaElegir
 
 from tkinter import *
 from tkinter.ttk import *
@@ -86,6 +87,7 @@ def verificar():
 		botonesNuevo()
 		diccionarioObjetos["entryFecha"].focus()
 
+
 def activarCampos():
 	diccionarioObjetos["entryFecha"].config(state="normal")
 	diccionarioObjetos["entryTipo"].config(state="normal")
@@ -94,6 +96,22 @@ def activarCampos():
 	diccionarioObjetos["entryMartillo"].config(state="normal")
 	diccionarioObjetos["entryObservaciones"].config(state="normal")
 	diccionarioObjetos["entryComentarios"].config(state="normal")
+def desactivarCarga():
+	diccionarioObjetos["entryFecha"].config(state="disabled")
+	diccionarioObjetos["entryTipo"].config(state="disabled")
+	diccionarioObjetos["entryPredio"].config(state="disabled")
+	diccionarioObjetos["entryLocalidad"].config(state="disabled")
+	diccionarioObjetos["entryMartillo"].config(state="disabled")
+	diccionarioObjetos["entryObservaciones"].config(state="disabled")
+	diccionarioObjetos["entryComentarios"].config(state="disabled")
+
+	diccionarioObjetos["botGuardar"]["state"] = "disabled"
+	diccionarioObjetos["botBorrar"]["state"] = "disabled"
+	diccionarioObjetos["botEditar"]["state"] = "disabled"
+	diccionarioObjetos["botBuscar"]["state"] = "normal"
+
+	diccionarioObjetos["entryNombre"].delete(0, tk.END)
+	diccionarioObjetos["entryNombre"].focus()
 def borrarCampos():
 	diccionarioObjetos["entryFecha"].delete(0, tk.END)
 	diccionarioObjetos["entryTipo"].delete(0, tk.END)
@@ -125,15 +143,104 @@ def cargarDatosRemate(row):
 	diccionarioObjetos["entryObservaciones"].insert(0, observaciones)
 	diccionarioObjetos["entryComentarios"].insert(0, comentarios)
 
-def botonesNuevo():
-	diccionarioObjetos["botGuardar"]["state"] = "normal"
-	diccionarioObjetos["botBorrar"]["state"] = "disabled"
-	diccionarioObjetos["botEditar"]["state"] = "disabled"
-	diccionarioObjetos["botBuscar"]["state"] = "disabled"
+def guardar():
+	try:
+		x_nombre = diccionarioObjetos["entryNombre"].get()
+		x_fecha = diccionarioObjetos["entryFecha"].get()
+		x_tipo = diccionarioObjetos["entryTipo"].get()
+		x_predio = diccionarioObjetos["entryPredio"].get()
+		x_localidad = diccionarioObjetos["entryLocalidad"].get()
+		x_martillo = diccionarioObjetos["entryMartillo"].get()
+		x_observaciones = diccionarioObjetos["entryObservaciones"].get()
+		x_comentarios = diccionarioObjetos["entryComentarios"].get()
+
+		entities = [str(x_nombre),
+		str(x_fecha),
+		str(x_tipo),
+		str(x_predio),
+		str(x_localidad),
+		str(x_martillo),
+		str(x_observaciones),
+		str(x_comentarios)]
+	except:
+		messagebox.showerror("ERROR", "No se pudo obtener los datos")
+		return 0
+
+	try:
+		MsgBox = messagebox.askquestion('ATENCION', "¿Desea editar?", icon = 'warning')
+		if(MsgBox == 'yes'):
+			con = sql_connection()
+			cursorObj = con.cursor()
+			cursorObj.execute("INSERT INTO remate VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, ?, 'activo')", entities)
+			con.commit()
+			messagebox.showinfo("Guardado", "Guardado con Éxito")
+			borrarCampos()
+			desactivarCarga()
+	except:
+		messagebox.showerror("ERROR", "No se pudo Guardar")
+def editar():
+	try:
+		x_nombre = diccionarioObjetos["entryNombre"].get()
+		x_fecha = diccionarioObjetos["entryFecha"].get()
+		x_tipo = diccionarioObjetos["entryTipo"].get()
+		x_predio = diccionarioObjetos["entryPredio"].get()
+		x_localidad = diccionarioObjetos["entryLocalidad"].get()
+		x_martillo = diccionarioObjetos["entryMartillo"].get()
+		x_observaciones = diccionarioObjetos["entryObservaciones"].get()
+		x_comentarios = diccionarioObjetos["entryComentarios"].get()
+		x_id = diccionarioObjetos["textID"].get()
+
+		entities = [str(x_nombre),
+		str(x_fecha),
+		str(x_tipo),
+		str(x_predio),
+		str(x_localidad),
+		str(x_martillo),
+		str(x_observaciones),
+		str(x_comentarios),
+		str(x_id)]
+	except:
+		messagebox.showerror("ERROR", "No se pudo obtener los datos")
+		return 0
+
+	try:
+		MsgBox = messagebox.askquestion('ATENCION', '¿Desea editar?\nID DB: ' + str(x_id) + '\nNombre (anterior): ' + str(x_nombre), icon = 'warning')
+		if(MsgBox == 'yes'):
+			con = sql_connection()
+			cursorObj = con.cursor()
+			cursorObj.execute('UPDATE remate SET nombre = ?, fecha = ?, tipo = ?, predio = ?, localidad = ?, martillo = ?, observaciones = ?, comentarios = ? where id = ?', entities)
+			con.commit()
+			messagebox.showinfo("Editado", "EDITADO con Éxito")
+			borrarCampos()
+			desactivarCarga()
+	except:
+		messagebox.showerror("ERROR", "No se pudo editar")
+def borrar():
+	try:
+		x_nombre = diccionarioObjetos["entryNombre"].get()
+		x_id = diccionarioObjetos["textID"].get()
+
+		MsgBox = messagebox.askquestion('ATENCION', '¿Desea BORRAR?\nID DB: ' + str(x_id) + '\nNombre (anterior): ' + str(x_nombre), icon = 'warning')
+		if(MsgBox == 'yes'):
+			con = sql_connection()
+			cursorObj = con.cursor()
+			cursorObj.execute('UPDATE remate SET estado = "borrado" where id = ' + str(x_id))
+			con.commit()
+			messagebox.showinfo("Borrado", "Borrado con Éxito")
+			borrarCampos()
+			desactivarCarga()
+	except:
+		messagebox.showerror("ERROR", "No se pudo borrar")
+
 def botonesEditar():
 	diccionarioObjetos["botGuardar"]["state"] = "disabled"
 	diccionarioObjetos["botBorrar"]["state"] = "normal"
 	diccionarioObjetos["botEditar"]["state"] = "normal"
+	diccionarioObjetos["botBuscar"]["state"] = "disabled"
+def botonesNuevo():
+	diccionarioObjetos["botGuardar"]["state"] = "normal"
+	diccionarioObjetos["botBorrar"]["state"] = "disabled"
+	diccionarioObjetos["botEditar"]["state"] = "disabled"
 	diccionarioObjetos["botBuscar"]["state"] = "disabled"
 def activarBuscar():
 	diccionarioObjetos["botBuscar"]["state"] = "normal"
@@ -210,6 +317,8 @@ def bodyRemate(window):
 	entryMartillo.bind('<Return>', (lambda event: entryObservaciones.focus()))
 	entryObservaciones.bind('<Return>', (lambda event: entryComentarios.focus()))
 
+	entryNombre.bind('<F5>', (lambda event: buscar()))
+
 
 def ventana1(idRemate):
 
@@ -247,12 +356,14 @@ def ventana1(idRemate):
 	lblBody = tk.Label(window, backgroun="#E6F5FF")
 	lblBody.pack(side=TOP, fill=X, padx=150)
 
-	botGuardar = tk.Button(barraherr, image=iconGuardar, compound="top", backgroun="#b3f2bc")
-	botBorrar = tk.Button(barraherr, image=iconBorrar, compound="top", backgroun="#FFaba8")
-	botEditar = tk.Button(barraherr, image=iconEditar, compound="top", backgroun="#f2f0b3")
+	botGuardar = tk.Button(barraherr, image=iconGuardar, compound="top", backgroun="#b3f2bc", command=guardar)
+	botBorrar = tk.Button(barraherr, image=iconBorrar, compound="top", backgroun="#FFaba8", command = borrar)
+	botEditar = tk.Button(barraherr, image=iconEditar, compound="top", backgroun="#f2f0b3", command = editar)
 	botBuscar = tk.Button(barraherr, image=iconBuscar, compound="top", command = buscar, backgroun="#b1fae3")
 	botAyuda = tk.Button(barraherr, image=iconAyuda, compound="top", command=ayuda, backgroun="#f2f0b3")
 	botCerrar = tk.Button(barraherr, image=iconCerrar, compound="top", command=cerrarVentana, backgroun="#FF6E6E")
+
+	
 
 	padX=3
 	padY=2
