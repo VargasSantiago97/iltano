@@ -183,7 +183,7 @@ def cargarDatosProductor(row):
 	estado = str(row[24])
 
 	diccionarioObjetos["textID"].set(idd)
-	diccionarioObjetos["textTitulo"].set(nombre + "    -    " + razon)
+	diccionarioObjetos["textTitulo"].set(nombre)
 
 	diccionarioObjetos["entryAlias"].insert(0, nombre)
 	diccionarioObjetos["entryRazon"].insert(0, razon)
@@ -360,99 +360,23 @@ def escape():
 	desactivarCarga()
 
 
-def bodyProductor(window):
-	"""
-	#pestaña 1
-	alias
-	razon social
-	documento
-	tipo
-	con iva
-	establecimiento
-	ruca
+def bodyCatVenta(window):
 
-	#pestaña 2
-	direccion
-	localidad
-	provicia
-	c postal
+		tk.Label(window, text = "Alias", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 1, padx=10, pady=10)
+		tk.Label(window, text = "Razon social", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 2, padx=10, pady=10)
+		tk.Label(window, text = "Documento", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 3, padx=10, pady=10)
+		tk.Label(window, text = "Tipo", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 4, padx=10, pady=10)
+		tk.Label(window, text = "Condicion IVA", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 5, padx=10, pady=10)
+		tk.Label(window, text = "RUCA", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 6, padx=10, pady=10)
+		tk.Label(window, text = "Establecimiento", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 7, padx=10, pady=10)
 
-	#pestaña 3
-	telefono
-	correo
-	cbu
-
-	#pestaña 4
-	renspa
-
-	#pestaña5
-	fac compra
-	fac ventas
-
-
-
-
-	"id"	integer,
-	"nombre"	text,
-	"razon"	text,
-	"ndoc"	text,
-	"tipo"	text,
-	"grupo"	text,
-	"con_iva"	text,
-	"direccion"	text,
-	"localidad"	text,
-	"provincia"	text,
-	"cod_postal"	text,
-	"comprobante_defecto"	text,
-	"punto_defecto"	text,
-	"observaciones"	text,
-	"creado_el"	text,
-	"creado_por"	text,
-	"cbu"	text,
-	"telefono"	text,
-	"correo"	text,
-	"ruca"	TEXT,
-	"renspa"	TEXT,
-	"compra"	TEXT,
-	"venta"	TEXT,
-	"establecimiento"	TEXT,
-	"estado"	TEXT,
-	"""	
-	#parPes
-	pestañas = ttk.Notebook(window)
-
-	label_productor = Label(window, backgroun="#E6F5FF")
-	label_direccion = Label(window, backgroun="#E6F5FF")
-	label_renspa = Label(window, backgroun="#E6F5FF")
-	label_otros = Label(window, backgroun="#E6F5FF")
-	label_facturacion = Label(window, backgroun="#E6F5FF")
-
-	pestañas.add(label_productor, text="Productor", padding = 20)
-	pestañas.add(label_direccion, text="Direccion", padding = 20)
-	pestañas.add(label_renspa, text="RENSPA", padding = 20)
-	pestañas.add(label_otros, text="Otros", padding = 20)
-	pestañas.add(label_facturacion, text="Facturacion", padding = 20)
-
-	#pestañas.place(x = 0, y = 0, relwidth = 1, relheight = 1)
-	pestañas.pack()
-
-	#pestaña 1 PRODUCTOR
-	if(True):
-		tk.Label(label_productor, text = "Alias", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 1, padx=10, pady=10)
-		tk.Label(label_productor, text = "Razon social", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 2, padx=10, pady=10)
-		tk.Label(label_productor, text = "Documento", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 3, padx=10, pady=10)
-		tk.Label(label_productor, text = "Tipo", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 4, padx=10, pady=10)
-		tk.Label(label_productor, text = "Condicion IVA", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 5, padx=10, pady=10)
-		tk.Label(label_productor, text = "RUCA", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 6, padx=10, pady=10)
-		tk.Label(label_productor, text = "Establecimiento", font=("Helvetica Neue",14), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 7, padx=10, pady=10)
-
-		entryAlias = Entry(label_productor, font=("Helvetica Neue",14))
-		entryRazon = Entry(label_productor, font=("Helvetica Neue",14), state="disabled")
-		entryDocumento = Entry(label_productor, font=("Helvetica Neue",14), state="disabled")
-		comboTipo = Combobox(label_productor, font=("Helvetica Neue",14), state="disabled")
-		comboIva = Combobox(label_productor, font=("Helvetica Neue",14), state="disabled")
-		entryRuca = Entry(label_productor, font=("Helvetica Neue",14), state="disabled")
-		entryEstablecimiento = Entry(label_productor, font=("Helvetica Neue",14), state="disabled")
+		entryAlias = Entry(window, font=("Helvetica Neue",14))
+		entryRazon = Entry(window, font=("Helvetica Neue",14), state="disabled")
+		entryDocumento = Entry(window, font=("Helvetica Neue",14), state="disabled")
+		comboTipo = Combobox(window, font=("Helvetica Neue",14), state="disabled")
+		comboIva = Combobox(window, font=("Helvetica Neue",14), state="disabled")
+		entryRuca = Entry(window, font=("Helvetica Neue",14), state="disabled")
+		entryEstablecimiento = Entry(window, font=("Helvetica Neue",14), state="disabled")
 
 		entryAlias.grid(sticky = "w", column = 1, row = 1, padx=0, pady=10)
 		entryRazon.grid(sticky = "w", column = 1, row = 2, padx=0, pady=10)
@@ -583,7 +507,7 @@ def ventana1(idProductor):
 	dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : True}
 
 	window = Tk()
-	window.title("PRODUCTOR")
+	window.title("CATEGORIAS DE VENTA")
 	window.geometry("700x500+200+50")
 	window.configure(backgroun="#E6F5FF") #E8F6FA
 	window.resizable(0,0)
@@ -634,7 +558,7 @@ def ventana1(idProductor):
 	botBuscar["state"] = "disabled"
 
 	textTitulo = StringVar()
-	textTitulo.set("PRODUCTOR")
+	textTitulo.set("Cat. venta")
 	textID = StringVar()
 	textID.set("")
 
@@ -654,7 +578,7 @@ def ventana1(idProductor):
 	window.bind("<Escape>", (lambda event: escape()))
 	window.bind("<Control-s>", (lambda event: cerrarVentana()))
 
-	bodyProductor(lblBody)
+	bodyCatVenta(lblBody)
 
 	window.mainloop()
 

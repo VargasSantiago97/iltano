@@ -133,7 +133,7 @@ def cargarDatosRemate(row):
 	comentarios = str(row[8])
 
 	diccionarioObjetos["textID"].set(idd)
-	diccionarioObjetos["textTitulo"].set(nombre)
+	diccionarioObjetos["textTitulo"].set(nombre + "   -   " + fecha)
 
 	diccionarioObjetos["entryNombre"].insert(0, nombre)
 	diccionarioObjetos["entryFecha"].insert(0, fecha)
@@ -249,6 +249,11 @@ def activarBuscar():
 def desactivarBuscar():
 	diccionarioObjetos["botBuscar"]["state"] = "disabled"
 	pass
+
+def escape():
+	borrarCampos()
+	desactivarCarga()
+
 def bodyRemate(window):
 	#ID
 	#NOMBRE
@@ -399,7 +404,7 @@ def ventana1(idRemate):
 	diccionarioObjetos["textID"] = textID
 	
 
-	window.bind("<Escape>", (lambda event: cerrarVentana()))
+	window.bind("<Escape>", (lambda event: escape()))
 
 	bodyRemate(lblBody)
 

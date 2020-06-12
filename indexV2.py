@@ -6,8 +6,6 @@ import time
 import logging
 import datetime
 
-from librerias import ventanaRemates
-
 from tkinter import *
 from tkinter.ttk import *
 from tkinter import messagebox
