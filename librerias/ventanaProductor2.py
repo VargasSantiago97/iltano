@@ -248,8 +248,7 @@ def guardar():
 			cursorObj.execute("INSERT INTO productores VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", entities)
 			con.commit()
 			messagebox.showinfo("Guardado", "Guardado con Éxito")
-			borrarCampos()
-			desactivarCarga()
+			escape()
 	except:
 		messagebox.showerror("ERROR", "No se pudo Guardar")
 def editar():
@@ -317,8 +316,7 @@ def editar():
 			cursorObj.execute('UPDATE productores SET nombre = ?, razon = ?, ndoc = ?, tipo = ?, grupo = ?, con_iva = ?, direccion = ?, localidad = ?, provincia = ?, cod_postal = ?, comprobante_defecto = ?, punto_defecto = ?, observaciones = ?, creado_el = ?, creado_por = ?, cbu = ?, telefono = ?, correo = ?, ruca = ?, renspa = ?, compra = ?, venta = ?, establecimiento = ?, estado = ? where id = ?', entities)
 			con.commit()
 			messagebox.showinfo("Editado", "EDITADO con Éxito")
-			borrarCampos()
-			desactivarCarga()
+			escape()
 	except:
 		messagebox.showerror("ERROR", "No se pudo editar")
 def borrar():
@@ -333,8 +331,7 @@ def borrar():
 			cursorObj.execute('UPDATE productores SET estado = "borrado" where id = ' + str(x_id))
 			con.commit()
 			messagebox.showinfo("Borrado", "Borrado con Éxito")
-			borrarCampos()
-			desactivarCarga()
+			escape()
 	except:
 		messagebox.showerror("ERROR", "No se pudo borrar")
 
@@ -348,6 +345,11 @@ def botonesNuevo():
 	diccionarioObjetos["botBorrar"]["state"] = "disabled"
 	diccionarioObjetos["botEditar"]["state"] = "disabled"
 	diccionarioObjetos["botBuscar"]["state"] = "disabled"
+def botonesInicio():
+	diccionarioObjetos["botGuardar"]["state"] = "disabled"
+	diccionarioObjetos["botBorrar"]["state"] = "disabled"
+	diccionarioObjetos["botEditar"]["state"] = "disabled"
+	diccionarioObjetos["botBuscar"]["state"] = "normal"
 def activarBuscar():
 	diccionarioObjetos["botBuscar"]["state"] = "normal"
 	pass
@@ -358,6 +360,7 @@ def desactivarBuscar():
 def escape():
 	borrarCampos()
 	desactivarCarga()
+	botonesInicio()
 
 
 def bodyProductor(window):

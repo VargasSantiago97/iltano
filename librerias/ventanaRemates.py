@@ -175,8 +175,7 @@ def guardar():
 			cursorObj.execute("INSERT INTO remate VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, ?, 'activo')", entities)
 			con.commit()
 			messagebox.showinfo("Guardado", "Guardado con Éxito")
-			borrarCampos()
-			desactivarCarga()
+			escape()
 	except:
 		messagebox.showerror("ERROR", "No se pudo Guardar")
 def editar():
@@ -212,8 +211,7 @@ def editar():
 			cursorObj.execute('UPDATE remate SET nombre = ?, fecha = ?, tipo = ?, predio = ?, localidad = ?, martillo = ?, observaciones = ?, comentarios = ? where id = ?', entities)
 			con.commit()
 			messagebox.showinfo("Editado", "EDITADO con Éxito")
-			borrarCampos()
-			desactivarCarga()
+			escape()
 	except:
 		messagebox.showerror("ERROR", "No se pudo editar")
 def borrar():
@@ -228,8 +226,7 @@ def borrar():
 			cursorObj.execute('UPDATE remate SET estado = "borrado" where id = ' + str(x_id))
 			con.commit()
 			messagebox.showinfo("Borrado", "Borrado con Éxito")
-			borrarCampos()
-			desactivarCarga()
+			escape()
 	except:
 		messagebox.showerror("ERROR", "No se pudo borrar")
 
@@ -243,6 +240,11 @@ def botonesNuevo():
 	diccionarioObjetos["botBorrar"]["state"] = "disabled"
 	diccionarioObjetos["botEditar"]["state"] = "disabled"
 	diccionarioObjetos["botBuscar"]["state"] = "disabled"
+def botonesInicio():
+	diccionarioObjetos["botGuardar"]["state"] = "disabled"
+	diccionarioObjetos["botBorrar"]["state"] = "disabled"
+	diccionarioObjetos["botEditar"]["state"] = "disabled"
+	diccionarioObjetos["botBuscar"]["state"] = "normal"
 def activarBuscar():
 	diccionarioObjetos["botBuscar"]["state"] = "normal"
 	pass
@@ -253,6 +255,7 @@ def desactivarBuscar():
 def escape():
 	borrarCampos()
 	desactivarCarga()
+	botonesInicio()
 
 def bodyRemate(window):
 	#ID

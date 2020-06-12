@@ -53,17 +53,17 @@ def buscar():
 
 		con = sql_connection()
 		condiciones = " WHERE id = " + str(ssss)
-		rows = actualizar_db(con, "catVenta", condiciones)
+		rows = actualizar_db(con, "catHacienda", condiciones)
 
 		diccionarioObjetos["entryAlias"].delete(0, tk.END)
 		diccionarioObjetos["entryAlias"].insert(0, rows[0][1])
 
 		verificar()
 
-	dicc_buscar = {"seleccionar" : "categoria de venta",
+	dicc_buscar = {"seleccionar" : "categoria de hacienda",
 	"columnas" : {"0":{"id" : "alias", "cabeza" : "Alias", "ancho" : 50, "row" : 1}, "1":{"id" : "nombre", "cabeza" : "Nombre", "ancho" : 150, "row" : 2}, "2":{"id" : "descripcion", "cabeza" : "Descripcion", "ancho" : 180, "row" : 3}},
 	"db" : direccionBaseDeDatos,
-	"tabla" : "catVenta",
+	"tabla" : "catHacienda",
 	"condiciones" : ' WHERE (alias LIKE  "%' + str(diccionarioObjetos["entryAlias"].get()) + '%" OR nombre LIKE "%' + str(diccionarioObjetos["entryAlias"].get()) + '%") AND estado = "activo"',
 	"dimensionesVentana" : "420x400"}
 	tablaElegir.tabla_elegir(dicc_buscar, funcsalirr)
@@ -73,13 +73,13 @@ def verificar():
 
 	con = sql_connection()
 	condiciones = " WHERE alias = '" + str(alias) + "' AND estado='activo'"
-	rows = actualizar_db(con, "catVenta", condiciones)
+	rows = actualizar_db(con, "catHacienda", condiciones)
 
 	if len(rows) == 1:
 		activarCampos()
 		borrarCampos()
 		diccionarioObjetos["entryAlias"].delete(0, tk.END)
-		cargarDatosProductor(rows[0])
+		cargarDatosCatHacienda(rows[0])
 		botonesEditar()
 		diccionarioObjetos["entryRazon"].focus()
 	else:
@@ -102,7 +102,7 @@ def desactivarCarga():
 def borrarCampos():
 	diccionarioObjetos["entryRazon"].delete(0, tk.END)
 	diccionarioObjetos["entryDescripcion"].delete(0, tk.END)
-def cargarDatosProductor(row):
+def cargarDatosCatHacienda(row):
 	idd = str(row[0])
 	nombre = str(row[1])
 	razon = str(row[2])
@@ -136,7 +136,7 @@ def guardar():
 		if(MsgBox == 'yes'):
 			con = sql_connection()
 			cursorObj = con.cursor()
-			cursorObj.execute("INSERT INTO catVenta VALUES(NULL, ?, ?, ?, ?)", entities)
+			cursorObj.execute("INSERT INTO catHacienda VALUES(NULL, ?, ?, ?, ?)", entities)
 			con.commit()
 			messagebox.showinfo("Guardado", "Guardado con Éxito")
 			escape()
@@ -160,7 +160,7 @@ def editar():
 		if(MsgBox == 'yes'):
 			con = sql_connection()
 			cursorObj = con.cursor()
-			cursorObj.execute('UPDATE catVenta SET alias = ?, nombre = ?, descripcion = ?, estado = ? where id = ?', entities)
+			cursorObj.execute('UPDATE catHacienda SET alias = ?, nombre = ?, descripcion = ?, estado = ? where id = ?', entities)
 			con.commit()
 			messagebox.showinfo("Editado", "EDITADO con Éxito")
 			escape()
@@ -175,7 +175,7 @@ def borrar():
 		if(MsgBox == 'yes'):
 			con = sql_connection()
 			cursorObj = con.cursor()
-			cursorObj.execute('UPDATE catVenta SET estado = "borrado" where id = ' + str(x_id))
+			cursorObj.execute('UPDATE catHacienda SET estado = "borrado" where id = ' + str(x_id))
 			con.commit()
 			messagebox.showinfo("Borrado", "Borrado con Éxito")
 			escape()
@@ -210,9 +210,9 @@ def escape():
 	botonesInicio()
 
 
-def bodyCatVenta(window):
+def bodyCatHacienda(window):
 	"""
-	CREATE TABLE "catVenta" (
+	CREATE TABLE "catHacienda" (
 	"id"	INTEGER PRIMARY KEY AUTOINCREMENT,
 	"alias"	TEXT,
 	"nombre"	TEXT,
@@ -256,7 +256,7 @@ def ventana1(idProductor):
 	dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : True}
 
 	window = Tk()
-	window.title("CATEGORIAS DE VENTA")
+	window.title("CATEGORIAS DE HACIENDA")
 	window.geometry("700x500+200+50")
 	window.configure(backgroun="#E6F5FF") #E8F6FA
 	window.resizable(0,0)
@@ -307,7 +307,7 @@ def ventana1(idProductor):
 	botBuscar["state"] = "disabled"
 
 	textTitulo = StringVar()
-	textTitulo.set("Cat. venta")
+	textTitulo.set("Cat. hacienda")
 	textID = StringVar()
 	textID.set("")
 
@@ -327,7 +327,7 @@ def ventana1(idProductor):
 	window.bind("<Escape>", (lambda event: escape()))
 	window.bind("<Control-s>", (lambda event: cerrarVentana()))
 
-	bodyCatVenta(lblBody)
+	bodyCatHacienda(lblBody)
 
 	window.mainloop()
 
