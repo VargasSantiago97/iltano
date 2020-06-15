@@ -27,8 +27,9 @@ dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : True}
 
 window = Tk()
 window.title("IL TANO HACIENDA SAS")
-window.geometry("1285x728")
-window.configure(backgroun="#2C4D4F") #E8F6FA
+window.geometry("1024x600")
+window.resizable(0,0)
+window.configure(backgroun="#000000") #E8F6FA
 
 
 #Pantalla detalles
@@ -37,7 +38,7 @@ def pantallaDetalles():
 		windowDetalles.attributes('-fullscreen', dicc_objetos["varFullScreenDetalles"])
 		dicc_objetos["varFullScreenDetalles"] = not dicc_objetos["varFullScreenDetalles"]
 
-	windowDetalles = Tk()
+	windowDetalles = Toplevel()
 	windowDetalles.geometry("700x700")
 	windowDetalles.configure(backgroun="#000000")
 
@@ -138,6 +139,57 @@ if(True):
 	window.config(menu = barraMenu)
 
 	window.bind('<F11>', (lambda event: pantCompleta()))
+
+#BARRA DE HERRAMIENTAS
+if(True):
+	barraherr = tk.Frame(window, relief=SOLID, bd=2, backgroun="#242b33")
+	barraherr.pack(side=TOP, fill=X, pady = 2)
+
+	botBuscar = tk.Button(barraherr, text="bot 1\nasd", compound="top", backgroun="#b3f2bc")
+	botImprimir = tk.Button(barraherr, text="bot 2", compound="top", backgroun="#f2f0b3")
+	botExcel = tk.Button(barraherr, text="bot 3", compound="top", backgroun="#f2f0b3")
+	botAyuda = tk.Button(barraherr, text="bot 4", compound="top", backgroun="#f2f0b3")
+	botCerrar = tk.Button(barraherr, text="bot 5", compound="top", backgroun="#FF6E6E")
+
+	padX=3
+	padY=2
+
+	botBuscar.pack(side=LEFT, padx=padX+20, pady=padY)
+	botImprimir.pack(side=LEFT, padx=padX, pady=padY)
+	botExcel.pack(side=LEFT, padx=padX, pady=padY)
+	botAyuda.pack(side=LEFT, padx=padX+20, pady=padY)
+	botCerrar.pack(side=LEFT, padx=padX, pady=padY)
+
+#BARRA DE TITULO
+if(True):
+	barraTitulo = tk.Frame(window, relief=SOLID, bd=2, backgroun="#242b33")
+	barraTitulo.pack(side=TOP, fill=X)
+
+	textTitulo = StringVar()
+	textTitulo.set("REMATE:")
+	textID = StringVar()
+	textID.set("")
+
+	lbl_titulo = tk.Label(barraTitulo, font=("Helvetica Neue",12,"bold"), anchor="n", backgroun="#242b33", foreground = "#ffffff")
+	lbl_titulo.pack()
+	lbl_titulo.config(textvariable=textTitulo)
+
+#BODY
+if(True):
+
+	lblBody = tk.Label(window, backgroun="#242b33")
+	lblBody.pack(side=TOP, fill=BOTH, padx=2, pady=2)
+	lblBody.config(width="1", height="100")
+
+	padX=3
+	padY=2
+
+	lbl_tabla = Label(lblBody)
+	lbl_tabla.place(x=2, y=0, width=1012, height=300)
+
+	lbl_datos = Label(lblBody)
+	lbl_datos.place(x=2, y=304, width=1012, height=204)
+
 
 
 
