@@ -411,6 +411,10 @@ def ventana1(idRemate):
 
 	bodyRemate(lblBody)
 
+	if(idRemate!="NULL"):
+		diccionarioObjetos["entryNombre"].insert(0, idRemate)
+		verificar()
+
 	window.mainloop()
 
 ventana1("NULL")

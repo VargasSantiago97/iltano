@@ -248,7 +248,7 @@ def bodyCatVenta(window):
 	entryRazon.bind('<Return>', (lambda event: entryDescripcion.focus()))
 
 
-def ventana1(idProductor):
+def ventana1(idCatVenta):
 
 	def cerrarVentana():
 		window.destroy()
@@ -328,6 +328,10 @@ def ventana1(idProductor):
 	window.bind("<Control-s>", (lambda event: cerrarVentana()))
 
 	bodyCatVenta(lblBody)
+
+	if(idCatVenta!="NULL"):
+		diccionarioObjetos["entryAlias"].insert(0, idCatVenta)
+		verificar()
 
 	window.mainloop()
 

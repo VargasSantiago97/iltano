@@ -585,7 +585,7 @@ def ventana1(idProductor):
 
 	dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : True}
 
-	window = Tk()
+	window = tk.Toplevel()
 	window.title("PRODUCTOR")
 	window.geometry("700x500+200+50")
 	window.configure(backgroun="#E6F5FF") #E8F6FA
@@ -659,6 +659,10 @@ def ventana1(idProductor):
 
 	bodyProductor(lblBody)
 
+	if(idProductor!="NULL"):
+		diccionarioObjetos["entryAlias"].insert(0, idProductor)
+		verificar()
+
 	window.mainloop()
 
-ventana1("NULL")
+#ventana1("NULL")

@@ -114,6 +114,7 @@ def tabla_elegir(dicc, funcion_salida):
 		#str((tabla_elegir.item(tabla_elegir.selection()[0]))['values'])
 
 	tabla_elegir.bind("<Double-1>", (lambda event: elegir()))
+	tabla_elegir.bind("<Return>", (lambda event: elegir()))
 	Button(window_new, text="Cerrar", command=lambda: cerrar_window_elegir()).grid(column = 0, row = 1, padx=5, pady=10)
 	window_new.bind("<Escape>", (lambda event: cerrar_window_elegir()))
 	window_new.mainloop()
