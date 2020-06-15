@@ -31,6 +31,88 @@ window.geometry("1024x600")
 window.resizable(0,0)
 window.configure(backgroun="#000000") #E8F6FA
 
+dicRemates = {
+	"seleccionar" : "REMATES",
+	
+	"columnas" : {
+		"0":{
+			"id" : "num1", 
+			"cabeza" : "CORRAL", 
+			"ancho" : 30, 
+			"row" : 1}, 
+		"1":{
+			"id" : "num2", 
+			"cabeza" : "VENDEDOR", 
+			"ancho" : 100, 
+			"row" : 2},
+		"2":{
+			"id" : "num3", 
+			"cabeza" : "CANTIDAD", 
+			"ancho" : 30, 
+			"row" : 4},
+		"3":{
+			"id" : "num4", 
+			"cabeza" : "CATEGORIA", 
+			"ancho" : 100, 
+			"row" : 6},
+		"4":{
+			"id" : "num5", 
+			"cabeza" : "PINTURA", 
+			"ancho" : 30, 
+			"row" : 7},
+		"5":{
+			"id" : "num6", 
+			"cabeza" : "KGS", 
+			"ancho" : 30, 
+			"row" : 7},
+		"6":{
+			"id" : "num7", 
+			"cabeza" : "PROMEDIO", 
+			"ancho" : 30, 
+			"row" : 7},
+		"7":{
+			"id" : "num8", 
+			"cabeza" : "PRECIO", 
+			"ancho" : 30, 
+			"row" : 7},
+		"8":{
+			"id" : "num9", 
+			"cabeza" : "COMPRADOR", 
+			"ancho" : 100, 
+			"row" : 7},
+		},
+	
+	"consulta": {
+		"db" : 'database/iltanohacienda.db',
+		"tabla" : "remate",
+		"condiciones" : ' WHERE estado = "activo"'},
+	"filtros" : {
+		"0" : {
+			"id": "nombre",
+			"cabeza":"Alias",
+		},
+		"1" : {
+			"id": "fecha",
+			"cabeza":"Fecha",
+		},
+		"2" : {
+			"id": "tipo",
+			"cabeza":"Tipo",
+		},
+		"3" : {
+			"id": "predio",
+			"cabeza":"Predio",
+		},
+		"4" : {
+			"id": "localidad",
+			"cabeza":"Localidad",
+		},
+		"5" : {
+			"id": "martillo",
+			"cabeza":"Martillo",
+		},
+	},
+	}
 
 #Pantalla detalles
 def pantallaDetalles():
@@ -185,11 +267,34 @@ if(True):
 	padY=2
 
 	lbl_tabla = Label(lblBody)
-	lbl_tabla.place(x=2, y=0, width=1012, height=300)
+	lbl_tabla.place(x=2, y=0, width=1012, height=250)
 
 	lbl_datos = Label(lblBody)
-	lbl_datos.place(x=2, y=304, width=1012, height=204)
+	lbl_datos.place(x=2, y=254, width=1012, height=230)
 
+	#TABLA
+	if(True):
+		sbr = Scrollbar(lbl_tabla)
+		sbr.pack(side=RIGHT, fill="y")
+
+		columnas = []
+		for i in range(0, len(dicRemates["columnas"])):
+			columnas.append(dicRemates["columnas"][str(i)]["id"])
+		columnas = tuple(columnas)
+
+		tabla = ttk.Treeview(lbl_tabla, columns=columnas, selectmode=tk.BROWSE, show='headings') 
+		tabla.pack(side=LEFT, fill="both", expand=True)
+		sbr.config(command=tabla.yview)
+		tabla.config(yscrollcommand=sbr.set)
+
+
+		for i in range(0, len(dicRemates["columnas"])):
+			tabla.heading(dicRemates["columnas"][str(i)]["id"], text=dicRemates["columnas"][str(i)]["cabeza"], command=lambda: treeview_sort_column(tabla, dicRemates["columnas"][str(i)]["id"], False))
+			tabla.column(dicRemates["columnas"][str(i)]["id"], width=dicRemates["columnas"][str(i)]["ancho"])
+
+
+		tabla.bind("<Double-1>", (lambda event: elegir(tabla.item(tabla.selection()))))
+		tabla.bind("<Return>", (lambda event: elegir(tabla.item(tabla.selection()))))
 
 
 
