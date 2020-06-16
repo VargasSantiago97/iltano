@@ -23,7 +23,7 @@ from sqlite3 import Error
 
 import shutil
 
-dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : True}
+dicc_objetos={"varFullScreen" : False, "varFullScreenDetalles" : True}
 diccionario_objetos = {}
 
 direccionBaseDeDatos = "librerias/database/iltanohacienda.db"
@@ -33,6 +33,7 @@ window.title("IL TANO HACIENDA SAS")
 window.geometry("1024x600")
 window.resizable(0,0)
 window.configure(backgroun="#000000") #E8F6FA
+window.attributes('-fullscreen', True)
 
 def sql_connection():
 	try:
@@ -134,6 +135,7 @@ def pantallaDetalles():
 	windowDetalles.bind('<F11>', (lambda event: pantCompletaDetalles()))
 	windowDetalles.mainloop()
 
+
 #BARRA DE MENU
 if(True):
 	def pantCompleta():
@@ -221,11 +223,11 @@ if(True):
 	barraherr = tk.Frame(window, relief=SOLID, bd=2, backgroun="#242b33")
 	barraherr.pack(side=TOP, fill=X, pady = 2)
 
-	botBuscar = tk.Button(barraherr, text="AGREGAR\nNUEVO LOTE", compound="top", backgroun="#b3f2bc", font=("Helvetica", 10, "bold"))
-	botImprimir = tk.Button(barraherr, text="EDITAR\nLOTE", compound="top", backgroun="#f2f0b3", font=("Helvetica", 10, "bold"))
-	botExcel = tk.Button(barraherr, text="BORRAR\nLOTE", compound="top", backgroun="#FF6E6E", font=("Helvetica", 10, "bold"))
-	botAyuda = tk.Button(barraherr, text="bot 4\nasd", compound="top", backgroun="#f2f0b3", font=("Helvetica", 10, "bold"))
-	botCerrar = tk.Button(barraherr, text="bot 5\nasd", compound="top", backgroun="#FF6E6E", font=("Helvetica", 10, "bold"))
+	botBuscar = tk.Button(barraherr, text="AGREGARNUEVO LOTE", compound="top", backgroun="#b3f2bc", font=("Helvetica", 10, "bold"))
+	botImprimir = tk.Button(barraherr, text="EDITARLOTE", compound="top", backgroun="#f2f0b3", font=("Helvetica", 10, "bold"))
+	botExcel = tk.Button(barraherr, text="BORRARLOTE", compound="top", backgroun="#FF6E6E", font=("Helvetica", 10, "bold"))
+	botAyuda = tk.Button(barraherr, text="bot 4nasd", compound="top", backgroun="#f2f0b3", font=("Helvetica", 10, "bold"))
+	botCerrar = tk.Button(barraherr, text="bot 5nasd", compound="top", backgroun="#FF6E6E", font=("Helvetica", 10, "bold"))
 
 	padX=3
 	padY=2
@@ -314,7 +316,7 @@ if(True):
 		lblComprador = tk.Label(lbl_datos, backgroun="#f0f0f0", foreground="#FFFFFF", relief=SOLID, bd=2)
 		lblComprador.place(x=606, y=25, width=400, height=87)
 		lblPrecio = tk.Label(lbl_datos, backgroun="#f0f0f0", foreground="#FFFFFF", relief=SOLID, bd=2)
-		lblPrecio.place(x=606, y=114, width=200, height=114)
+		lblPrecio.place(x=606, y=137, width=200, height=91)
 
 		tk.Label(lbl_datos, backgroun="#f2f0b3", text="COMPRADOR", font=("Helvetica", 10, "bold"), foreground="#000000", relief=SOLID, bd=2).place(x=606, y=2, width=400, height=25)
 		tk.Label(lbl_datos, backgroun="#f2f0b3", text="PRECIO", font=("Helvetica", 10, "bold"), foreground="#000000", relief=SOLID, bd=2).place(x=606, y=114, width=200, height=25)
@@ -445,6 +447,10 @@ if(True):
 			btn_eliminar = tk.Button(lbl_datos, text="ELIMINAR", compound="top", backgroun="#FF6E6E", font=("Helvetica", 15, "bold"))
 			btn_eliminar.place(x=810, y=180, width=196, height=48)
 
+		#PRECIO
+		if(True):
+			Label(lblPrecio, font=("verdana",18, "bold"), text="$/kg", backgroun="#f0f0f0").grid(column=0, row=0, padx = 5, pady = 20)
+			entry_precio = Entry(lblPrecio, font=("verdana",18, "bold"), backgroun="#f0f0f0", width=6).grid(column=1, row=0, padx = 5, pady = 20)
 
 	#BUSCADOR PRODUCTORES
 	if(True):
@@ -486,5 +492,6 @@ if(True):
 		tabla_productor.bind('<Return>', (lambda event: seleccionarTablaComprador()))
 
 
+window.bind("<Control-s>", (lambda event: window.destroy()))
 window.mainloop()
 
