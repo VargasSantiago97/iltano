@@ -585,7 +585,7 @@ def ventana1(idProductor):
 
 	dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : True}
 
-	window = tk.Toplevel()
+	window = Tk()
 	window.title("PRODUCTOR")
 	window.geometry("700x500+200+50")
 	window.configure(backgroun="#E6F5FF") #E8F6FA
@@ -665,4 +665,4 @@ def ventana1(idProductor):
 
 	window.mainloop()
 
-#ventana1("NULL")
+ventana1("NULL")

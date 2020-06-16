@@ -6,7 +6,7 @@ import time
 import logging
 import datetime
 
-import ventanaIngreso
+#import ventanaIngreso
 import PDF_catalogo
 
 from tkinter import *
