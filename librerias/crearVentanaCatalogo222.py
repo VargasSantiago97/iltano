@@ -6,6 +6,7 @@ import time
 import logging
 import datetime
 
+import ventanaIngreso
 import PDF_catalogo
 
 from tkinter import *
@@ -39,7 +40,7 @@ dire = "C:/Users/Santiago/Desktop/mipdf2.pdf"
 dicLotes = {}
 dicLotesUbic = {}
 
-remate = "remate1"
+remate = "REMATE040620"
 
 
 def treeview_sort_column(tv, col, reverse):
@@ -792,6 +793,8 @@ def catalogo(window):
 	tabla_lotesCargados.bind('<Double-1>', (lambda event: seleccionarTablaLotes()))
 	tabla_lotesCargados.bind('<Control-Up>', (lambda event: moverLotArriba()))
 	tabla_lotesCargados.bind('<Control-Down>', (lambda event: moverLotAbajo()))
+
+
 
 
 window1 = Tk()

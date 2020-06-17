@@ -805,6 +805,7 @@ def cargarDatosLote(row):
 		pintura = rows_pintura[0][2]
 	else:
 		pintura = "S/P"
+	diccionarioObjetos["PINTURA"] = pintura
 
 
 	if len(rows_productor) == 1:
@@ -925,13 +926,12 @@ def editar():
 		if(MsgBox == 'yes'):
 			con = sql_connection()
 			cursorObj = con.cursor()
-			cursorObj.execute('UPDATE remate SET remate = ?, productor = ?, cantidad = ?, corral = ?, catVenta = ?, catHacienda = ?, pintura = ?, kgBruto = ?, kgProm = ?, desbastePorcentaje = ?, desbasteKg = ?, neto = ?, netoPromedio = ?, observaciones = ?, observacionesDescripcion = ?, dte = ?, flete = ?, estado = ? where id = ?', entities)
+			cursorObj.execute('UPDATE lotes SET remate = ?, productor = ?, cantidad = ?, corral = ?, catVenta = ?, catHacienda = ?, pintura = ?, kgBruto = ?, kgProm = ?, desbastePorcentaje = ?, desbasteKg = ?, neto = ?, netoPromedio = ?, observaciones = ?, observacionesDescripcion = ?, dte = ?, flete = ?, estado = ? where id = ?', entities)
 			con.commit()
 			messagebox.showinfo("Editado", "EDITADO con Éxito")
 			escape()
 	except:
 		messagebox.showerror("ERROR", "No se pudo editar")
-
 def borrar():
 	try:
 		x_id = diccionarioObjetos["idLote"]
@@ -968,6 +968,7 @@ def botonesInicio():
 	diccionarioObjetos["botBuscar"]["state"] = "normal"
 
 def escape():
+	diccionarioObjetos["idLote"]=""
 	borrarCampos()
 	desactivarCampos()
 	botonesInicio()
@@ -1301,4 +1302,4 @@ def ventana1(idLote, idRemate, idVendedor):
 
 	window.mainloop()
 
-ventana1("15", "NULL", "NULL")
+ventana1("16", "NULL", "NULL")

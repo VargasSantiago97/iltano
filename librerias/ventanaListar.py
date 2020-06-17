@@ -8,7 +8,7 @@ import datetime
 
 import tablaElegir
 #from librerias import tablaElegir
-import ventanaProductor2
+#import ventanaProductor2
 
 from tkinter import *
 from tkinter.ttk import *
@@ -448,5 +448,71 @@ dicRemates = {
 		},
 	},
 	}
-
-ventana1(dicProd)
+dicLotes = {
+	"seleccionar" : "LOTES",
+	
+	"columnas" : {
+		"0":{
+			"id" : "num1", 
+			"cabeza" : "CORRAL", 
+			"ancho" : 20, 
+			"row" : 4}, 
+		"1":{
+			"id" : "num2", 
+			"cabeza" : "VENDEDOR", 
+			"ancho" : 200, 
+			"row" : 2},
+		"2":{
+			"id" : "num3", 
+			"cabeza" : "CANTIDAD", 
+			"ancho" : 20, 
+			"row" : 3},
+		"3":{
+			"id" : "num4", 
+			"cabeza" : "CATEGORIA", 
+			"ancho" : 200, 
+			"row" : 6},
+		"4":{
+			"id" : "num5", 
+			"cabeza" : "KGs", 
+			"ancho" : 20, 
+			"row" : 12},
+		"5":{
+			"id" : "num6", 
+			"cabeza" : "Promedio", 
+			"ancho" : 20, 
+			"row" : 13},
+		},
+	
+	"consulta": {
+		"db" : 'database/iltanohacienda.db',
+		"tabla" : "lotes",
+		"condiciones" : ' WHERE estado = "activo"'},
+	"filtros" : {
+		"0" : {
+			"id": "remate",
+			"cabeza":"Remate",
+		},
+		"1" : {
+			"id": "productor",
+			"cabeza":"Vendedor",
+		},
+		"2" : {
+			"id": "cantidad",
+			"cabeza":"Cantidad",
+		},
+		"3" : {
+			"id": "corral",
+			"cabeza":"Corral",
+		},
+		"4" : {
+			"id": "catVenta",
+			"cabeza":"Categoria Venta",
+		},
+		"5" : {
+			"id": "catHacienda",
+			"cabeza":"Categoria Hacienda",
+		},
+	},
+	}
+ventana1(dicLotes)
