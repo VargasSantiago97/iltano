@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+
+
 import time
 
 import logging
@@ -29,8 +31,10 @@ from sqlite3 import Error
 
 import shutil
 
+#direccionBaseDeDatos = str(filedialog.askopenfilename())
 diccionarioObjetos = {}
 direccionBaseDeDatos = 'database/iltanohacienda.db'
+#direccionBaseDeDatos = r"//192.168.50.120/proyecto/iltano db/iltanohacienda.db"
 
 def sql_connection():
 	try:
