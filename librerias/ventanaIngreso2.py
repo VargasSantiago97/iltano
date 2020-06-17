@@ -571,6 +571,7 @@ direccionBaseDeDatos = 'database/iltanohacienda.db'
 
 diccionarioObjetos["REMATE_CORRECTO"] = False
 diccionarioObjetos["PRODUCTOR_CORRECTO"] = False
+diccionarioObjetos["BUSCAR"] = "remate"
 
 def sql_connection():
 	try:
@@ -588,7 +589,14 @@ def actualizar_db(con, tabla, condiciones):
 def ayuda():
 	messagebox.showinfo("Atencion", "Ayuda no disponible")
 	pass
+def buscar():
+	if(diccionarioObjetos["BUSCAR"]=="remate"):
+		buscarRemate()
+	else:
+		buscarProductor()
 def buscarRemate():
+	diccionarioObjetos["REMATE_CORRECTO"] = False
+	diccionarioObjetos["texto_fecha"].set("")
 	def funcsalirr(ssss):
 		con = sql_connection()
 		condiciones = " WHERE id = " + str(ssss)
@@ -605,6 +613,8 @@ def buscarRemate():
 	"dimensionesVentana" : "336x400"}
 	tablaElegir.tabla_elegir(dicc_buscar, funcsalirr)
 def buscarProductor():
+	diccionarioObjetos["PRODUCTOR_CORRECTO"] = False
+	diccionarioObjetos["texto_cuit"].set("")
 	def funcsalirr(ssss):
 
 		con = sql_connection()
@@ -632,11 +642,11 @@ def verificarLote():
 	rows = actualizar_db(con, "lotes", condiciones)
 
 	if len(rows) > 0:
-		activarCampos()
 		borrarCampos()
 		cargarDatosLote(rows[0])
 		botonesEditar()
-
+		activarCampos()
+		botonesEditar()
 	else:
 		messagebox.showerror("ERROR", "Error al buscar LOTE")
 def verificarRemate():
@@ -649,7 +659,7 @@ def verificarRemate():
 	if len(rows) > 0:
 		diccionarioObjetos["REMATE_CORRECTO"] = True
 		diccionarioObjetos["texto_fecha"].set("Fecha: " + str(rows[0][2]))
-
+		diccionarioObjetos["entry_vendedor"].focus()
 	else:
 		diccionarioObjetos["REMATE_CORRECTO"] = False
 		diccionarioObjetos["texto_fecha"].set("ERROR: Error al buscar REMATE")
@@ -670,6 +680,7 @@ def verificarVendedor():
 		pintura = rows_pintura[0][2]
 	else:
 		pintura = "S/P"
+	diccionarioObjetos["PINTURA"] = pintura
 
 	if len(rows_productor) > 0:
 		diccionarioObjetos["PRODUCTOR_CORRECTO"] = True
@@ -683,11 +694,16 @@ def verificarVendedor():
 	verificarActivar()
 
 def verificarActivar():
-	if (diccionarioObjetos["REMATE_CORRECTO"] == True) and (diccionarioObjetos["PRODUCTOR_CORRECTO"] == True):
-		activarCampos()
+	if ((diccionarioObjetos["REMATE_CORRECTO"] == True) and (diccionarioObjetos["PRODUCTOR_CORRECTO"] == True)):
+		if(diccionarioObjetos["idLote"]==""):
+			activarCampos()
+			botonesNuevo()
+		else:
+			activarCampos()
+			botonesEditar()
 	else:
 		desactivarCampos()
-
+		botonesInicio()
 def activarCampos():
 	diccionarioObjetos["entry_remate"].config(state="normal")
 	diccionarioObjetos["entry_vendedor"].config(state="normal")
@@ -716,8 +732,6 @@ def desactivarCampos():
 	diccionarioObjetos["txt_observaciones"].config(state="disabled")
 	diccionarioObjetos["entry_dte"].config(state="disabled")
 
-	diccionarioObjetos["REMATE_CORRECTO"] = False
-	diccionarioObjetos["PRODUCTOR_CORRECTO"] = False
 def borrarCampos():
 	diccionarioObjetos["entry_remate"].delete(0, tk.END)
 	diccionarioObjetos["texto_fecha"].set("")
@@ -795,96 +809,142 @@ def cargarDatosLote(row):
 
 	if len(rows_productor) == 1:
 		diccionarioObjetos["texto_cuit"].set("PINTURA: " + pintura + "  |  obs: " + str(rows_productor[0][13]))
+		diccionarioObjetos["PRODUCTOR_CORRECTO"] = True
 	else:
+		diccionarioObjetos["PRODUCTOR_CORRECTO"] = False
 		diccionarioObjetos["texto_cuit"].set("ERROR, PRODUCTOR NO EXISTE")
 
 
 	if len(rows_remate) == 1:
 		diccionarioObjetos["texto_fecha"].set("Fecha: " + str(rows_remate[0][2]))
+		diccionarioObjetos["REMATE_CORRECTO"] = True
 	else:
+		diccionarioObjetos["REMATE_CORRECTO"] = False
 		diccionarioObjetos["texto_fecha"].set("ERROR, REMATE NO EXISTE")
 
 
 def guardar():
 	try:
-		x_nombre = diccionarioObjetos["entryNombre"].get()
-		x_fecha = diccionarioObjetos["entryFecha"].get()
-		x_tipo = diccionarioObjetos["entryTipo"].get()
-		x_predio = diccionarioObjetos["entryPredio"].get()
-		x_localidad = diccionarioObjetos["entryLocalidad"].get()
-		x_martillo = diccionarioObjetos["entryMartillo"].get()
-		x_observaciones = diccionarioObjetos["entryObservaciones"].get()
-		x_comentarios = diccionarioObjetos["entryComentarios"].get()
+		x_remate = diccionarioObjetos["entry_remate"].get()
+		x_productor = diccionarioObjetos["entry_vendedor"].get()
+		x_cantidad = diccionarioObjetos["entry_cantidad"].get()
+		x_corral = diccionarioObjetos["entry_corral"].get()
+		x_catVenta = diccionarioObjetos["combo_catVenta"].get()
+		x_catHacienda = diccionarioObjetos["combo_catHacienda"].get()
+		x_pintura = diccionarioObjetos["PINTURA"]
+		x_kgBruto = diccionarioObjetos["entry_brutoTropa"].get()
+		x_kgProm = ""
+		x_desbastePorcentaje = diccionarioObjetos["entry_desbastePorcentaje"].get()
+		x_desbasteKg = ""
+		x_neto = diccionarioObjetos["entry_netoTropa"].get()
+		x_netoPromedio = diccionarioObjetos["entry_netoPromedio"].get()
+		x_observaciones = diccionarioObjetos["entry_observaciones"].get()
+		x_observacionesDescripcion = diccionarioObjetos["txt_observaciones"].get("1.0", tk.END)
+		x_dte = diccionarioObjetos["entry_dte"].get()
+		x_flete = ""
+		x_estado = "activo"
 
-		entities = [str(x_nombre),
-		str(x_fecha),
-		str(x_tipo),
-		str(x_predio),
-		str(x_localidad),
-		str(x_martillo),
+		entities = [str(x_remate),
+		str(x_productor),
+		str(x_cantidad),
+		str(x_corral),
+		str(x_catVenta),
+		str(x_catHacienda),
+		str(x_pintura),
+		str(x_kgBruto),
+		str(x_kgProm),
+		str(x_desbastePorcentaje),
+		str(x_desbasteKg),
+		str(x_neto),
+		str(x_netoPromedio),
 		str(x_observaciones),
-		str(x_comentarios)]
+		str(x_observacionesDescripcion),
+		str(x_dte),
+		str(x_flete),
+		str(x_estado)]
 	except:
 		messagebox.showerror("ERROR", "No se pudo obtener los datos")
 		return 0
 
 	try:
-		MsgBox = messagebox.askquestion('ATENCION', "¿Desea editar?", icon = 'warning')
-		if(MsgBox == 'yes'):
-			con = sql_connection()
-			cursorObj = con.cursor()
-			cursorObj.execute("INSERT INTO remate VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, ?, 'activo')", entities)
-			con.commit()
-			messagebox.showinfo("Guardado", "Guardado con Éxito")
-			escape()
+		con = sql_connection()
+		cursorObj = con.cursor()
+		cursorObj.execute("INSERT INTO lotes VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", entities)
+		con.commit()
+		escape()
 	except:
 		messagebox.showerror("ERROR", "No se pudo Guardar")
 def editar():
 	try:
-		x_nombre = diccionarioObjetos["entryNombre"].get()
-		x_fecha = diccionarioObjetos["entryFecha"].get()
-		x_tipo = diccionarioObjetos["entryTipo"].get()
-		x_predio = diccionarioObjetos["entryPredio"].get()
-		x_localidad = diccionarioObjetos["entryLocalidad"].get()
-		x_martillo = diccionarioObjetos["entryMartillo"].get()
-		x_observaciones = diccionarioObjetos["entryObservaciones"].get()
-		x_comentarios = diccionarioObjetos["entryComentarios"].get()
-		x_id = diccionarioObjetos["textID"].get()
+		x_id = diccionarioObjetos["idLote"]
+		x_remate = diccionarioObjetos["entry_remate"].get()
+		x_productor = diccionarioObjetos["entry_vendedor"].get()
+		x_cantidad = diccionarioObjetos["entry_cantidad"].get()
+		x_corral = diccionarioObjetos["entry_corral"].get()
+		x_catVenta = diccionarioObjetos["combo_catVenta"].get()
+		x_catHacienda = diccionarioObjetos["combo_catHacienda"].get()
+		x_pintura = diccionarioObjetos["PINTURA"]
+		x_kgBruto = diccionarioObjetos["entry_brutoTropa"].get()
+		x_kgProm = ""
+		x_desbastePorcentaje = diccionarioObjetos["entry_desbastePorcentaje"].get()
+		x_desbasteKg = ""
+		x_neto = diccionarioObjetos["entry_netoTropa"].get()
+		x_netoPromedio = diccionarioObjetos["entry_netoPromedio"].get()
+		x_observaciones = diccionarioObjetos["entry_observaciones"].get()
+		x_observacionesDescripcion = diccionarioObjetos["txt_observaciones"].get("1.0", tk.END)
+		x_dte = diccionarioObjetos["entry_dte"].get()
+		x_flete = ""
+		x_estado = "activo"
 
-		entities = [str(x_nombre),
-		str(x_fecha),
-		str(x_tipo),
-		str(x_predio),
-		str(x_localidad),
-		str(x_martillo),
+		entities = [str(x_remate),
+		str(x_productor),
+		str(x_cantidad),
+		str(x_corral),
+		str(x_catVenta),
+		str(x_catHacienda),
+		str(x_pintura),
+		str(x_kgBruto),
+		str(x_kgProm),
+		str(x_desbastePorcentaje),
+		str(x_desbasteKg),
+		str(x_neto),
+		str(x_netoPromedio),
 		str(x_observaciones),
-		str(x_comentarios),
+		str(x_observacionesDescripcion),
+		str(x_dte),
+		str(x_flete),
+		str(x_estado),
 		str(x_id)]
+
 	except:
 		messagebox.showerror("ERROR", "No se pudo obtener los datos")
 		return 0
 
 	try:
-		MsgBox = messagebox.askquestion('ATENCION', '¿Desea editar?\nID DB: ' + str(x_id) + '\nNombre (anterior): ' + str(x_nombre), icon = 'warning')
+		MsgBox = messagebox.askquestion('ATENCION', '¿Desea editar?\nID DB: ' + str(x_id), icon = 'warning')
 		if(MsgBox == 'yes'):
 			con = sql_connection()
 			cursorObj = con.cursor()
-			cursorObj.execute('UPDATE remate SET nombre = ?, fecha = ?, tipo = ?, predio = ?, localidad = ?, martillo = ?, observaciones = ?, comentarios = ? where id = ?', entities)
+			cursorObj.execute('UPDATE remate SET remate = ?, productor = ?, cantidad = ?, corral = ?, catVenta = ?, catHacienda = ?, pintura = ?, kgBruto = ?, kgProm = ?, desbastePorcentaje = ?, desbasteKg = ?, neto = ?, netoPromedio = ?, observaciones = ?, observacionesDescripcion = ?, dte = ?, flete = ?, estado = ? where id = ?', entities)
 			con.commit()
 			messagebox.showinfo("Editado", "EDITADO con Éxito")
 			escape()
 	except:
 		messagebox.showerror("ERROR", "No se pudo editar")
+
 def borrar():
 	try:
-		x_nombre = diccionarioObjetos["entryNombre"].get()
-		x_id = diccionarioObjetos["textID"].get()
+		x_id = diccionarioObjetos["idLote"]
 
-		MsgBox = messagebox.askquestion('ATENCION', '¿Desea BORRAR?\nID DB: ' + str(x_id) + '\nNombre (anterior): ' + str(x_nombre), icon = 'warning')
+		if(x_id==""):
+			messagebox.showerror("ERROR", "Lote no seleccionado")
+			return 0
+
+		MsgBox = messagebox.askquestion('ATENCION', '¿Desea BORRAR?\nID DB: ' + str(x_id), icon = 'warning')
 		if(MsgBox == 'yes'):
 			con = sql_connection()
 			cursorObj = con.cursor()
-			cursorObj.execute('UPDATE remate SET estado = "borrado" where id = ' + str(x_id))
+			cursorObj.execute('UPDATE lotes SET estado = "borrado" where id = ' + str(x_id))
 			con.commit()
 			messagebox.showinfo("Borrado", "Borrado con Éxito")
 			escape()
@@ -895,12 +955,12 @@ def botonesEditar():
 	diccionarioObjetos["botGuardar"]["state"] = "disabled"
 	diccionarioObjetos["botBorrar"]["state"] = "normal"
 	diccionarioObjetos["botEditar"]["state"] = "normal"
-	diccionarioObjetos["botBuscar"]["state"] = "disabled"
+	diccionarioObjetos["botBuscar"]["state"] = "normal"
 def botonesNuevo():
 	diccionarioObjetos["botGuardar"]["state"] = "normal"
 	diccionarioObjetos["botBorrar"]["state"] = "disabled"
 	diccionarioObjetos["botEditar"]["state"] = "disabled"
-	diccionarioObjetos["botBuscar"]["state"] = "disabled"
+	diccionarioObjetos["botBuscar"]["state"] = "normal"
 def botonesInicio():
 	diccionarioObjetos["botGuardar"]["state"] = "disabled"
 	diccionarioObjetos["botBorrar"]["state"] = "disabled"
@@ -977,6 +1037,7 @@ def bodyLote(window):
 			tk.Label(lbl_remate, text = "Remate", font=("Helvetica Neue",10), backgroun="#E6F5FF").grid(sticky = "e", column = 0, row = 0, padx=5, pady=5)
 			entry_remate = Entry(lbl_remate, width="32")
 			entry_remate.grid(sticky = "e", column = 1, row = 0, padx=5, pady=5)
+			entry_remate.focus()
 
 			texto_fecha = StringVar()
 			texto_fecha.set("")
@@ -1006,9 +1067,19 @@ def bodyLote(window):
 			diccionarioObjetos["entry_vendedor"] = entry_vendedor
 			diccionarioObjetos["texto_cuit"] = texto_cuit
 		
-		
 		entry_remate.bind("<Return>", (lambda event: buscarRemate()))
 		entry_vendedor.bind("<Return>", (lambda event: buscarProductor()))
+
+		entry_remate.bind("<F5>", (lambda event: buscarRemate()))
+		entry_vendedor.bind("<F5>", (lambda event: buscarProductor()))
+
+		def setearRemate():
+			diccionarioObjetos["BUSCAR"] = "remate"
+		def setearProductor():
+			diccionarioObjetos["BUSCAR"] = "productor"
+
+		entry_remate.bind("<Button-1>", (lambda event: setearRemate()))
+		entry_vendedor.bind("<Button-1>", (lambda event: setearProductor()))
 
 	#LABEL DATOS LOTES
 	if(True):
@@ -1169,7 +1240,7 @@ def ventana1(idLote, idRemate, idVendedor):
 	botGuardar = tk.Button(barraherr, image=iconGuardar, compound="top", backgroun="#b3f2bc", command=guardar)
 	botBorrar = tk.Button(barraherr, image=iconBorrar, compound="top", backgroun="#FFaba8", command = borrar)
 	botEditar = tk.Button(barraherr, image=iconEditar, compound="top", backgroun="#f2f0b3", command = editar)
-	botBuscar = tk.Button(barraherr, image=iconBuscar, compound="top", backgroun="#b1fae3")
+	botBuscar = tk.Button(barraherr, image=iconBuscar, compound="top", command=buscar,backgroun="#b1fae3")
 	botAyuda = tk.Button(barraherr, image=iconAyuda, compound="top", command=ayuda, backgroun="#f2f0b3")
 	botCerrar = tk.Button(barraherr, image=iconCerrar, compound="top", command=cerrarVentana, backgroun="#FF6E6E")
 
@@ -1216,16 +1287,18 @@ def ventana1(idLote, idRemate, idVendedor):
 		diccionarioObjetos["idLote"] = idLote
 		verificarLote()
 	else:
+		diccionarioObjetos["idLote"] = ""
 		if(idRemate != "NULL"):
 			diccionarioObjetos["entry_remate"].delete(0, tk.END)
 			diccionarioObjetos["entry_remate"].insert(0, idRemate)
 			verificarRemate()
+			verificarActivar()
 		if(idVendedor != "NULL"):
 			diccionarioObjetos["entry_vendedor"].delete(0, tk.END)
 			diccionarioObjetos["entry_vendedor"].insert(0, idVendedor)
 			verificarVendedor()
+			verificarActivar()
 
-	verificarActivar()
 	window.mainloop()
 
-ventana1("NULL", "NULL", "NULL")
+ventana1("15", "NULL", "NULL")

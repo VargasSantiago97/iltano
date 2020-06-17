@@ -23,7 +23,7 @@ from sqlite3 import Error
 
 import shutil
 
-dicc_objetos={"varFullScreen" : False, "varFullScreenDetalles" : False}
+dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : False}
 diccionario_objetos = {}
 
 direccionBaseDeDatos = "librerias/database/iltanohacienda.db"
@@ -33,7 +33,7 @@ window.title("IL TANO HACIENDA SAS")
 window.geometry("1024x600")
 window.resizable(0,0)
 window.configure(backgroun="#000000") #E8F6FA
-window.attributes('-fullscreen', False)
+window.attributes('-fullscreen', dicc_objetos["varFullScreen"])
 
 def sql_connection():
 	try:
