@@ -1302,11 +1302,10 @@ def exportar():
 
 
 def catalogo(idRemate):
-	window1 = Tk()
-	window1.title("Catalogo")
-	window1.geometry("1024x600")
-	window1.configure(backgroun="#2C4D4F") #E8F6FA
-	catalogo(window1)
+	window = Tk()
+	window.title("Catalogo")
+	window.geometry("1024x600")
+	window.configure(backgroun="#2C4D4F") #E8F6FA
 
 	padX = 5
 	padY = 5
@@ -1449,7 +1448,7 @@ def catalogo(idRemate):
 		btn_filtrarMostrarTodo.place(x = 20, y = 270, width=110, height=30)
 
 	#TABLA -> LOTES
-	#if(True):
+	if(True):
 		sbr_lotes = Scrollbar(lbl_tabla)
 		sbr_lotes.pack(side=RIGHT, fill="y")
 
@@ -1475,7 +1474,7 @@ def catalogo(idRemate):
 		tabla_lotes.column("promedio", width=30)
 
 	#CARGAR
-	#if(True):
+	if(True):
 		tk.Label(lbl_cargar, text="Cargar", font=("Helvetica Neue",12, "bold"), anchor="c", backgroun="#E0F8F1").place(x = 0, y = 2, width = 100)
 
 		
@@ -1590,7 +1589,6 @@ def catalogo(idRemate):
 	actualizarDicCat()
 	#actualizarTablaCategorias()
 	actualizarProductores()
-
 	actualizarDatosCatalogo()
 	actualizarLotes()
 
@@ -1603,6 +1601,6 @@ def catalogo(idRemate):
 	tabla_lotesCargados.bind('<Control-Up>', (lambda event: moverLotArriba()))
 	tabla_lotesCargados.bind('<Control-Down>', (lambda event: moverLotAbajo()))
 
-	window1.mainloop()
+	window.mainloop()
 
 catalogo("remate1")

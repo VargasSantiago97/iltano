@@ -7,7 +7,6 @@ import logging
 import datetime
 
 import tablaElegir
-
 from tkinter import *
 from tkinter.ttk import *
 from tkinter import messagebox
@@ -1302,4 +1301,4 @@ def ventana1(idLote, idRemate, idVendedor):
 
 	window.mainloop()
 
-ventana1("16", "NULL", "NULL")
+ventana1("NULL", "NULL", "NULL")
