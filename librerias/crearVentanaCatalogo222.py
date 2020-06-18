@@ -522,41 +522,25 @@ def catalogo(idRemate):
 	lbl_tablaCategoriasMover.place(x = 756, y = 2+mod_alt, width = 100, height = 250)
 	lbl_acciones.place(x = 858, y = 2+mod_alt, width = 425, height = 250)
 	lbl_categoria.place(x = 2, y = 204+mod_alt+var_bajar, width = 1281, height = 48)
-	lbl_tablaCargados.place(x = 2, y = 254+mod_alt+var_bajar, width = 1179, height = 370)
+	lbl_tablaCargados.place(x = 2, y = 254+mod_alt+var_bajar, width = 800, height = 370)
 	lbl_tablaCargadosMover.place(x = 1183, y = 254+mod_alt+var_bajar, width = 100, height = 370)
 
 	#DATOS DE CATALOGO
 	if(True):	
-		tk.Label(lbl_datos, text="Datos catálogo", font=("Helvetica Neue",14, "bold"), anchor="c", backgroun="#E0F8F1").place(x = 0, y = 2, width = 298)
+		tk.Label(lbl_datos, text="Catálogo", font=("Helvetica Neue",14, "bold"), anchor="c", backgroun="#E0F8F1").place(x = 0, y = 2, width = 298)
 	
-		tk.Label(lbl_datos, text="Fecha:", font=("Helvetica Neue",10), anchor="e", backgroun="#E0F8F1").place(x = 0, y = 50, width = 80)
-		tk.Label(lbl_datos, text="Titulo:", font=("Helvetica Neue",10), anchor="e", backgroun="#E0F8F1").place(x = 0, y = 80, width = 80)
-		tk.Label(lbl_datos, text="Predio:", font=("Helvetica Neue",10), anchor="e", backgroun="#E0F8F1").place(x = 0, y = 110, width = 80)
-		tk.Label(lbl_datos, text="Localidad:", font=("Helvetica Neue",10), anchor="e", backgroun="#E0F8F1").place(x = 0, y = 140, width = 80)
-		tk.Label(lbl_datos, text="Remata:", font=("Helvetica Neue",10), anchor="e", backgroun="#E0F8F1").place(x = 0, y = 170, width = 80)
-		tk.Label(lbl_datos, text="Total ingresados", font=("Helvetica Neue",10), anchor="c", backgroun="#E0F8F1").place(x = 0, y = 200, width = 150)
-		tk.Label(lbl_datos, text="Total corrales", font=("Helvetica Neue",10), anchor="c", backgroun="#E0F8F1").place(x = 140, y = 200, width = 150)
+		tk.Label(lbl_datos, text="Seleccionar Remate:", font=("Helvetica Neue",10), anchor="e", backgroun="#E0F8F1").place(x = 0, y = 50, width = 150)
+		tk.Label(lbl_datos, text="Seleccionar Catalogo:", font=("Helvetica Neue",10), anchor="e", backgroun="#E0F8F1").place(x = 0, y = 80, width = 150)
 
-		entry_datosFecha = Entry(lbl_datos)
-		entry_datosFecha.place(x = 90, y = 50, width = 180)
+		combo_remate = Combobox(lbl_datos)
+		combo_remate.place(x = 150, y = 50, width = 130)
 
-		entry_datosTitulo = Entry(lbl_datos)
-		entry_datosTitulo.place(x = 90, y = 80, width = 180)
+		combo_catalogo = Combobox(lbl_datos, state="disabled")
+		combo_catalogo.place(x = 150, y = 80, width = 130)
 
-		entry_datosPredio = Entry(lbl_datos)
-		entry_datosPredio.place(x = 90, y = 110, width = 180)
+		btn_nuevo = tk.Button(lbl_datos, text="Nuevo catalogo", state="disabled", backgroun="#fffcbf")
+		btn_nuevo.place(x = 100, y = 120, width = 100)
 
-		entry_datosLocalidad = Entry(lbl_datos)
-		entry_datosLocalidad.place(x = 90, y = 140, width = 180)
-
-		entry_datosRemata = Entry(lbl_datos)
-		entry_datosRemata.place(x = 90, y = 170, width = 180)
-
-		entry_totalIngresados = Entry(lbl_datos)
-		entry_totalIngresados.place(x = 25, y = 220, width = 100)
-
-		entry_totalCorrales = Entry(lbl_datos)
-		entry_totalCorrales.place(x = 165, y = 220, width = 100)
 
 	#TABLA -> CATEGORIAS DE VENTA
 	if(True):
@@ -657,13 +641,7 @@ def catalogo(idRemate):
 	#ASIGNAR OBJETOS AL DICCIONARIOS:
 	if(True):
 		#Datos del catalogo
-		diccionario_objetos["entry_datosFecha"] = entry_datosFecha
-		diccionario_objetos["entry_datosTitulo"] = entry_datosTitulo
-		diccionario_objetos["entry_datosPredio"] = entry_datosPredio
-		diccionario_objetos["entry_datosLocalidad"] = entry_datosLocalidad
-		diccionario_objetos["entry_datosRemata"] = entry_datosRemata
-		diccionario_objetos["entry_totalIngresados"] = entry_totalIngresados
-		diccionario_objetos["entry_totalCorrales"] = entry_totalCorrales
+
 
 		#Tabla cat ventas
 		diccionario_objetos["tabla_catVenta"] = tabla_catVenta
