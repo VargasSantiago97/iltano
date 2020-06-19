@@ -517,10 +517,10 @@ def catalogo(idRemate):
 	mod_alt = 0
 	var_bajar = 50
 
-	lbl_datos.place(x = 2, y = 2+mod_alt, width = 300, height = 250)
-	lbl_tablaCategorias.place(x = 304, y = 2+mod_alt, width = 450, height = 250)
-	lbl_tablaCategoriasMover.place(x = 756, y = 2+mod_alt, width = 100, height = 250)
-	lbl_acciones.place(x = 858, y = 2+mod_alt, width = 425, height = 250)
+	lbl_datos.place(x = 2, y = 2+mod_alt, width = 300, height = 170)
+	lbl_tablaCategorias.place(x = 304, y = 2+mod_alt, width = 450, height = 170)
+	lbl_tablaCategoriasMover.place(x = 756, y = 2+mod_alt, width = 100, height = 170)
+	lbl_acciones.place(x = 858, y = 2+mod_alt, width = 164, height = 170)
 	lbl_categoria.place(x = 2, y = 204+mod_alt+var_bajar, width = 1281, height = 48)
 	lbl_tablaCargados.place(x = 2, y = 254+mod_alt+var_bajar, width = 800, height = 370)
 	lbl_tablaCargadosMover.place(x = 1183, y = 254+mod_alt+var_bajar, width = 100, height = 370)
@@ -547,7 +547,7 @@ def catalogo(idRemate):
 		sbr_catVenta = Scrollbar(lbl_tablaCategorias)
 		sbr_catVenta.pack(side=RIGHT, fill="y")
 
-		tabla_catVenta = ttk.Treeview(lbl_tablaCategorias, columns=("cabezas", "alias", "nombre"), selectmode=tk.BROWSE, height=7) 
+		tabla_catVenta = ttk.Treeview(lbl_tablaCategorias, columns=("cabezas", "alias", "nombre"), selectmode=tk.BROWSE) 
 		tabla_catVenta.pack(side=LEFT, fill="both", expand=True)
 		sbr_catVenta.config(command=tabla_catVenta.yview)
 		tabla_catVenta.config(yscrollcommand=sbr_catVenta.set)
@@ -564,17 +564,17 @@ def catalogo(idRemate):
 
 	#MOVER -> TABLA CATEGORIAS
 	if(True):
+		btn_moverArribaTodoCat = tk.Button(lbl_tablaCategoriasMover, text="↑↑↑", font=("verdana",15,"bold"), backgroun="#F5A9A9", command = moverCatArribaTODO)
+		btn_moverArribaTodoCat.place(x = 25, y = 10, width=50, height=25)
+
 		btn_moverArribaCat = tk.Button(lbl_tablaCategoriasMover, text="↑", font=("verdana",15,"bold"), backgroun="#F5D0A9", command = moverCatArriba)
-		btn_moverArribaCat.place(x = 25, y = 70, width=50, height=50)
+		btn_moverArribaCat.place(x = 25, y = 50, width=50, height=25)
 
 		btn_moverAbajoCat = tk.Button(lbl_tablaCategoriasMover, text="↓", font=("verdana",15,"bold"), backgroun="#F5D0A9", command = moverCatAbajo)
-		btn_moverAbajoCat.place(x = 25, y = 130, width=50, height=50)
-
-		btn_moverArribaTodoCat = tk.Button(lbl_tablaCategoriasMover, text="↑↑↑", font=("verdana",15,"bold"), backgroun="#F5A9A9", command = moverCatArribaTODO)
-		btn_moverArribaTodoCat.place(x = 25, y = 10, width=50, height=50)
+		btn_moverAbajoCat.place(x = 25, y = 90, width=50, height=25)
 
 		btn_moverAbajoTodoCat = tk.Button(lbl_tablaCategoriasMover, text="↓↓↓", font=("verdana",15,"bold"), backgroun="#F5A9A9", command = moverCatAbajoTODO)
-		btn_moverAbajoTodoCat.place(x = 25, y = 190, width=50, height=50)
+		btn_moverAbajoTodoCat.place(x = 25, y = 130, width=50, height=25)
 
 	#ACCIONES
 	if(True):
