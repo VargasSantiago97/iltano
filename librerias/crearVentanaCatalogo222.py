@@ -32,12 +32,12 @@ import json
 diccionario_textos = {}
 diccionario_objetos = {}
 diccionario_pinturas = {}
-dicCat = {}
+dicCat = {"asd":"asd"}
 dicCatUbic = {}
 dicProductores = {}
 
 direccionBaseDeDatos = 'database/iltanohacienda.db'
-diccionarioObjetos = {}
+
 
 dire = "C:/Users/Santiago/Desktop/mipdf2.pdf"
 
@@ -46,6 +46,10 @@ dicLotesUbic = {}
 
 remate = "remate1"
 
+diccionarioObjetos = {
+	"dicCatUbic" : dicCatUbic,
+	"dicLotesUbic" : dicLotesUbic
+}
 
 def treeview_sort_column(tv, col, reverse):
 	l = [(tv.set(k, col), k) for k in tv.get_children('')]
@@ -130,7 +134,42 @@ def activarCategoria():
 	diccionarioObjetos["btn_nuevo"].configure(state="normal")
 	diccionarioObjetos["btn_nuevo"].configure(backgroun="#d3ffba")
 def categoriaCargada():
-	pass
+	diccionarioObjetos["btn_guardar"].configure(state="normal")
+	diccionarioObjetos["btn_eliminar"].configure(state="normal")
+	diccionarioObjetos["btn_pdf"].configure(state="normal")
+
+	diccionarioObjetos["dicCatUbic"].clear()
+
+	actualizarDicCat()
+
+	#Leer diccionarios
+	try:
+		ubicGuardar = "../catalogos"
+
+		nombreArchivoLotes = "remate_" + str(diccionarioObjetos["entryRemate"].get()) + "_-_catalogo_" + str(diccionarioObjetos["entry_catalogo"].get()) + "_lot.json"
+		nombreArchivoCat = "remate_" + str(diccionarioObjetos["entryRemate"].get()) + "_-_catalogo_" + str(diccionarioObjetos["entry_catalogo"].get()) + "_cat.json"
+
+		archivo = open(ubicGuardar + "/" + nombreArchivoLotes, "r")
+		nuevoDicLotesUbic = json.loads(archivo.read())
+		archivo.close()
+
+		archivoCat = open(ubicGuardar + "/" + nombreArchivoCat, "r")
+		nuevoDicCatUbic = json.loads(archivoCat.read())
+		archivoCat.close()
+
+		diccionarioObjetos["dicCatUbic"].update(nuevoDicCatUbic)
+
+	except:
+		messagebox.showerror("ERROR", "Error, no se pudo cargar")
+		return 0
+
+	actualizarLotes()
+	actualizarTablaCategorias()
+
+	diccionarioObjetos["dicLotesUbic"].clear()
+	diccionarioObjetos["dicLotesUbic"].update(nuevoDicLotesUbic)
+
+
 
 
 #Productores
@@ -169,8 +208,6 @@ def actualizarDicCat():
 
 				cantidadTotal = cantidadTotal + cantidad
 				cabezasTotal = cabezasTotal + cabezas
-
-		actualizarDicCatUbic()		
 	except:
 		messagebox.showerror("ERROR", "Error al cargar")
 def actualizarDicCatUbic():
@@ -180,7 +217,6 @@ def actualizarDicCatUbic():
 	try:
 		for i in range(0, cant):
 			dicCatUbic[str(i)] = llaves[i]
-		actualizarTablaCategorias()
 	except:
 		messagebox.showerror("ERROR", "Error al ordenar")
 def actualizarTablaCategorias():
@@ -197,7 +233,7 @@ def actualizarTablaCategorias():
 			str(dicCat[dicCatUbic[str(i)]]["alias"]), 
 			str(dicCat[dicCatUbic[str(i)]]["nombre"])))
 	except:
-		messagebox.showerror("ERROR", "Error al cargar los productores usados")
+		messagebox.showerror("ERROR", "Error al cargar categorias de venta")
 
 def actualizarDatosCatalogo():
 	con = sql_connection()
@@ -593,7 +629,16 @@ def nuevoCatalogo(window, remate):
 				diccionarioObjetos["entry_catalogo"].delete(0, tk.END)
 				diccionarioObjetos["entry_catalogo"].insert(0, x_alias)
 				winCat.destroy()
+
 				actualizarDicCat()
+				actualizarDicCatUbic()
+				actualizarTablaCategorias()
+				actualizarLotes()
+
+				diccionarioObjetos["btn_guardar"].config(state="normal")
+				diccionarioObjetos["btn_eliminar"].config(state="normal")
+				diccionarioObjetos["btn_pdf"].config(state="normal")
+
 		except:
 			messagebox.showerror("ERROR", "No se pudo Guardar")
 
@@ -636,7 +681,7 @@ def catalogo(idRemate):
 	window.title("Catalogo")
 	window.geometry("1024x600")
 	window.configure(backgroun="#2C4D4F") #E8F6FA
-	window.attributes('-fullscreen', False)
+	window.attributes('-fullscreen', True)
 
 	padX = 5
 	padY = 5
@@ -719,13 +764,13 @@ def catalogo(idRemate):
 	#ACCIONES
 	if(True):
 
-		btn_guardar = tk.Button(lbl_acciones, text="Guardar Catalogo", font=("verdana",10), backgroun="#F5D0A9", width=18, command=guardar)
+		btn_guardar = tk.Button(lbl_acciones, text="Guardar Catalogo", font=("verdana",10), backgroun="#F5D0A9", width=18, command=guardar, state = "disabled")
 		btn_guardar.pack(pady=5)
 
-		btn_guardar = tk.Button(lbl_acciones, text="Eliminar Catalogo", font=("verdana",10), backgroun="#F5D0A9", width=18, command=exportar)
-		btn_guardar.pack(pady=5)
+		btn_eliminar = tk.Button(lbl_acciones, text="Eliminar Catalogo", font=("verdana",10), backgroun="#F5D0A9", width=18, command=exportar, state = "disabled")
+		btn_eliminar.pack(pady=5)
 
-		btn_pdf = tk.Button(lbl_acciones, text="Generar PDF", font=("verdana",10), backgroun="#F5D0A9", width=18, command=exportar)
+		btn_pdf = tk.Button(lbl_acciones, text="Generar PDF", font=("verdana",10), backgroun="#F5D0A9", width=18, command=exportar, state = "disabled")
 		btn_pdf.pack(pady=5)
 
 	#CATEGORIA SELECCIONADA
@@ -792,6 +837,13 @@ def catalogo(idRemate):
 		diccionarioObjetos["entry_catalogo"] = entry_catalogo
 
 		diccionarioObjetos["btn_nuevo"] = btn_nuevo
+
+		diccionarioObjetos["btn_guardar"] = btn_guardar
+		diccionarioObjetos["btn_eliminar"] = btn_eliminar
+		diccionarioObjetos["btn_pdf"] = btn_pdf
+		
+
+
 
 		#Tabla cat ventas
 		diccionario_objetos["tabla_catVenta"] = tabla_catVenta
