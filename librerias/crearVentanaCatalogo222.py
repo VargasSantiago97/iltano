@@ -8,6 +8,7 @@ import datetime
 
 #import ventanaIngreso
 import PDF_catalogo
+import tablaElegir
 
 from tkinter import *
 from tkinter.ttk import *
@@ -26,6 +27,8 @@ from sqlite3 import Error
 
 import shutil
 
+import json
+
 diccionario_textos = {}
 diccionario_objetos = {}
 diccionario_pinturas = {}
@@ -34,6 +37,7 @@ dicCatUbic = {}
 dicProductores = {}
 
 direccionBaseDeDatos = 'database/iltanohacienda.db'
+diccionarioObjetos = {}
 
 dire = "C:/Users/Santiago/Desktop/mipdf2.pdf"
 
@@ -76,13 +80,66 @@ def actualizar_db2(con, tabla, condiciones):
 
 	return rows
 
+
+def buscar(selecBuscar):
+	def funcsalirr(ssss):
+		con = sql_connection()
+		condiciones = " WHERE id = " + str(ssss)
+		rows = actualizar_db(con, "remate", condiciones)
+
+		diccionarioObjetos["entryRemate"].delete(0, tk.END)
+		diccionarioObjetos["entryRemate"].insert(0, rows[0][1])
+
+		activarCategoria()
+	def funcsalirrcat(ssss):
+		con = sql_connection()
+		condiciones = " WHERE id = " + str(ssss)
+		rows = actualizar_db(con, "catalogo", condiciones)
+
+		diccionarioObjetos["entry_catalogo"].delete(0, tk.END)
+		diccionarioObjetos["entry_catalogo"].insert(0, rows[0][1])
+
+		categoriaCargada()
+
+	#Buscar remate
+	if(selecBuscar=="remate"):
+
+		dicc_buscar = {"seleccionar" : "remate",
+		"columnas" : {"0":{"id" : "nombre", "cabeza" : "Remate", "ancho" : 180, "row" : 1}, "1":{"id" : "fecha", "cabeza" : "Fecha", "ancho" : 60, "row" : 2}, "2":{"id" : "tipo", "cabeza" : "Tipo", "ancho" : 70, "row" : 3}},
+		"db" : direccionBaseDeDatos,
+		"tabla" : "remate",
+		"condiciones" : ' WHERE nombre LIKE  "%' + str(diccionarioObjetos["entryRemate"].get()) + '%" AND estado = "activo"',
+		"dimensionesVentana" : "336x400"}
+		tablaElegir.tabla_elegir(dicc_buscar, funcsalirr)
+
+	#Buscar catalogo
+	if(selecBuscar=="catalogo"):
+		dicc_buscar = {"seleccionar" : "catalogo",
+		"columnas" : {"0":{"id" : "nombre", "cabeza" : "Catalogo", "ancho" : 180, "row" : 1}, "1":{"id" : "fecha", "cabeza" : "Nombre", "ancho" : 60, "row" : 2}, "2":{"id" : "tipo", "cabeza" : "Remate", "ancho" : 70, "row" : 3}},
+		"db" : direccionBaseDeDatos,
+		"tabla" : "catalogo",
+		"condiciones" : ' WHERE (nombre LIKE  "%' + str(diccionarioObjetos["entry_catalogo"].get()) + '%" OR alias LIKE  "%' + str(diccionarioObjetos["entry_catalogo"].get()) + '%") AND remate = "' + str(diccionarioObjetos["entryRemate"].get()) + '" AND estado = "activo"',
+		"dimensionesVentana" : "336x400"}
+		tablaElegir.tabla_elegir(dicc_buscar, funcsalirrcat)
+
+def activarCategoria():
+	diccionarioObjetos["entry_catalogo"].configure(state="normal")
+	diccionarioObjetos["entry_catalogo"].delete(0, tk.END)
+	diccionarioObjetos["entry_catalogo"].focus()
+
+	diccionarioObjetos["btn_nuevo"].configure(state="normal")
+	diccionarioObjetos["btn_nuevo"].configure(backgroun="#d3ffba")
+def categoriaCargada():
+	pass
+
+
 #Productores
 def actualizarProductores():
 	con = sql_connection()
 	condiciones = ""
 	rows = actualizar_db(con, "productores", condiciones)
 	for row in rows:
-		dicProductores[str(row[3])] = str(row[1])
+		dicProductores[str(row[1])] = str(row[1])
 
 #CATEGORIA
 def actualizarDicCat():
@@ -95,27 +152,25 @@ def actualizarDicCat():
 	try:
 		for row in rows:
 			con = sql_connection()
-			condiciones = " WHERE estado = 'activo' AND catVenta = '" + str(row[2]) + "'"
+			condiciones = " WHERE estado = 'activo' AND catVenta = '" + str(row[1]) + "' AND remate = '" + str(diccionarioObjetos["entryRemate"].get()) + "'"
 			rows_lotes = actualizar_db2(con, "lotes", condiciones)
 
 			cantidad = len(rows_lotes)
 			if cantidad>0:
 				cabezas = 0
 				for row_lote in rows_lotes:
-					cabezas = cabezas + int(row_lote[0])
+					try:
+						num_cab = int(row_lote[0])
+					except:
+						num_cab = 0
+					cabezas = cabezas + num_cab
+
 				dicCat[str(row[0])] = {"cantidad" : cantidad, "cabezas" : cabezas,"alias" : str(row[1]), "nombre" : str(row[2])}
 
 				cantidadTotal = cantidadTotal + cantidad
 				cabezasTotal = cabezasTotal + cabezas
 
-		actualizarDicCatUbic()
-
-		diccionario_objetos["entry_totalCorrales"].delete(0, tk.END)
-		diccionario_objetos["entry_totalIngresados"].delete(0, tk.END)
-
-		diccionario_objetos["entry_totalCorrales"].insert(0, cantidadTotal)
-		diccionario_objetos["entry_totalIngresados"].insert(0, cabezasTotal)
-		
+		actualizarDicCatUbic()		
 	except:
 		messagebox.showerror("ERROR", "Error al cargar")
 def actualizarDicCatUbic():
@@ -128,7 +183,6 @@ def actualizarDicCatUbic():
 		actualizarTablaCategorias()
 	except:
 		messagebox.showerror("ERROR", "Error al ordenar")
-
 def actualizarTablaCategorias():
 
 	tabla = diccionario_objetos["tabla_catVenta"]
@@ -144,6 +198,7 @@ def actualizarTablaCategorias():
 			str(dicCat[dicCatUbic[str(i)]]["nombre"])))
 	except:
 		messagebox.showerror("ERROR", "Error al cargar los productores usados")
+
 def actualizarDatosCatalogo():
 	con = sql_connection()
 	condiciones = " WHERE nombre = '" + remate + "'"
@@ -168,26 +223,25 @@ def actualizarLotes():
 	cant_cats = len(dicCatUbic)
 
 	for i in range(0, cant_cats):
+		id_cateVenta = str(dicCatUbic[str(i)])
+		cateVent = dicCat[id_cateVenta]["alias"]
+
 		con = sql_connection()
-		cateVent = dicCat[str(dicCatUbic[str(i)])]["nombre"]
-		condiciones = " WHERE estado = 'activo' AND catVenta = '" + cateVent + "'"
+		condiciones = " WHERE estado = 'activo' AND catVenta = '" + cateVent + "' AND remate = '" + str(diccionarioObjetos["entryRemate"].get()) + "'"
 
 		rows = actualizar_db(con, "lotes", condiciones)
 
 		cant_lotes = len(rows)
 
-		id_cateVenta = str(dicCatUbic[str(i)])
 		dicLotes[id_cateVenta] = {}
 		dicLotesUbic[id_cateVenta] = {}
 
 		j=0
 
 		for row in rows:
-			productor = dicProductores[str(row[2])]
-
 			dicLotes[id_cateVenta][str(row[0])] = {
 			"corral" : str(row[4]),
-			"productor" : productor,
+			"productor" : str(row[2]),
 			"cantidad" : str(row[3]),
 			"categoria" : str(row[6]),
 			"pintura" : str(row[7]),
@@ -227,11 +281,6 @@ def cargarDatosLotes():
 		messagebox.showerror("ERROR", "Error al cargar")
 
 
-
-
-
-
-	#print(rows)
 
 def tablaADicLotesUbic():
 	#print(type(diccionario_objetos["tabla_lotesCargados"].get_children()))
@@ -433,6 +482,7 @@ def seleccionarTablaCat():
 	diccionario_objetos["texto_cat_filtrar"].set(str(dicCat[str(dicCatUbic[str(ubicacion)])]["nombre"]))
 	diccionario_objetos["texto_cat_id"].set(dicCatUbic[str(ubicacion)])
 
+	#actualizarLotes()
 	cargarDatosLotes()
 
 	#print(ubicacion)
@@ -495,6 +545,91 @@ def exportar():
 		return 0
 	PDF_catalogo.preliquidacionPDF(dicc)
 
+def guardar():
+	try:
+		ubicGuardar = "../catalogos"
+
+		nombreArchivoLotes = "remate_" + str(diccionarioObjetos["entryRemate"].get()) + "_-_catalogo_" + str(diccionarioObjetos["entry_catalogo"].get()) + "_lot.json"
+		nombreArchivoCat = "remate_" + str(diccionarioObjetos["entryRemate"].get()) + "_-_catalogo_" + str(diccionarioObjetos["entry_catalogo"].get()) + "_cat.json"
+
+		archivo = open(ubicGuardar + "/" + nombreArchivoLotes, "w")
+		diccLotes = json.dumps(dicLotesUbic, indent=4)
+		archivo.write(diccLotes)
+		archivo.close()
+
+		archivoCat = open(ubicGuardar + "/" + nombreArchivoCat, "w")
+		diccCat = json.dumps(dicCatUbic, indent=4)
+		archivoCat.write(diccCat)
+		archivoCat.close()
+
+	except:
+		messagebox.showerror("ERROR", "Error al guardar")
+
+
+#NUEVO CATALOGO
+def nuevoCatalogo(window, remate):
+	def guardarCatalogo():
+		try:
+			x_alias = entry_alias.get()
+			x_nombre = entry_nombre.get()
+			x_remate = remate
+			x_fecha = entry_fecha.get()
+			x_observaciones = entry_observaciones.get()
+			x_estado = "activo"
+
+			entities = [str(x_alias), str(x_nombre), str(x_remate), str(x_fecha), str(x_observaciones), str(x_estado)]
+		except:
+			messagebox.showerror("ERROR", "No se pudo obtener los datos")
+			return 0
+
+		try:
+			MsgBox = messagebox.askquestion('ATENCION', "¿Desea guardar?", icon = 'warning')
+			if(MsgBox == 'yes'):
+				con = sql_connection()
+				cursorObj = con.cursor()
+				cursorObj.execute("INSERT INTO catalogo VALUES(NULL, ?, ?, ?, ?, ?, ?)", entities)
+				con.commit()
+				messagebox.showinfo("Guardado", "Guardado con Éxito")
+				diccionarioObjetos["entry_catalogo"].delete(0, tk.END)
+				diccionarioObjetos["entry_catalogo"].insert(0, x_alias)
+				winCat.destroy()
+				actualizarDicCat()
+		except:
+			messagebox.showerror("ERROR", "No se pudo Guardar")
+
+
+	winCat = Toplevel(window)
+	winCat.title("Nuevo Catalogo")
+	winCat.geometry("450x350")
+	winCat.configure(backgroun="#E0F8F1") #E8F6FA
+
+	sec1 = Label(winCat, backgroun="#E0F8F1")
+	sec2 = Label(winCat, backgroun="#E0F8F1")
+	sec3 = Label(winCat, backgroun="#E0F8F1")
+
+	sec1.grid(column = 0, row = 0, padx = 10, pady = 10)
+	sec2.grid(column = 0, row = 1, padx = 10, pady = 10)
+	sec3.grid(column = 0, row = 2, padx = 10, pady = 10)
+
+	Label(sec1, text="Crear catalogo en: " + str(remate), backgroun="#E0F8F1", font=("Helvetica", 15)).pack()
+
+	Label(sec2, text="Alias:", backgroun="#E0F8F1", font=("Helvetica", 15)).grid(sticky=E, column = 0, row = 0, padx=10, pady=10)
+	Label(sec2, text="Nombre:", backgroun="#E0F8F1", font=("Helvetica", 15)).grid(sticky=E, column = 0, row = 1, padx=10, pady=10)
+	Label(sec2, text="Fecha:", backgroun="#E0F8F1", font=("Helvetica", 15)).grid(sticky=E, column = 0, row = 2, padx=10, pady=10)
+	Label(sec2, text="Observaciones:", backgroun="#E0F8F1", font=("Helvetica", 15)).grid(sticky=E, column = 0, row = 3, padx=10, pady=10)
+
+	entry_alias = Entry(sec2, font=("Helvetica", 15))
+	entry_nombre = Entry(sec2, font=("Helvetica", 15))
+	entry_fecha = Entry(sec2, font=("Helvetica", 15))
+	entry_observaciones = Entry(sec2, font=("Helvetica", 15))
+
+	entry_alias.grid(sticky=W, column = 1, row = 0, padx=10, pady=10)
+	entry_nombre.grid(sticky=W, column = 1, row = 1, padx=10, pady=10)
+	entry_fecha.grid(sticky=W, column = 1, row = 2, padx=10, pady=10)
+	entry_observaciones.grid(sticky=W, column = 1, row = 3, padx=10, pady=10)
+
+	btn_guardarCat = tk.Button(sec3, text="Guardar", font=("Helvetica", 15), command = guardarCatalogo, backgroun="#d3ffba")
+	btn_guardarCat.pack()
 
 def catalogo(idRemate):
 	window = Tk()
@@ -521,9 +656,9 @@ def catalogo(idRemate):
 	lbl_tablaCategorias.place(x = 304, y = 2+mod_alt, width = 450, height = 170)
 	lbl_tablaCategoriasMover.place(x = 756, y = 2+mod_alt, width = 100, height = 170)
 	lbl_acciones.place(x = 858, y = 2+mod_alt, width = 164, height = 170)
-	lbl_categoria.place(x = 2, y = 204+mod_alt+var_bajar, width = 1281, height = 48)
-	lbl_tablaCargados.place(x = 2, y = 254+mod_alt+var_bajar, width = 800, height = 370)
-	lbl_tablaCargadosMover.place(x = 1183, y = 254+mod_alt+var_bajar, width = 100, height = 370)
+	lbl_categoria.place(x = 2, y = 124+mod_alt+var_bajar, width = 1020, height = 48)
+	lbl_tablaCargados.place(x = 2, y = 174+mod_alt+var_bajar, width = 918, height = 370)
+	lbl_tablaCargadosMover.place(x = 922, y = 174+mod_alt+var_bajar, width = 100, height = 370)
 
 	#DATOS DE CATALOGO
 	if(True):	
@@ -532,15 +667,20 @@ def catalogo(idRemate):
 		tk.Label(lbl_datos, text="Seleccionar Remate:", font=("Helvetica Neue",10), anchor="e", backgroun="#E0F8F1").place(x = 0, y = 50, width = 150)
 		tk.Label(lbl_datos, text="Seleccionar Catalogo:", font=("Helvetica Neue",10), anchor="e", backgroun="#E0F8F1").place(x = 0, y = 80, width = 150)
 
-		combo_remate = Combobox(lbl_datos)
-		combo_remate.place(x = 150, y = 50, width = 130)
+		entry_remate = Entry(lbl_datos)
+		entry_remate.place(x = 150, y = 50, width = 130)
+		entry_remate.focus()
 
-		combo_catalogo = Combobox(lbl_datos, state="disabled")
-		combo_catalogo.place(x = 150, y = 80, width = 130)
+		entry_catalogo = Entry(lbl_datos, state="disabled")
+		entry_catalogo.place(x = 150, y = 80, width = 130)
 
-		btn_nuevo = tk.Button(lbl_datos, text="Nuevo catalogo", state="disabled", backgroun="#fffcbf")
+		btn_nuevo = tk.Button(lbl_datos, text="Nuevo catalogo", state="disabled", backgroun="#fffcbf", command=lambda: nuevoCatalogo(window, entry_remate.get()))
 		btn_nuevo.place(x = 100, y = 120, width = 100)
 
+		entry_remate.bind("<Return>", (lambda event: buscar("remate")))
+		entry_catalogo.bind("<Return>", (lambda event: buscar("catalogo")))
+
+		#tablaElegir
 
 	#TABLA -> CATEGORIAS DE VENTA
 	if(True):
@@ -578,8 +718,15 @@ def catalogo(idRemate):
 
 	#ACCIONES
 	if(True):
-		btn_pdf = tk.Button(lbl_acciones, text="Generar PDF", font=("verdana",10), backgroun="#F5D0A9", command=exportar)
-		btn_pdf.place(x = 20, y = 30, width=110, height=30)
+
+		btn_guardar = tk.Button(lbl_acciones, text="Guardar Catalogo", font=("verdana",10), backgroun="#F5D0A9", width=18, command=guardar)
+		btn_guardar.pack(pady=5)
+
+		btn_guardar = tk.Button(lbl_acciones, text="Eliminar Catalogo", font=("verdana",10), backgroun="#F5D0A9", width=18, command=exportar)
+		btn_guardar.pack(pady=5)
+
+		btn_pdf = tk.Button(lbl_acciones, text="Generar PDF", font=("verdana",10), backgroun="#F5D0A9", width=18, command=exportar)
+		btn_pdf.pack(pady=5)
 
 	#CATEGORIA SELECCIONADA
 	if(True):
@@ -641,7 +788,10 @@ def catalogo(idRemate):
 	#ASIGNAR OBJETOS AL DICCIONARIOS:
 	if(True):
 		#Datos del catalogo
+		diccionarioObjetos["entryRemate"] = entry_remate
+		diccionarioObjetos["entry_catalogo"] = entry_catalogo
 
+		diccionarioObjetos["btn_nuevo"] = btn_nuevo
 
 		#Tabla cat ventas
 		diccionario_objetos["tabla_catVenta"] = tabla_catVenta
@@ -666,6 +816,10 @@ def catalogo(idRemate):
 	#actualizarTablaCategorias()
 	#actualizarProductores()
 	#actualizarDatosCatalogo()
+
+	entry_remate.insert(0, "remate1")
+	#actualizarDicCat()
+
 	#actualizarLotes()
 
 	tabla_catVenta.bind('<Control-Up>', (lambda event: moverCatArriba()))
