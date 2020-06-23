@@ -27,7 +27,7 @@ import shutil
 
 import json
 
-dicc_objetos={"varFullScreen" : False, "varFullScreenDetalles" : False}
+dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : False}
 diccionario_objetos = {}
 
 diccionarioLotes = {}
@@ -269,6 +269,7 @@ def cargarTablaLotes():
 			diccionarioLotes[str(i)]["comprador"]))
 
 def elegirItem(asd):
+	#DATOS DEL LOTE
 	id_lote = str(asd["text"])
 
 	con = sql_connection()
@@ -297,7 +298,68 @@ def elegirItem(asd):
 	diccionario_objetos["datosLote_txt_observaciones"].insert("1.0", txt_observaciones)
 	diccionario_objetos["datosLote_txt_observaciones"].config(state="disabled")
 
+	#DATOS DE LA COMPRA
+	id_remate_alias = str(diccionario_objetos["id_remate_alias"])
 
+	con = sql_connection()
+	condiciones = " WHERE estado = 'activo' AND lote = '" + id_lote + "' AND remate = '" + id_remate_alias + "'"
+	rows = actualizar_db(con, "compraventa", condiciones)
+
+	if(len(rows)==0):
+		diccionario_objetos["texto_alias"].set("")
+		diccionario_objetos["texto_razon"].set("")
+		diccionario_objetos["texto_cuit"].set("")
+		diccionario_objetos["texto_kgs"].set(0)
+		diccionario_objetos["texto_total"].set(0)
+		diccionario_objetos["texto_cabezas"].set(0)
+
+		diccionario_objetos["entry_precio"].delete(0, tk.END)
+		diccionario_objetos["btn_guardar"].configure(text="GUARDAR", state="disabled")
+		diccionario_objetos["btn_eliminar"].configure(state="disabled")
+
+		diccionario_objetos["id_compraventa"] = ""
+	else:
+		diccionario_objetos["id_compraventa"] = str(rows[0][0])
+
+		#verificar productor
+		if(rows[0][2]!=""):
+			cargarDatosComprador(rows[0][2])
+		else:
+			diccionario_objetos["texto_alias"].set("")
+			diccionario_objetos["texto_razon"].set("")
+			diccionario_objetos["texto_cuit"].set("")
+			diccionario_objetos["texto_kgs"].set(0)
+			diccionario_objetos["texto_total"].set(0)
+			diccionario_objetos["texto_cabezas"].set(0)
+
+		#verificar precio
+		diccionario_objetos["entry_precio"].delete(0, tk.END)
+		if(rows[0][3]!=""):
+			diccionario_objetos["entry_precio"].insert(0, rows[0][3])
+
+		#Cambiar botones
+		diccionario_objetos["btn_guardar"].configure(text="EDITAR", state="normal")
+		diccionario_objetos["btn_eliminar"].configure(state="normal")
+
+
+
+#COMPRAVENTA
+def eliminarCompraventa():
+	try:
+		id_compraventa = diccionario_objetos["id_compraventa"]
+
+		MsgBox = messagebox.askquestion('ATENCION', '¿Desea BORRAR?', icon = 'warning')
+		if(MsgBox == 'yes'):
+			con = sql_connection()
+			cursorObj = con.cursor()
+			cursorObj.execute('UPDATE compraventa SET estado = "borrado" where id = ' + id_compraventa)
+			con.commit()
+			messagebox.showinfo("Borrado", "Borrado con Éxito")
+			crearDiccionarioLotes()
+			cargarTablaLotes()
+			
+	except:
+		messagebox.showerror("ERROR", "No se pudo borrar")
 
 
 #SELECCIONAR REMATE Y CATALOGO
@@ -423,8 +485,8 @@ def seleccionarCatalogo():
 #BARRA DE MENU
 if(True):
 	def pantCompleta():
-		window.attributes('-fullscreen', dicc_objetos["varFullScreen"])
 		dicc_objetos["varFullScreen"] = not dicc_objetos["varFullScreen"]
+		window.attributes('-fullscreen', dicc_objetos["varFullScreen"])
 	
 	def salirWindow():
 		window.destroy()
@@ -675,11 +737,11 @@ if(True):
 		#COMPRADOR
 		if(True):
 			texto_alias = StringVar()
-			texto_alias.set("Fernandez Lucas Ramon Matias")
+			texto_alias.set("")
 			texto_razon = StringVar()
-			texto_razon.set("asdasd")
+			texto_razon.set("")
 			texto_cuit = StringVar()
-			texto_cuit.set("20-40500364-4")
+			texto_cuit.set("")
 
 			lbl_alias = tk.Label(lblComprador, font=("Helvetica Neue", 10, "bold"), anchor="w", backgroun="#f0f0f0")
 			lbl_alias.place(x=2, y=2, width=250)
@@ -700,11 +762,11 @@ if(True):
 			Label(lblComprador, font=("verdana",8), text="Cabezas:", backgroun="#f0f0f0").place(x=247, y=40)
 
 			texto_kgs = StringVar()
-			texto_kgs.set("99999")
+			texto_kgs.set("")
 			texto_total = StringVar()
-			texto_total.set("9999999.99")
+			texto_total.set("")
 			texto_cabezas = StringVar()
-			texto_cabezas.set("999")
+			texto_cabezas.set("")
 
 			lbl_kgs = tk.Label(lblComprador, font=("Helvetica Neue", 10, "bold"), anchor="w", backgroun="#f0f0f0")
 			lbl_kgs.place(x=305, y=-2, width=90)
@@ -734,14 +796,19 @@ if(True):
 			btn_guardar = tk.Button(lbl_datos, text="GUARDAR", compound="top", backgroun="#b3f2bc", font=("Helvetica", 20, "bold"), state = "disabled")
 			btn_guardar.place(x=810, y=114, width=196, height=60)
 
-			btn_eliminar = tk.Button(lbl_datos, text="ELIMINAR", compound="top", backgroun="#FF6E6E", font=("Helvetica", 15, "bold"), state = "disabled")
+			btn_eliminar = tk.Button(lbl_datos, text="ELIMINAR", compound="top", backgroun="#FF6E6E", font=("Helvetica", 15, "bold"), state = "disabled", command=eliminarCompraventa)
 			btn_eliminar.place(x=810, y=180, width=196, height=48)
+
+			diccionario_objetos["btn_guardar"] = btn_guardar
+			diccionario_objetos["btn_eliminar"] = btn_eliminar
 
 		#PRECIO
 		if(True):
 			Label(lblPrecio, font=("verdana",18, "bold"), text="$/kg", backgroun="#f0f0f0").grid(column=0, row=0, padx = 5, pady = 20)
-			entry_precio = Entry(lblPrecio, font=("verdana",18, "bold"), backgroun="#f0f0f0", width=6).grid(column=1, row=0, padx = 5, pady = 20)
+			entry_precio = tk.Entry(lblPrecio, font=("verdana",18, "bold"), backgroun="#f0f0f0", width=6)
+			entry_precio.grid(column=1, row=0, padx = 5, pady = 20)
 
+			diccionario_objetos["entry_precio"] = entry_precio
 	#BUSCADOR PRODUCTORES
 	if(True):
 		lbl_comprador_aux = Label(lblBuscador, backgroun="#f0f0f0")
@@ -780,6 +847,17 @@ if(True):
 		entry_filtrar_productor.bind("<Return>", (lambda event: compradorFiltrar()))
 		tabla_productor.bind('<Double-1>', (lambda event: seleccionarTablaComprador()))
 		tabla_productor.bind('<Return>', (lambda event: seleccionarTablaComprador()))
+
+	diccionario_objetos["textID"].set(1)
+	diccionario_objetos["id_remate_alias"] = "remate1"
+
+
+	diccionario_objetos["id_catalogo_id"] = 16
+	diccionario_objetos["id_catalogo_alias"] = "nuevoCat"
+	diccionario_objetos["textTitulo"].set("REMATE:")
+
+	crearDiccionarioLotes()
+	cargarTablaLotes()
 
 
 window.bind("<Control-s>", (lambda event: window.destroy()))
