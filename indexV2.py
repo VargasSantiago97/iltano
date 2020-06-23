@@ -6,6 +6,8 @@ import time
 import logging
 import datetime
 
+from librerias import tablaElegir
+
 from tkinter import *
 from tkinter.ttk import *
 from tkinter import messagebox
@@ -23,8 +25,12 @@ from sqlite3 import Error
 
 import shutil
 
-dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : False}
+import json
+
+dicc_objetos={"varFullScreen" : False, "varFullScreenDetalles" : False}
 diccionario_objetos = {}
+
+diccionarioLotes = {}
 
 direccionBaseDeDatos = "librerias/database/iltanohacienda.db"
 
@@ -47,6 +53,13 @@ def actualizar_db(con, tabla, condiciones):
 	rows = cursorObj.fetchall()
 
 	return rows
+def actualizar_db_selec(con, seleccionar, tabla, condiciones):
+	cursorObj = con.cursor()
+	cursorObj.execute("SELECT " + str(seleccionar) + " FROM " + str(tabla) + condiciones)
+	rows = cursorObj.fetchall()
+
+	return rows
+
 def treeview_sort_column(tv, col, reverse):
 	l = [(tv.set(k, col), k) for k in tv.get_children('')]
 	l.sort(reverse=reverse)
@@ -66,7 +79,7 @@ def compradorFiltrar():
 	condiciones =  ' WHERE (nombre LIKE "%' + pal_clave + '%" OR razon LIKE "%' + pal_clave + '%" OR ndoc LIKE "%' + pal_clave + '%" OR grupo LIKE "%' + pal_clave + '%" OR con_iva LIKE "%' + pal_clave + '%" OR localidad LIKE "%' + pal_clave + '%" OR provincia LIKE "%' + pal_clave + '%" OR ruca LIKE "%' + pal_clave + '%" OR establecimiento LIKE "%' + pal_clave + '%") AND estado = "activo"'
 	rows = actualizar_db(con, "productores", condiciones)
 	if(len(rows)==1):
-		#cargarDatosComprador(rows[0][3])
+		cargarDatosComprador(rows[0][1])
 		cargarTablaCompradores([])
 	else:
 		cargarTablaCompradores(rows)
@@ -82,7 +95,7 @@ def cargarTablaCompradores(rows):
 			texto_alias = str(row[1])
 			texto_cuit = str(row[3])
 
-			tabla.insert("", tk.END, tags=(str(row[0]), str(row[3])), values = (texto_alias,
+			tabla.insert("", tk.END, tags=(str(row[0]), str(row[1])), values = (texto_alias,
 				texto_cuit,))
 	except:
 		messagebox.showerror("ERROR", "Error al cargar")
@@ -96,7 +109,7 @@ def seleccionarTablaComprador():
 	cargarDatosComprador(productor)
 def cargarDatosComprador(productor):
 	con = sql_connection()
-	condiciones = " WHERE ndoc = '" + str(productor) + "'"
+	condiciones = " WHERE nombre = '" + str(productor) + "'"
 	rows = actualizar_db(con, "productores", condiciones)
 
 	row = rows[0]
@@ -105,10 +118,28 @@ def cargarDatosComprador(productor):
 	texto_razon = str(row[2])
 	texto_cuit = str(row[3])
 
-	diccionario_objetos["texto_aliasComprador"].set(texto_alias)
-	diccionario_objetos["texto_razonComprador"].set(texto_razon)
-	diccionario_objetos["texto_cuitComprador"].set(texto_cuit)
+	tabla = diccionario_objetos["tabla"]
 
+	kilogramos = 0
+	cabezas = 0
+
+	for i in tabla.get_children():
+		if(tabla.item(i)["values"][8])==texto_alias:
+			kilogramos = kilogramos + float(tabla.item(i)["values"][5])
+			cabezas = cabezas + int(tabla.item(i)["values"][2])
+
+
+	texto_kgs = str(kilogramos)
+	texto_total = ""
+	texto_cabezas = str(cabezas)
+
+
+	diccionario_objetos["texto_alias"].set(texto_alias)
+	diccionario_objetos["texto_razon"].set(texto_razon)
+	diccionario_objetos["texto_cuit"].set(texto_cuit)
+	diccionario_objetos["texto_kgs"].set(texto_kgs)
+	diccionario_objetos["texto_total"].set(texto_total)
+	diccionario_objetos["texto_cabezas"].set(texto_cabezas)
 
 #Pantalla detalles
 def pantallaDetalles():
@@ -136,6 +167,259 @@ def pantallaDetalles():
 	windowDetalles.mainloop()
 
 
+#CARGAR LOTES
+def crearDiccionarioLotes():
+	remate = str(diccionario_objetos["id_remate_alias"])
+	catalogo = str(diccionario_objetos["id_catalogo_alias"])
+
+	#Leer diccionarios
+	try:
+		ubicGuardar = "catalogos"
+
+		nombreArchivoLotes = "remate_" + remate + "_-_catalogo_" + catalogo + "_lot.json"
+		nombreArchivoCat = "remate_" + remate + "_-_catalogo_" + catalogo + "_cat.json"
+
+		archivo = open(ubicGuardar + "/" + nombreArchivoLotes, "r")
+		dicLotes = json.loads(archivo.read())
+		archivo.close()
+
+		archivoCat = open(ubicGuardar + "/" + nombreArchivoCat, "r")
+		dicCat = json.loads(archivoCat.read())
+		archivoCat.close()
+
+	except:
+		messagebox.showerror("ERROR", "Error, no se pudo cargar")
+		return 0
+
+	k = 0
+	diccionarioLotes.clear()
+	for i in range(0, len(dicCat)):
+		id_cat = dicCat[str(i)]
+		for j in range(0, len(dicLotes[id_cat])):
+			id_lote = dicLotes[id_cat][str(j)]
+
+			con = sql_connection()
+			condiciones = " WHERE id = " + str(id_lote)
+			rows = actualizar_db(con, "lotes", condiciones)
+
+			con = sql_connection()
+			condiciones = " WHERE remate = '" + remate + "' AND productor = '" + str(rows[0][2]) + "'"
+			rows_pintura = actualizar_db_selec(con, "pintura", "pintura", condiciones)
+			if(len(rows_pintura) > 0):
+				x_pintura = rows_pintura[0][0]
+			else:
+				x_pintura = ""
+
+			con = sql_connection()
+			condiciones = " WHERE lote = '" + str(rows[0][0]) + "' AND estado = 'activo'"
+			rows_compraventa = actualizar_db(con, "compraventa", condiciones)
+
+			if(len(rows_compraventa) > 0):
+				x_precio = rows_compraventa[0][3]
+				x_comprador = rows_compraventa[0][2]
+			else:
+				x_precio = ""
+				x_comprador = ""
+
+			x_id = rows[0][0]
+			x_corral = rows[0][4]
+			x_vendedor = rows[0][2]
+			x_cantidad = rows[0][3]
+			x_categoriaVenta = rows[0][5]
+			x_categoria = rows[0][6]
+			x_kilogramos = rows[0][12]
+			x_promedio = rows[0][13]
+
+
+			diccionarioLotes[str(k)] = {
+			"id" : str(x_id),
+			"corral" : str(x_corral),
+			"vendedor" : str(x_vendedor),
+			"cantidad" : str(x_cantidad),
+			"categoria" : str(x_categoria),
+			"categoriaVenta" : str(x_categoriaVenta),
+			"pintura" : str(x_pintura),
+			"kilogramos" : str(x_kilogramos),
+			"promedio" : str(x_promedio),
+			"precio" : str(x_precio),
+			"comprador" : str(x_comprador)
+			}
+			k += 1
+
+
+def cargarTablaLotes():
+
+	tabla = diccionario_objetos["tabla"]
+
+	for i in tabla.get_children():
+		tabla.delete(i)
+
+
+	cant_lotes = len(diccionarioLotes)
+
+	for i in range(0, cant_lotes):
+		tabla.insert("", str(i), tags=str(i), text = diccionarioLotes[str(i)]["id"], iid= diccionarioLotes[str(i)]["id"], values = (diccionarioLotes[str(i)]["corral"],
+			diccionarioLotes[str(i)]["vendedor"],
+			diccionarioLotes[str(i)]["cantidad"],
+			diccionarioLotes[str(i)]["categoria"],
+			diccionarioLotes[str(i)]["pintura"],
+			diccionarioLotes[str(i)]["kilogramos"],
+			diccionarioLotes[str(i)]["promedio"],
+			diccionarioLotes[str(i)]["precio"],
+			diccionarioLotes[str(i)]["comprador"]))
+
+def elegirItem(asd):
+	id_lote = str(asd["text"])
+
+	con = sql_connection()
+	condiciones = " WHERE id = " + id_lote
+	rows = actualizar_db(con, "lotes", condiciones)
+
+	row = rows[0]
+
+	texto_catHacienda = str(row[6])
+	texto_catVenta = str(row[5])
+	texto_corral = str(row[4])
+	texto_cantidad = str(row[3])
+	texto_neto = str(row[12])
+	texto_promedio = str(row[13])
+	txt_observaciones = str(row[14]) + "  -  " + str(row[15])
+
+	diccionario_objetos["datosLote_texto_catHacienda"].set(texto_catHacienda)
+	diccionario_objetos["datosLote_texto_catVenta"].set(texto_catVenta)
+	diccionario_objetos["datosLote_texto_corral"].set(texto_corral)
+	diccionario_objetos["datosLote_texto_cantidad"].set(texto_cantidad)
+	diccionario_objetos["datosLote_texto_neto"].set(texto_neto)
+	diccionario_objetos["datosLote_texto_promedio"].set(texto_promedio)
+
+	diccionario_objetos["datosLote_txt_observaciones"].config(state="normal")
+	diccionario_objetos["datosLote_txt_observaciones"].delete("1.0", tk.END)
+	diccionario_objetos["datosLote_txt_observaciones"].insert("1.0", txt_observaciones)
+	diccionario_objetos["datosLote_txt_observaciones"].config(state="disabled")
+
+
+
+
+#SELECCIONAR REMATE Y CATALOGO
+def seleccionarRemate():
+
+	def buscarRemate():
+		def funcsalirr(ssss):
+			con = sql_connection()
+			condiciones = " WHERE id = " + str(ssss)
+			rows = actualizar_db(con, "remate", condiciones)
+
+			entryRemate.delete(0, tk.END)
+			entryRemate.insert(0, rows[0][1])
+
+		dicc_buscar = {"seleccionar" : "remate",
+		"columnas" : {"0":{"id" : "nombre", "cabeza" : "Remate", "ancho" : 180, "row" : 1}, "1":{"id" : "fecha", "cabeza" : "Fecha", "ancho" : 60, "row" : 2}, "2":{"id" : "tipo", "cabeza" : "Tipo", "ancho" : 70, "row" : 3}},
+		"db" : direccionBaseDeDatos,
+		"tabla" : "remate",
+		"condiciones" : ' WHERE nombre LIKE  "%' + str(entryRemate.get()) + '%" AND estado = "activo"',
+		"dimensionesVentana" : "336x400"}
+		tablaElegir.tabla_elegir(dicc_buscar, funcsalirr)
+
+	def remateSeleccionador():
+		con = sql_connection()
+		condiciones = " WHERE nombre = '" + str(entryRemate.get()) + "' AND estado = 'activo'"
+		rows = actualizar_db(con, "remate", condiciones)
+
+		if (len(rows)==0):
+			messagebox.showerror("ERROR", "ERROR, ese remate no existe o está borrado")
+			return 0
+		else:
+			diccionario_objetos["textID"].set(rows[0][0])
+			diccionario_objetos["id_remate_alias"] = rows[0][1]
+			diccionario_objetos["textTitulo"].set("REMATE: " + str(rows[0][1]))
+			wind_select.destroy()
+
+	wind_select = Toplevel(window)
+	wind_select.title("SELECCIONAR REMATE")
+	wind_select.geometry("400x200")
+	wind_select.configure(backgroun="#E8F6FA") #E8F6FA
+
+	tk.Label(wind_select, text="REMATE", font=("Helvetica Neue",12,"bold"), anchor="n", backgroun="#E8F6FA", foreground = "#000000").grid(column=0, row=0, padx=10, pady=10)
+
+	entryRemate = Entry(wind_select, font=("Helvetica Neue",12,"bold"))
+	entryRemate.grid(column = 1, row = 0, padx = 10, pady = 10)
+	entryRemate.bind("<Return>", (lambda event: buscarRemate()))
+	entryRemate.bind("<Control-s>", (lambda event: remateSeleccionador()))
+	entryRemate.bind("<F1>", (lambda event: remateSeleccionador()))
+	entryRemate.focus()
+
+
+	btn_buscar = Button(wind_select, text="Buscar", command=buscarRemate)
+	btn_buscar.grid(column = 1, row = 1, padx = 10, pady = 10)
+
+	btn_seleccionar = Button(wind_select, text="Seleccionar", command= lambda: remateSeleccionador())
+	btn_seleccionar.grid(column = 1, row = 2, padx = 10, pady = 10)
+
+	wind_select.mainloop()
+def seleccionarCatalogo():
+	remateName = diccionario_objetos["textID"].get()
+
+	if remateName == "":
+		messagebox.showerror("ERROR", "Primero debe seleccionar un remate")
+		return 0
+
+	def buscarCatalogo():
+		def funcsalirCat(ssss):
+			con = sql_connection()
+			condiciones = " WHERE id = " + str(ssss)
+			rows = actualizar_db(con, "catalogo", condiciones)
+
+			entryCatalogo.delete(0, tk.END)
+			entryCatalogo.insert(0, rows[0][1])
+
+		dicc_buscar = {"seleccionar" : "catalogo",
+		"columnas" : {"0":{"id" : "nombre", "cabeza" : "Catalogo", "ancho" : 180, "row" : 1}, "1":{"id" : "nombre", "cabeza" : "Nombre", "ancho" : 60, "row" : 2}, "2":{"id" : "fecha", "cabeza" : "Fecha", "ancho" : 70, "row" : 4}},
+		"db" : direccionBaseDeDatos,
+		"tabla" : "catalogo",
+		"condiciones" : ' WHERE (nombre LIKE  "%' + str(entryCatalogo.get()) + '%" OR alias LIKE  "%' + str(entryCatalogo.get()) + '%") AND estado = "activo"',
+		"dimensionesVentana" : "336x400"}
+		tablaElegir.tabla_elegir(dicc_buscar, funcsalirCat)
+
+	def catalogoSeleccionador():
+		con = sql_connection()
+		condiciones = " WHERE alias = '" + str(entryCatalogo.get()) + "' AND estado = 'activo'"
+		rows = actualizar_db(con, "catalogo", condiciones)
+
+		if (len(rows)==0):
+			messagebox.showerror("ERROR", "ERROR, ese catalogo no existe o está borrado")
+			return 0
+		else:
+			diccionario_objetos["id_catalogo_id"] = rows[0][0]
+			diccionario_objetos["id_catalogo_alias"] = rows[0][1]
+			diccionario_objetos["textTitulo"].set("REMATE: " + str(diccionario_objetos["id_remate_alias"]) + "    -    CATALOGO: " + rows[0][1])
+			wind_select.destroy()
+			crearDiccionarioLotes()
+			cargarTablaLotes()
+
+	wind_select = Toplevel(window)
+	wind_select.title("SELECCIONAR CATALOGO EN REMATE: " + str(diccionario_objetos["id_remate_alias"]))
+	wind_select.geometry("400x200")
+	wind_select.configure(backgroun="#E8F6FA") #E8F6FA
+
+	tk.Label(wind_select, text="CATALOGO", font=("Helvetica Neue",12,"bold"), anchor="n", backgroun="#E8F6FA", foreground = "#000000").grid(column=0, row=0, padx=10, pady=10)
+
+	entryCatalogo = Entry(wind_select, font=("Helvetica Neue",12,"bold"))
+	entryCatalogo.grid(column = 1, row = 0, padx = 10, pady = 10)
+	entryCatalogo.bind("<Return>", (lambda event: buscarCatalogo()))
+	entryCatalogo.bind("<Control-s>", (lambda event: catalogoSeleccionador()))
+	entryCatalogo.bind("<F1>", (lambda event: catalogoSeleccionador()))
+	entryCatalogo.focus()
+
+
+	btn_buscar = Button(wind_select, text="Buscar", command=buscarCatalogo)
+	btn_buscar.grid(column = 1, row = 1, padx = 10, pady = 10)
+
+	btn_seleccionar = Button(wind_select, text="Seleccionar", command= lambda: catalogoSeleccionador())
+	btn_seleccionar.grid(column = 1, row = 2, padx = 10, pady = 10)
+
+	wind_select.mainloop()
+
+
 #BARRA DE MENU
 if(True):
 	def pantCompleta():
@@ -160,7 +444,7 @@ if(True):
 	mnuRemate.add_command(label="Remate", command = lambda: ventanaRemates.ventana1("NULL"))
 	mnuRemate.add_command(label="Listado de remates")
 	mnuRemate.add_separator()
-	mnuRemate.add_command(label="Seleccionar remate")
+	mnuRemate.add_command(label="Seleccionar remate", command = lambda: seleccionarRemate())
 
 	mnuCategorias = Menu(barraMenu)
 	mnuCategorias.add_command(label="Cat. Venta")
@@ -193,6 +477,8 @@ if(True):
 
 	mnuCatalogo = Menu(barraMenu)
 	mnuCatalogo.add_command(label="Catalogo")
+	mnuCatalogo.add_separator()
+	mnuCatalogo.add_command(label="Seleccionar Catalogo", command= lambda: seleccionarCatalogo())
 
 	mnuConfiguracion = Menu(barraMenu)
 	mnuConfiguracion.add_command(label="Administrar Empresa")
@@ -252,6 +538,9 @@ if(True):
 	lbl_titulo.pack()
 	lbl_titulo.config(textvariable=textTitulo)
 
+	diccionario_objetos["textTitulo"] = textTitulo
+	diccionario_objetos["textID"] = textID
+
 #BODY
 if(True):
 
@@ -301,9 +590,10 @@ if(True):
 		tabla.column("PRECIO", width=30)
 		tabla.column("COMPRADOR", width=200)
 
+		tabla.bind("<Double-1>", (lambda event: elegirItem(tabla.item(tabla.selection()))))
+		tabla.bind("<Return>", (lambda event: elegirItem(tabla.item(tabla.selection()))))
 
-		tabla.bind("<Double-1>", (lambda event: elegir(tabla.item(tabla.selection()))))
-		tabla.bind("<Return>", (lambda event: elegir(tabla.item(tabla.selection()))))
+		diccionario_objetos["tabla"] = tabla
 
 	#DATOS
 	if(True):
@@ -325,9 +615,9 @@ if(True):
 		if(True):
 
 			texto_catHacienda = StringVar()
-			texto_catHacienda.set("Ternero")
+			texto_catHacienda.set("")
 			texto_catVenta = StringVar()
-			texto_catVenta.set("Abasto Conserva")
+			texto_catVenta.set("")
 
 			lbl_catVenta = tk.Label(lblLote, font=("Helvetica Neue",12, "bold"), anchor="w", backgroun="#f0f0f0")
 			lbl_catVenta.place(x=0, y=0, width=290)
@@ -344,13 +634,13 @@ if(True):
 
 
 			texto_corral = StringVar()
-			texto_corral.set("02BIS")
+			texto_corral.set("")
 			texto_cantidad = StringVar()
-			texto_cantidad.set("16")
+			texto_cantidad.set("")
 			texto_neto = StringVar()
-			texto_neto.set("9999")
+			texto_neto.set("")
 			texto_promedio = StringVar()
-			texto_promedio.set("999")
+			texto_promedio.set("")
 
 
 			lbl_corral = tk.Label(lblLote, font=("Helvetica Neue",15,"bold"), anchor="c", backgroun="#f0f0f0")
@@ -371,7 +661,7 @@ if(True):
 
 			txt_observaciones = scrolledtext.ScrolledText(lblLote, backgroun="#edfffa")
 			txt_observaciones.place(x = 0, y = 120, width = 225+71, height = 100)
-			txt_observaciones.insert("1.0", "ASDASDASD")
+			txt_observaciones.insert("1.0", "Para comezar a cargar: \n1) Seleccione un remate\n2) Seleccione un catalogo\n3) Doble click sobre el lote\n4) Buscar comprador\n5) Colocar precio por kilo\n6) Guardar")
 			txt_observaciones.config(state="disabled")
 
 			diccionario_objetos["datosLote_texto_catHacienda"] = texto_catHacienda
@@ -441,10 +731,10 @@ if(True):
 
 		#BOTONES
 		if(True):
-			btn_guardar = tk.Button(lbl_datos, text="GUARDAR", compound="top", backgroun="#b3f2bc", font=("Helvetica", 20, "bold"))
+			btn_guardar = tk.Button(lbl_datos, text="GUARDAR", compound="top", backgroun="#b3f2bc", font=("Helvetica", 20, "bold"), state = "disabled")
 			btn_guardar.place(x=810, y=114, width=196, height=60)
 
-			btn_eliminar = tk.Button(lbl_datos, text="ELIMINAR", compound="top", backgroun="#FF6E6E", font=("Helvetica", 15, "bold"))
+			btn_eliminar = tk.Button(lbl_datos, text="ELIMINAR", compound="top", backgroun="#FF6E6E", font=("Helvetica", 15, "bold"), state = "disabled")
 			btn_eliminar.place(x=810, y=180, width=196, height=48)
 
 		#PRECIO

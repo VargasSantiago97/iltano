@@ -32,7 +32,7 @@ import json
 diccionario_textos = {}
 diccionario_objetos = {}
 diccionario_pinturas = {}
-dicCat = {"asd":"asd"}
+dicCat = {}
 dicCatUbic = {}
 dicProductores = {}
 
@@ -533,25 +533,37 @@ def seleccionarTablaLotes():
 def crearDiccionarioExportar():
 	dicc = {}
 
-	name = str(time.strftime("%d-%m-%y")) + " " + remate + " creado a las " + str(time.strftime("%H-%M-%S")) + "hs.pdf"
+	name = str(time.strftime("%d-%m-%y")) + " " + str(diccionarioObjetos["entryRemate"].get()) + " creado a las " + str(time.strftime("%H-%M-%S")) + "hs.pdf"
 	file = filedialog.askdirectory()
+
+	con = sql_connection()
+	condiciones = " WHERE nombre = '" + str(diccionarioObjetos["entryRemate"].get()) + "'"
+	rows = actualizar_db(con, "remate", condiciones)
+
+	row = rows[0]
+
+	x_fecha = str(row[2])
+	x_titulo = str(row[1])
+	x_predio = str(row[4])
+	x_lugar = str(row[5])
+	x_remata = str(row[6])
+	x_totalIngresador = str("null")
+	x_totalCorrales = str("null")
 
 	if (file==""):
 		return 0
 
 	file = file + "/" + name
 
-
-
 	dicc["datos"] = {
 	"ruta":file,
-	"fecha" : diccionario_objetos["entry_datosFecha"].get(),
-	"titulo" : diccionario_objetos["entry_datosTitulo"].get(),
-	"predio" : diccionario_objetos["entry_datosPredio"].get(),
-	"lugar" : diccionario_objetos["entry_datosLocalidad"].get(),
-	"remata" : diccionario_objetos["entry_datosRemata"].get(),
-	"totalIngresados" : diccionario_objetos["entry_totalIngresados"].get(),
-	"totalCorrales" : diccionario_objetos["entry_totalCorrales"].get(),
+	"fecha" : x_fecha,
+	"titulo" : x_titulo,
+	"predio" : x_predio,
+	"lugar" : x_lugar,
+	"remata" : x_remata,
+	"totalIngresados" : x_totalIngresador,
+	"totalCorrales" : x_totalCorrales,
 	}
 
 	dicc["lotes"] = {}
@@ -600,7 +612,21 @@ def guardar():
 
 	except:
 		messagebox.showerror("ERROR", "Error al guardar")
+def eliminar():
+	try:
+		x_remate = diccionarioObjetos["entryRemate"].get()
+		x_id = diccionarioObjetos["entry_catalogo"].get()
 
+		MsgBox = messagebox.askquestion('ATENCION', '¿Desea BORRAR este catalogo?\nCatalogo: ' + str(x_id), icon = 'warning')
+		if(MsgBox == 'yes'):
+			con = sql_connection()
+			cursorObj = con.cursor()
+			cursorObj.execute('UPDATE catalogo SET estado = "borrado" where alias = "' + str(x_id) + '" AND remate = "' + str(x_remate) + '"')
+			con.commit()
+			messagebox.showinfo("Borrado", "Borrado con Éxito")
+			#escape()
+	except:
+		messagebox.showerror("ERROR", "No se pudo borrar")
 
 #NUEVO CATALOGO
 def nuevoCatalogo(window, remate):
@@ -629,6 +655,9 @@ def nuevoCatalogo(window, remate):
 				diccionarioObjetos["entry_catalogo"].delete(0, tk.END)
 				diccionarioObjetos["entry_catalogo"].insert(0, x_alias)
 				winCat.destroy()
+
+				diccionarioObjetos["dicCatUbic"].clear()
+				diccionarioObjetos["dicLotesUbic"].clear()
 
 				actualizarDicCat()
 				actualizarDicCatUbic()
@@ -681,7 +710,7 @@ def catalogo(idRemate):
 	window.title("Catalogo")
 	window.geometry("1024x600")
 	window.configure(backgroun="#2C4D4F") #E8F6FA
-	window.attributes('-fullscreen', True)
+	window.attributes('-fullscreen', False)
 
 	padX = 5
 	padY = 5
@@ -767,7 +796,7 @@ def catalogo(idRemate):
 		btn_guardar = tk.Button(lbl_acciones, text="Guardar Catalogo", font=("verdana",10), backgroun="#F5D0A9", width=18, command=guardar, state = "disabled")
 		btn_guardar.pack(pady=5)
 
-		btn_eliminar = tk.Button(lbl_acciones, text="Eliminar Catalogo", font=("verdana",10), backgroun="#F5D0A9", width=18, command=exportar, state = "disabled")
+		btn_eliminar = tk.Button(lbl_acciones, text="Eliminar Catalogo", font=("verdana",10), backgroun="#F5D0A9", width=18, command=eliminar, state = "disabled")
 		btn_eliminar.pack(pady=5)
 
 		btn_pdf = tk.Button(lbl_acciones, text="Generar PDF", font=("verdana",10), backgroun="#F5D0A9", width=18, command=exportar, state = "disabled")
