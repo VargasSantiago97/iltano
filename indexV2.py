@@ -27,7 +27,7 @@ import shutil
 
 import json
 
-dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : False}
+dicc_objetos={"varFullScreen" : False, "varFullScreenDetalles" : False}
 diccionario_objetos = {}
 
 diccionarioLotes = {}
@@ -72,6 +72,8 @@ def treeview_sort_column(tv, col, reverse):
 	tv.heading(col, command=lambda: \
 	treeview_sort_column(tv, col, not reverse))
 
+
+#PRODUCTORES
 def compradorFiltrar():
 	pal_clave = str(diccionario_objetos["entry_comprador"].get())
 
@@ -140,6 +142,17 @@ def cargarDatosComprador(productor):
 	diccionario_objetos["texto_kgs"].set(texto_kgs)
 	diccionario_objetos["texto_total"].set(texto_total)
 	diccionario_objetos["texto_cabezas"].set(texto_cabezas)
+
+	diccionario_objetos["btn_guardar"].config(state="normal")
+#prod. auxiliars
+def nuevoProductorAuxiliar():
+	winProd = Toplevel(window)
+	winProd.title("NUEVO PRODUCTOR AUXILIAR")
+	winProd.geometry("400x200")
+	winProd.configure(backgroun="#E8F6FA") #E8F6FA
+	winProd.mainloop()
+
+
 
 #Pantalla detalles
 def pantallaDetalles():
@@ -217,9 +230,11 @@ def crearDiccionarioLotes():
 			if(len(rows_compraventa) > 0):
 				x_precio = rows_compraventa[0][3]
 				x_comprador = rows_compraventa[0][2]
+				x_precioCalculo = rows_compraventa[0][3]
 			else:
 				x_precio = ""
 				x_comprador = ""
+				x_precioCalculo = 0
 
 			x_id = rows[0][0]
 			x_corral = rows[0][4]
@@ -229,6 +244,7 @@ def crearDiccionarioLotes():
 			x_categoria = rows[0][6]
 			x_kilogramos = rows[0][12]
 			x_promedio = rows[0][13]
+			x_total = round(float(x_kilogramos) * float(x_precioCalculo), 2)
 
 
 			diccionarioLotes[str(k)] = {
@@ -242,10 +258,10 @@ def crearDiccionarioLotes():
 			"kilogramos" : str(x_kilogramos),
 			"promedio" : str(x_promedio),
 			"precio" : str(x_precio),
-			"comprador" : str(x_comprador)
+			"comprador" : str(x_comprador),
+			"total" : str(x_total)
 			}
 			k += 1
-
 
 def cargarTablaLotes():
 
@@ -266,11 +282,13 @@ def cargarTablaLotes():
 			diccionarioLotes[str(i)]["kilogramos"],
 			diccionarioLotes[str(i)]["promedio"],
 			diccionarioLotes[str(i)]["precio"],
-			diccionarioLotes[str(i)]["comprador"]))
+			diccionarioLotes[str(i)]["comprador"],
+			diccionarioLotes[str(i)]["total"]))
 
-def elegirItem(asd):
+def elegirItem(loteseleccion):
 	#DATOS DEL LOTE
-	id_lote = str(asd["text"])
+	id_lote = str(loteseleccion["text"])
+	diccionario_objetos["id_lote"] = id_lote
 
 	con = sql_connection()
 	condiciones = " WHERE id = " + id_lote
@@ -314,7 +332,7 @@ def elegirItem(asd):
 		diccionario_objetos["texto_cabezas"].set(0)
 
 		diccionario_objetos["entry_precio"].delete(0, tk.END)
-		diccionario_objetos["btn_guardar"].configure(text="GUARDAR", state="disabled")
+		diccionario_objetos["btn_guardar"].configure(text="GUARDAR", state="disabled", command=guardarCompraventa)
 		diccionario_objetos["btn_eliminar"].configure(state="disabled")
 
 		diccionario_objetos["id_compraventa"] = ""
@@ -338,7 +356,7 @@ def elegirItem(asd):
 			diccionario_objetos["entry_precio"].insert(0, rows[0][3])
 
 		#Cambiar botones
-		diccionario_objetos["btn_guardar"].configure(text="EDITAR", state="normal")
+		diccionario_objetos["btn_guardar"].configure(text="EDITAR", state="normal", command=editarCompraventa)
 		diccionario_objetos["btn_eliminar"].configure(state="normal")
 
 
@@ -360,6 +378,60 @@ def eliminarCompraventa():
 			
 	except:
 		messagebox.showerror("ERROR", "No se pudo borrar")
+def guardarCompraventa():
+	try:
+		x_lote = diccionario_objetos["id_lote"]
+		x_comprador = diccionario_objetos["texto_alias"].get()
+		x_precio = diccionario_objetos["entry_precio"].get()
+		x_estado = "activo"
+		x_remate = str(diccionario_objetos["id_remate_alias"])
+		x_vendedor = ""
+
+		entities = [x_lote,
+		x_comprador,
+		x_precio,
+		x_remate,
+		x_estado,
+		x_vendedor]
+
+	except:
+		messagebox.showerror("ERROR", "Error al obtener los datos")
+		return 0
+
+	try:
+		con = sql_connection()
+		cursorObj = con.cursor()
+		cursorObj.execute("INSERT INTO compraventa VALUES(NULL, ?, ?, ?, ?, ?, ?)", entities)
+		con.commit()
+		messagebox.showinfo("Éxito", "Productor ingresado con éxito!")
+		crearDiccionarioLotes()
+		cargarTablaLotes()
+	except:
+		messagebox.showerror("ERROR", "Error al guardar")
+def editarCompraventa():
+	try:
+		x_idCompraventa = diccionario_objetos["id_compraventa"]
+		x_comprador = diccionario_objetos["texto_alias"].get()
+		x_precio = diccionario_objetos["entry_precio"].get()
+
+		entities = [str(x_comprador),
+		str(x_precio),
+		str(x_idCompraventa)]
+
+	except:
+		messagebox.showerror("ERROR", "Error al obtener los datos")
+		return 0
+
+	try:
+		con = sql_connection()
+		cursorObj = con.cursor()
+		cursorObj.execute('UPDATE compraventa SET comprador = ?, precio = ? where id = ?', entities)
+		con.commit()
+		messagebox.showinfo("Éxito", "Lote EDITADO con éxito!")
+		crearDiccionarioLotes()
+		cargarTablaLotes()
+	except:
+		messagebox.showerror("ERROR", "Error al guardar")
 
 
 #SELECCIONAR REMATE Y CATALOGO
@@ -482,6 +554,36 @@ def seleccionarCatalogo():
 	wind_select.mainloop()
 
 
+#EXPORTAR
+def exportarExcel():
+	tabla = diccionario_objetos["tabla"]
+
+	dire = filedialog.askdirectory()
+	fileName = dire + "/Catalogo cargado - " + diccionario_objetos["id_remate_alias"] + " - " + diccionario_objetos["id_catalogo_alias"] + " --- " + str(time.strftime("%d-%m-%y")) + " - " + str(time.strftime("%H-%M-%S")) + "hs.csv"
+
+	archivoExportar = open(fileName, "w")
+
+	texto = "CORRAL;VENDEDOR;CANTIDAD;CATEGORIA;PINTURA;KILOGRAMOS;PROMEDIO;PRECIO;COMPRADOR;TOTAL\n"
+
+	for i in tabla.get_children():
+		info = tabla.item(i)["values"]
+
+		x_corral = str(info[0])
+		x_vendedor = str(info[1])
+		x_cantidad = str(info[2])
+		x_categoria = str(info[3])
+		x_pintura = str(info[4])
+		x_kilogramos = str(info[5])
+		x_promedio = str(info[6])
+		x_precio = str(info[7])
+		x_comprador = str(info[8])
+		x_total = str(info[9])
+
+		texto = texto + x_corral + ";" + x_vendedor + ";" + x_cantidad + ";" + x_categoria + ";" + x_pintura + ";" + x_kilogramos + ";" + x_promedio + ";" + x_precio + ";" + x_comprador + ";" + x_total + "\n"
+
+	archivoExportar.write(texto)
+	archivoExportar.close()
+
 #BARRA DE MENU
 if(True):
 	def pantCompleta():
@@ -574,7 +676,7 @@ if(True):
 	botBuscar = tk.Button(barraherr, text="AGREGARNUEVO LOTE", compound="top", backgroun="#b3f2bc", font=("Helvetica", 10, "bold"))
 	botImprimir = tk.Button(barraherr, text="EDITARLOTE", compound="top", backgroun="#f2f0b3", font=("Helvetica", 10, "bold"))
 	botExcel = tk.Button(barraherr, text="BORRARLOTE", compound="top", backgroun="#FF6E6E", font=("Helvetica", 10, "bold"))
-	botAyuda = tk.Button(barraherr, text="bot 4nasd", compound="top", backgroun="#f2f0b3", font=("Helvetica", 10, "bold"))
+	botAyuda = tk.Button(barraherr, text="EXPORTAR EXCEL", compound="top", backgroun="#f2f0b3", font=("Helvetica", 10, "bold"), command = exportarExcel)
 	botCerrar = tk.Button(barraherr, text="bot 5nasd", compound="top", backgroun="#FF6E6E", font=("Helvetica", 10, "bold"))
 
 	padX=3
@@ -625,7 +727,7 @@ if(True):
 		sbr.pack(side=RIGHT, fill="y")
 
 
-		tabla = ttk.Treeview(lbl_tabla, columns=["CORRAL", "VENDEDOR", "CANTIDAD", "CATEGORIA", "PINTURA", "KGS", "PROMEDIO", "PRECIO", "COMPRADOR"], selectmode=tk.BROWSE, show='headings') 
+		tabla = ttk.Treeview(lbl_tabla, columns=["CORRAL", "VENDEDOR", "CANTIDAD", "CATEGORIA", "PINTURA", "KGS", "PROMEDIO", "PRECIO", "COMPRADOR", "TOTAL"], selectmode=tk.BROWSE, show='headings') 
 		tabla.pack(side=LEFT, fill="both", expand=True)
 		sbr.config(command=tabla.yview)
 		tabla.config(yscrollcommand=sbr.set)
@@ -640,17 +742,18 @@ if(True):
 		tabla.heading("PROMEDIO", text="PROMEDIO", command=lambda: treeview_sort_column(tabla, "PROMEDIO", False))
 		tabla.heading("PRECIO", text="PRECIO", command=lambda: treeview_sort_column(tabla, "PRECIO", False))
 		tabla.heading("COMPRADOR", text="COMPRADOR", command=lambda: treeview_sort_column(tabla, "COMPRADOR", False))
-
+		tabla.heading("TOTAL", text="TOTAL", command=lambda: treeview_sort_column(tabla, "TOTAL", False))
 
 		tabla.column("CORRAL", width=30)
-		tabla.column("VENDEDOR", width=200)
+		tabla.column("VENDEDOR", width=150)
 		tabla.column("CANTIDAD", width=30)
 		tabla.column("CATEGORIA", width=30)
 		tabla.column("PINTURA", width=30)
 		tabla.column("KGS", width=30)
 		tabla.column("PROMEDIO", width=30)
 		tabla.column("PRECIO", width=30)
-		tabla.column("COMPRADOR", width=200)
+		tabla.column("COMPRADOR", width=150)
+		tabla.column("TOTAL", width=30)
 
 		tabla.bind("<Double-1>", (lambda event: elegirItem(tabla.item(tabla.selection()))))
 		tabla.bind("<Return>", (lambda event: elegirItem(tabla.item(tabla.selection()))))
@@ -780,7 +883,7 @@ if(True):
 			lbl_cabezas.place(x=305, y=38, width=90)
 			lbl_cabezas.config(textvariable=texto_cabezas)
 
-			btn_productorAuxiliar = tk.Button(lblComprador, text="Nuevo productor auxiliar", compound="top", backgroun="#dbdbdb", font=("Helvetica", 10, "bold"))
+			btn_productorAuxiliar = tk.Button(lblComprador, text="Nuevo productor auxiliar", compound="top", backgroun="#dbdbdb", font=("Helvetica", 10, "bold"), command=nuevoProductorAuxiliar)
 			btn_productorAuxiliar.place(x=213, y=62, width=180, height=18)
 
 			diccionario_objetos["texto_alias"] = texto_alias
@@ -793,7 +896,7 @@ if(True):
 
 		#BOTONES
 		if(True):
-			btn_guardar = tk.Button(lbl_datos, text="GUARDAR", compound="top", backgroun="#b3f2bc", font=("Helvetica", 20, "bold"), state = "disabled")
+			btn_guardar = tk.Button(lbl_datos, text="GUARDAR", compound="top", backgroun="#b3f2bc", font=("Helvetica", 20, "bold"), state = "disabled", command=guardarCompraventa)
 			btn_guardar.place(x=810, y=114, width=196, height=60)
 
 			btn_eliminar = tk.Button(lbl_datos, text="ELIMINAR", compound="top", backgroun="#FF6E6E", font=("Helvetica", 15, "bold"), state = "disabled", command=eliminarCompraventa)
