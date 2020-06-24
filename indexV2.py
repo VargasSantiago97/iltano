@@ -27,7 +27,7 @@ import shutil
 
 import json
 
-dicc_objetos={"varFullScreen" : False, "varFullScreenDetalles" : False}
+dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : False}
 diccionario_objetos = {}
 
 diccionarioLotes = {}
@@ -80,11 +80,27 @@ def compradorFiltrar():
 	con = sql_connection()
 	condiciones =  ' WHERE (nombre LIKE "%' + pal_clave + '%" OR razon LIKE "%' + pal_clave + '%" OR ndoc LIKE "%' + pal_clave + '%" OR grupo LIKE "%' + pal_clave + '%" OR con_iva LIKE "%' + pal_clave + '%" OR localidad LIKE "%' + pal_clave + '%" OR provincia LIKE "%' + pal_clave + '%" OR ruca LIKE "%' + pal_clave + '%" OR establecimiento LIKE "%' + pal_clave + '%") AND estado = "activo"'
 	rows = actualizar_db(con, "productores", condiciones)
+
+	try:
+		remate = diccionario_objetos["id_remate_alias"]
+		catalogo = diccionario_objetos["id_catalogo_alias"]
+		con = sql_connection()
+		condiciones = ' WHERE alias LIKE "%' + pal_clave + '%" AND estado = "activo" AND remate = "' + remate + '" AND catalogo = "' + catalogo + '"'
+		rows_aux = actualizar_db(con, "productoresAuxiliares", condiciones)
+
+		for row in rows_aux:
+			rows.append(row)
+
+	except:
+		pass
+
 	if(len(rows)==1):
 		cargarDatosComprador(rows[0][1])
 		cargarTablaCompradores([])
 	else:
 		cargarTablaCompradores(rows)
+def compradorFiltrarUsados():
+	pass
 
 def cargarTablaCompradores(rows):
 	tabla = diccionario_objetos["tabla_compradores"]
@@ -114,27 +130,48 @@ def cargarDatosComprador(productor):
 	condiciones = " WHERE nombre = '" + str(productor) + "'"
 	rows = actualizar_db(con, "productores", condiciones)
 
-	row = rows[0]
+	if(len(rows)==0):
+		remate = diccionario_objetos["id_remate_alias"]
+		catalogo = diccionario_objetos["id_catalogo_alias"]
 
-	texto_alias = str(row[1])
-	texto_razon = str(row[2])
-	texto_cuit = str(row[3])
+		con = sql_connection()
+		condiciones = " WHERE alias = '" + str(productor) + "' AND remate = '" + remate + "' AND catalogo = '" + catalogo + "'"
+		rows_aux = actualizar_db(con, "productoresAuxiliares", condiciones)
+
+		if(len(rows_aux)==0):
+			messagebox.showerror("ERROR", "No se pudo encontrar productor")
+			return 0
+		else:
+			texto_alias = rows_aux[0][1]
+			texto_razon = "productor auxiliar"
+			texto_cuit = ""
+
+	else:
+		row = rows[0]
+
+		texto_alias = str(row[1])
+		texto_razon = str(row[2])
+		texto_cuit = str(row[3])
+
 
 	tabla = diccionario_objetos["tabla"]
-
 	kilogramos = 0
 	cabezas = 0
+	total = 0
 
 	for i in tabla.get_children():
 		if(tabla.item(i)["values"][8])==texto_alias:
 			kilogramos = kilogramos + float(tabla.item(i)["values"][5])
 			cabezas = cabezas + int(tabla.item(i)["values"][2])
+			total = total + float(tabla.item(i)["values"][9])
 
+			kilogramos = round(kilogramos, 2)
+			cabezas = round(cabezas, 2)
+			total = round(total, 2)
 
 	texto_kgs = str(kilogramos)
-	texto_total = ""
+	texto_total = str(total)
 	texto_cabezas = str(cabezas)
-
 
 	diccionario_objetos["texto_alias"].set(texto_alias)
 	diccionario_objetos["texto_razon"].set(texto_razon)
@@ -146,12 +183,76 @@ def cargarDatosComprador(productor):
 	diccionario_objetos["btn_guardar"].config(state="normal")
 #prod. auxiliars
 def nuevoProductorAuxiliar():
+
+	def guardarProductorAuxiliar():
+		try:
+			remate = str(diccionario_objetos["id_remate_alias"])
+			catalogo = str(diccionario_objetos["id_catalogo_alias"])
+			alias = str(entry_prodAuxiliar.get())
+
+			con = sql_connection()
+			condiciones = " WHERE alias = '" + alias + "' AND remate = '" + remate + "' AND catalogo = '" + catalogo + "' AND estado='activo'"
+			rows = actualizar_db(con, "productoresAuxiliares", condiciones)
+
+			entities = [alias, remate, catalogo, "", "activo"]
+
+			con = sql_connection()
+			condiciones = " WHERE nombre = '" + alias + "' AND estado='activo'"
+			rows_verif = actualizar_db(con, "productores", condiciones)
+			if len(rows_verif) != 0:
+				messagebox.showerror("ERROR", "Este alias ya existe en base de datos 'Productores'")
+				return 0
+
+		except:
+			messagebox.showerror("ERROR", "Error al leer datos")
+			return 0
+
+		if len(rows)==0:
+			try:
+				con = sql_connection()
+				cursorObj = con.cursor()
+				cursorObj.execute("INSERT INTO productoresAuxiliares VALUES(NULL, ?, ?, ?, ?, ?)", entities)
+				con.commit()
+				messagebox.showinfo("Éxito", "Productor ingresado con éxito!")
+
+				winProd.destroy()
+
+				diccionario_objetos["texto_alias"].set(alias)
+				diccionario_objetos["texto_razon"].set("productor auxiliar")
+				diccionario_objetos["texto_cuit"].set("")
+				diccionario_objetos["texto_kgs"].set("")
+				diccionario_objetos["texto_total"].set("")
+				diccionario_objetos["texto_cabezas"].set("")
+
+				diccionario_objetos["btn_guardar"].configure(state="normal")
+			except:
+				messagebox.showerror("ERROR", "Error al guardar")
+		else:
+			messagebox.showerror("ERROR", "Ya existe un productor auxiliar con ese alias")
+
 	winProd = Toplevel(window)
 	winProd.title("NUEVO PRODUCTOR AUXILIAR")
-	winProd.geometry("400x200")
+	winProd.geometry("350x200")
 	winProd.configure(backgroun="#E8F6FA") #E8F6FA
-	winProd.mainloop()
 
+	winProd1 = Label(winProd, backgroun="#E8F6FA")
+	winProd2 = Label(winProd, backgroun="#E8F6FA")
+
+	winProd1.grid(column=0, row=0, pady = 10, padx = 10)
+	winProd2.grid(column=0, row=1, pady = 10, padx = 10)
+
+	tk.Label(winProd1, text="Alias", font=("Helvetica", 15), backgroun="#E8F6FA").grid(column=0, row=0, padx=20, pady=20)
+
+
+	entry_prodAuxiliar = Entry(winProd1, font=("Helvetica", 15))
+	entry_prodAuxiliar.grid(column=1, row=0)
+	entry_prodAuxiliar.focus()
+	entry_prodAuxiliar.bind("<Return>", (lambda event: guardarProductorAuxiliar()))
+
+	btn_guardarProdAux = tk.Button(winProd2, text="GUARDAR", font=("Helvetica", 15, "bold"), command=guardarProductorAuxiliar, backgroun="#b3f2bc")
+	btn_guardarProdAux.grid(column=0, row=0)
+
+	winProd.mainloop()
 
 
 #Pantalla detalles
@@ -262,7 +363,6 @@ def crearDiccionarioLotes():
 			"total" : str(x_total)
 			}
 			k += 1
-
 def cargarTablaLotes():
 
 	tabla = diccionario_objetos["tabla"]
@@ -284,8 +384,9 @@ def cargarTablaLotes():
 			diccionarioLotes[str(i)]["precio"],
 			diccionarioLotes[str(i)]["comprador"],
 			diccionarioLotes[str(i)]["total"]))
-
 def elegirItem(loteseleccion):
+	diccionario_objetos["btn_productorAuxiliar"].configure(state="normal")
+
 	#DATOS DEL LOTE
 	id_lote = str(loteseleccion["text"])
 	diccionario_objetos["id_lote"] = id_lote
@@ -358,7 +459,6 @@ def elegirItem(loteseleccion):
 		#Cambiar botones
 		diccionario_objetos["btn_guardar"].configure(text="EDITAR", state="normal", command=editarCompraventa)
 		diccionario_objetos["btn_eliminar"].configure(state="normal")
-
 
 
 #COMPRAVENTA
@@ -559,11 +659,16 @@ def exportarExcel():
 	tabla = diccionario_objetos["tabla"]
 
 	dire = filedialog.askdirectory()
+
+	if dire == ():
+		messagebox.showinfo("Atencion", "El archivo no se exportó")
+		return 0
+
 	fileName = dire + "/Catalogo cargado - " + diccionario_objetos["id_remate_alias"] + " - " + diccionario_objetos["id_catalogo_alias"] + " --- " + str(time.strftime("%d-%m-%y")) + " - " + str(time.strftime("%H-%M-%S")) + "hs.csv"
 
 	archivoExportar = open(fileName, "w")
 
-	texto = "CORRAL;VENDEDOR;CANTIDAD;CATEGORIA;PINTURA;KILOGRAMOS;PROMEDIO;PRECIO;COMPRADOR;TOTAL\n"
+	texto = "CORRAL;VENDEDOR;CANT;CATEGORIA;PINT;KG;PROM;PRECIO;COMPRADOR;TOTAL\n"
 
 	for i in tabla.get_children():
 		info = tabla.item(i)["values"]
@@ -622,6 +727,7 @@ if(True):
 	mnuProductores.add_command(label="Listado productores")
 	mnuProductores.add_separator()
 	mnuProductores.add_command(label="Productores AUX")
+	mnuProductores.add_command(label="Nuevo productor AUX", command = nuevoProductorAuxiliar)
 	mnuProductores.add_separator()
 	mnuProductores.add_command(label="Productores usados")
 
@@ -673,9 +779,8 @@ if(True):
 	barraherr = tk.Frame(window, relief=SOLID, bd=2, backgroun="#242b33")
 	barraherr.pack(side=TOP, fill=X, pady = 2)
 
-	botBuscar = tk.Button(barraherr, text="AGREGARNUEVO LOTE", compound="top", backgroun="#b3f2bc", font=("Helvetica", 10, "bold"))
-	botImprimir = tk.Button(barraherr, text="EDITARLOTE", compound="top", backgroun="#f2f0b3", font=("Helvetica", 10, "bold"))
-	botExcel = tk.Button(barraherr, text="BORRARLOTE", compound="top", backgroun="#FF6E6E", font=("Helvetica", 10, "bold"))
+	botBuscar = tk.Button(barraherr, text="AGREGAR NUEVO LOTE", compound="top", backgroun="#b3f2bc", font=("Helvetica", 10, "bold"))
+	botImprimir = tk.Button(barraherr, text="EDITAR LOTE", compound="top", backgroun="#f2f0b3", font=("Helvetica", 10, "bold"))
 	botAyuda = tk.Button(barraherr, text="EXPORTAR EXCEL", compound="top", backgroun="#f2f0b3", font=("Helvetica", 10, "bold"), command = exportarExcel)
 	botCerrar = tk.Button(barraherr, text="bot 5nasd", compound="top", backgroun="#FF6E6E", font=("Helvetica", 10, "bold"))
 
@@ -684,7 +789,6 @@ if(True):
 
 	botBuscar.pack(side=LEFT, padx=padX, pady=padY)
 	botImprimir.pack(side=LEFT, padx=padX, pady=padY)
-	botExcel.pack(side=LEFT, padx=padX, pady=padY)
 	botAyuda.pack(side=LEFT, padx=padX, pady=padY)
 	botCerrar.pack(side=LEFT, padx=padX, pady=padY)
 
@@ -883,7 +987,7 @@ if(True):
 			lbl_cabezas.place(x=305, y=38, width=90)
 			lbl_cabezas.config(textvariable=texto_cabezas)
 
-			btn_productorAuxiliar = tk.Button(lblComprador, text="Nuevo productor auxiliar", compound="top", backgroun="#dbdbdb", font=("Helvetica", 10, "bold"), command=nuevoProductorAuxiliar)
+			btn_productorAuxiliar = tk.Button(lblComprador, text="Nuevo productor auxiliar", compound="top", backgroun="#dbdbdb", font=("Helvetica", 10, "bold"), command=nuevoProductorAuxiliar, state="disabled")
 			btn_productorAuxiliar.place(x=213, y=62, width=180, height=18)
 
 			diccionario_objetos["texto_alias"] = texto_alias
@@ -950,6 +1054,7 @@ if(True):
 		entry_filtrar_productor.bind("<Return>", (lambda event: compradorFiltrar()))
 		tabla_productor.bind('<Double-1>', (lambda event: seleccionarTablaComprador()))
 		tabla_productor.bind('<Return>', (lambda event: seleccionarTablaComprador()))
+		btn_produc_filtrar.bind("<Button-3>", (lambda event: compradorFiltrarUsados()))
 
 	diccionario_objetos["textID"].set(1)
 	diccionario_objetos["id_remate_alias"] = "remate1"
