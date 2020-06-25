@@ -27,7 +27,7 @@ import shutil
 
 import json
 
-dicc_objetos={"varFullScreen" : False, "varFullScreenDetalles" : False}
+dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : False}
 diccionario_objetos = {}
 
 diccionarioLotes = {}

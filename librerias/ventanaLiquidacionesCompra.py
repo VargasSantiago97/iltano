@@ -27,7 +27,7 @@ import shutil
 
 import json
 
-dicc_objetos={"varFullScreen" : False, "varFullScreenDetalles" : False}
+dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : False}
 diccionario_objetos = {}
 
 diccionarioLotes = {}
@@ -40,6 +40,9 @@ window.geometry("1024x600")
 window.resizable(0,0)
 window.configure(backgroun="#000000") #E8F6FA
 window.attributes('-fullscreen', dicc_objetos["varFullScreen"])
+
+diccionario_objetos["id_remate_alias"] = "remate1"
+diccionario_objetos["id_catalogo_alias"] = "nuevoCat"
 
 def sql_connection():
 	try:
@@ -75,57 +78,50 @@ def treeview_sort_column(tv, col, reverse):
 
 #PRODUCTORES
 def compradorFiltrar():
-	#remate = diccionario_objetos["id_remate_alias"]
-	#catalogo = diccionario_objetos["id_catalogo_alias"]
-
 	pal_clave = str(diccionario_objetos["entry_comprador"].get())
+	remate = diccionario_objetos["id_remate_alias"]
+	catalogo = diccionario_objetos["id_catalogo_alias"]
 
 	con = sql_connection()
-	condiciones =  ' WHERE (nombre LIKE "%' + pal_clave + '%" OR razon LIKE "%' + pal_clave + '%" OR ndoc LIKE "%' + pal_clave + '%" OR grupo LIKE "%' + pal_clave + '%" OR con_iva LIKE "%' + pal_clave + '%" OR localidad LIKE "%' + pal_clave + '%" OR provincia LIKE "%' + pal_clave + '%" OR ruca LIKE "%' + pal_clave + '%" OR establecimiento LIKE "%' + pal_clave + '%") AND estado = "activo"'
-	rows = actualizar_db(con, "productores", condiciones)
+	condiciones = " WHERE estado = 'activo' AND remate = '" + remate + "' AND  comprador LIKE '%" + pal_clave + "%'"
+	rows = actualizar_db_selec(con, "comprador", "compraventa", condiciones)
 
-	try:
+	rows_compradores = []
+
+	for row in rows:
+		if row[0] not in rows_compradores:
+			rows_compradores.append(row[0])
+
+	#tupla = ("x", productor, "", cuit)
+	enviar = []
+
+	for row in rows_compradores:
 		con = sql_connection()
-		condiciones = ' WHERE alias LIKE "%' + pal_clave + '%" AND estado = "activo" AND remate = "' + remate + '" AND catalogo = "' + catalogo + '"'
-		rows_aux = actualizar_db(con, "productoresAuxiliares", condiciones)
+		condiciones = " WHERE nombre = '" + str(row) + "' AND estado = 'activo'"
+		prod = actualizar_db(con, "productores", condiciones)
 
-		for row in rows_aux:
-			rows.append(row)
+		if prod == []:
+			try:
+				con = sql_connection()
+				condiciones = " WHERE estado = 'activo' AND remate = '" + remate + "' AND catalogo = '" + catalogo + "' AND alias = '" + str(row) + "'"
+				prodAux = actualizar_db_selec(con, "productor", "productoresAuxiliares", condiciones)
 
-	except:
-		pass
+				con = sql_connection()
+				condiciones = " WHERE nombre = '" + str(prodAux[0][0]) + "' AND estado = 'activo'"
+				prod = actualizar_db(con, "productores", condiciones)
 
-	if(len(rows)==1):
-		cargarDatosComprador(rows[0][1])
-		cargarTablaCompradores([])
-	else:
-		cargarTablaCompradores(rows)
-def compradorFiltrarUsados():
-	try:
-		tabla = diccionario_objetos["tabla"]
+				if prod == []:
+					messagebox.showerror("ERROR", "NO se encontro productor asociado a productor auxiliar\nprod: " + str(row))
+					return 0
+			except:
+				messagebox.showerror("ERROR", "No se encontro Productor en la base de datos\nprod: " + str(row))
 
-		productores = []
+		tupla = ("", prod[0][1], "", prod[0][3])
+		if tupla not in enviar:
+			enviar.append(tupla)
 
-		for i in tabla.get_children():
-			productorsss = tabla.item(i)["values"][8]
-			if productorsss != "":
-				productor = productorsss
-				total = 0
-				for j in tabla.get_children():
-					if tabla.item(j)["values"][8] == productor:
-						try:
-							tot = float(tabla.item(j)["values"][9])
-						except:
-							tot = 0
-						total = total + tot
-				tupla = ("x", productor, "", total)
-				if tupla not in productores:
-					productores.append(tupla)
+	cargarTablaCompradores(enviar)
 
-		cargarTablaCompradores(productores)
-
-	except:
-		pass
 
 def cargarTablaCompradores(rows):
 
@@ -144,11 +140,25 @@ def cargarTablaCompradores(rows):
 	except:
 		messagebox.showerror("ERROR", "Error al cargar")
 def seleccionarTablaComprador():
+	remate = diccionario_objetos["id_remate_alias"]
+	catalogo = diccionario_objetos["id_catalogo_alias"]
+
+	diccionarioLotes.clear()
+
 	tabla = diccionario_objetos["tabla_compradores"]
-
 	seleccion = tabla.item(tabla.selection())
-
 	productor = seleccion["tags"][1]
+
+	actualizarDicLotes(productor)
+
+	con = sql_connection()
+	condiciones = " WHERE productor = '" + productor + "' AND remate = '" + remate + "' AND catalogo = '" + catalogo + "' AND estado = 'activo'"
+	rows = actualizar_db(con, "productoresAuxiliares", condiciones)
+
+	if(len(rows) != 0):
+		#Buscar lotes con prod AUX
+		prodAux = rows[0][1]
+		actualizarDicLotes(prodAux)
 
 	cargarDatosComprador(productor)
 def cargarDatosComprador(productor):
@@ -156,57 +166,7 @@ def cargarDatosComprador(productor):
 	condiciones = " WHERE nombre = '" + str(productor) + "'"
 	rows = actualizar_db(con, "productores", condiciones)
 
-	if(len(rows)==0):
-		remate = diccionario_objetos["id_remate_alias"]
-		catalogo = diccionario_objetos["id_catalogo_alias"]
-
-		con = sql_connection()
-		condiciones = " WHERE alias = '" + str(productor) + "' AND remate = '" + remate + "' AND catalogo = '" + catalogo + "'"
-		rows_aux = actualizar_db(con, "productoresAuxiliares", condiciones)
-
-		if(len(rows_aux)==0):
-			messagebox.showerror("ERROR", "No se pudo encontrar productor")
-			return 0
-		else:
-			texto_alias = rows_aux[0][1]
-			texto_razon = "productor auxiliar"
-			texto_cuit = ""
-
-	else:
-		row = rows[0]
-
-		texto_alias = str(row[1])
-		texto_razon = str(row[2])
-		texto_cuit = str(row[3])
-
-
-	tabla = diccionario_objetos["tabla"]
-	kilogramos = 0
-	cabezas = 0
-	total = 0
-
-	for i in tabla.get_children():
-		if(tabla.item(i)["values"][8])==texto_alias:
-			kilogramos = kilogramos + float(tabla.item(i)["values"][5])
-			cabezas = cabezas + int(tabla.item(i)["values"][2])
-			total = total + float(tabla.item(i)["values"][9])
-
-			kilogramos = round(kilogramos, 2)
-			cabezas = round(cabezas, 2)
-			total = round(total, 2)
-
-	texto_kgs = str(kilogramos)
-	texto_total = str(total)
-	texto_cabezas = str(cabezas)
-
-	diccionario_objetos["texto_alias"].set(texto_alias)
-	diccionario_objetos["texto_razon"].set(texto_razon)
-	diccionario_objetos["texto_cuit"].set(texto_cuit)
-	diccionario_objetos["texto_kgs"].set(texto_kgs)
-	diccionario_objetos["texto_total"].set(texto_total)
-	diccionario_objetos["texto_cabezas"].set(texto_cabezas)
-
-	diccionario_objetos["btn_guardar"].config(state="normal")
+	#CARGAR
 #prod. auxiliars
 def nuevoProductorAuxiliar():
 
@@ -446,6 +406,10 @@ def asignarProductoresAuxiliares():
 
 
 #CARGAR LOTES
+def actualizarDicLotes(productor):
+	pass
+	#ACTUALIZAR DICLOTES CON TES DEL PRODUCTOR
+
 def crearDiccionarioLotes():
 	remate = str(diccionario_objetos["id_remate_alias"])
 	catalogo = str(diccionario_objetos["id_catalogo_alias"])
@@ -722,7 +686,7 @@ if(True):
 	lbl_tablaGastos.place(x=2, y=155, width=1012, height=95)
 
 	lbl_datos = Label(lblBody)
-	lbl_datos.place(x=2, y=254, width=1012, height=270)
+	lbl_datos.place(x=2, y=254, width=1012, height=310)
 
 	#TABLA LOTES
 	if(True):
@@ -799,13 +763,13 @@ if(True):
 	#DATOS
 	if(True):
 		lblBuscador = tk.Label(lbl_datos, backgroun="#f0f0f0", text="PRODUCTOR", foreground="#FFFFFF", relief=SOLID, bd=2)
-		lblBuscador.place(x=2, y=2, width=300, height=266)
+		lblBuscador.place(x=2, y=2, width=300, height=306)
 
 		lblTotales = tk.Label(lbl_datos, backgroun="#f0f0f0", text="PRODUCTOR", foreground="#FFFFFF", relief=SOLID, bd=2)
-		lblTotales.place(x=304, y=2, width=300, height=266)
+		lblTotales.place(x=304, y=2, width=300, height=306)
 
 		lblOtros = tk.Label(lbl_datos, backgroun="#f0f0f0", foreground="#FFFFFF", relief=SOLID, bd=2)
-		lblOtros.place(x=606, y=2, width=400, height=266)
+		lblOtros.place(x=606, y=2, width=400, height=306)
 
 	#TOTALES
 	if(True):
@@ -830,7 +794,7 @@ if(True):
 	#BUSCADOR PRODUCTORES
 	if(True):
 		lbl_comprador_aux = Label(lblBuscador, backgroun="#f0f0f0")
-		lbl_comprador_aux.place(x = 3, y = 0, width = 290, height = 262)
+		lbl_comprador_aux.place(x = 3, y = 0, width = 290, height = 302)
 
 		lbl_ventana_productor_buscador_entry = tk.LabelFrame(lbl_comprador_aux, text="Filtrar", backgroun="#f0f0f0")
 		lbl_ventana_productor_buscador_tabla = tk.LabelFrame(lbl_comprador_aux, text="Productores", backgroun="#f0f0f0")
@@ -848,7 +812,7 @@ if(True):
 		sbr_productor = Scrollbar(lbl_ventana_productor_buscador_tabla)
 		sbr_productor.pack(side=RIGHT, fill="y")
 
-		tabla_productor = ttk.Treeview(lbl_ventana_productor_buscador_tabla, columns=("alias", "cuit"), selectmode=tk.BROWSE, height=8, show='headings') 
+		tabla_productor = ttk.Treeview(lbl_ventana_productor_buscador_tabla, columns=("alias", "cuit"), selectmode=tk.BROWSE, height=10, show='headings') 
 		tabla_productor.pack(side=LEFT, fill="both", expand=True)
 		sbr_productor.config(command=tabla_productor.yview)
 		tabla_productor.config(yscrollcommand=sbr_productor.set)
@@ -867,6 +831,7 @@ if(True):
 		tabla_productor.bind('<Return>', (lambda event: seleccionarTablaComprador()))
 
 
+compradorFiltrar()
 
 window.bind("<Control-s>", (lambda event: window.destroy()))
 window.mainloop()
