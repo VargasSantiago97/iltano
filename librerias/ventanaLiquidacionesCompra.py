@@ -6,7 +6,7 @@ import time
 import logging
 import datetime
 
-from librerias import tablaElegir
+import tablaElegir
 
 from tkinter import *
 from tkinter.ttk import *
@@ -32,7 +32,7 @@ diccionario_objetos = {}
 
 diccionarioLotes = {}
 
-direccionBaseDeDatos = "librerias/database/iltanohacienda.db"
+direccionBaseDeDatos = "database/iltanohacienda.db"
 
 window = Tk()
 window.title("IL TANO HACIENDA SAS")
@@ -75,6 +75,9 @@ def treeview_sort_column(tv, col, reverse):
 
 #PRODUCTORES
 def compradorFiltrar():
+	#remate = diccionario_objetos["id_remate_alias"]
+	#catalogo = diccionario_objetos["id_catalogo_alias"]
+
 	pal_clave = str(diccionario_objetos["entry_comprador"].get())
 
 	con = sql_connection()
@@ -82,8 +85,6 @@ def compradorFiltrar():
 	rows = actualizar_db(con, "productores", condiciones)
 
 	try:
-		remate = diccionario_objetos["id_remate_alias"]
-		catalogo = diccionario_objetos["id_catalogo_alias"]
 		con = sql_connection()
 		condiciones = ' WHERE alias LIKE "%' + pal_clave + '%" AND estado = "activo" AND remate = "' + remate + '" AND catalogo = "' + catalogo + '"'
 		rows_aux = actualizar_db(con, "productoresAuxiliares", condiciones)
@@ -444,32 +445,6 @@ def asignarProductoresAuxiliares():
 	window_asignar.mainloop()
 
 
-#Pantalla detalles
-def pantallaDetalles():
-	def pantCompletaDetalles():
-		windowDetalles.attributes('-fullscreen', dicc_objetos["varFullScreenDetalles"])
-		dicc_objetos["varFullScreenDetalles"] = not dicc_objetos["varFullScreenDetalles"]
-
-	windowDetalles = Toplevel()
-	windowDetalles.geometry("700x700")
-	windowDetalles.configure(backgroun="#000000")
-
-	texto_alias = StringVar(windowDetalles)
-	texto_alias.set("asd") # Caso 1
-
-	lbl_alias = tk.Label(windowDetalles, font=("Helvetica Neue",100,"bold"), anchor="n", backgroun="#000000", foreground = "#FFFFFF") 
-	lbl_alias.place(x=0, y=0, width = 700)
-	lbl_alias.config(textvariable=texto_alias)
-
-	dicc_objetos["texto_alias"] = texto_alias
-
-
-
-
-	windowDetalles.bind('<F11>', (lambda event: pantCompletaDetalles()))
-	windowDetalles.mainloop()
-
-
 #CARGAR LOTES
 def crearDiccionarioLotes():
 	remate = str(diccionario_objetos["id_remate_alias"])
@@ -723,281 +698,12 @@ def editarCompraventa():
 		messagebox.showerror("ERROR", "Error al guardar")
 
 
-#SELECCIONAR REMATE Y CATALOGO
-def seleccionarRemate():
-
-	def buscarRemate():
-		def funcsalirr(ssss):
-			con = sql_connection()
-			condiciones = " WHERE id = " + str(ssss)
-			rows = actualizar_db(con, "remate", condiciones)
-
-			entryRemate.delete(0, tk.END)
-			entryRemate.insert(0, rows[0][1])
-
-		dicc_buscar = {"seleccionar" : "remate",
-		"columnas" : {"0":{"id" : "nombre", "cabeza" : "Remate", "ancho" : 180, "row" : 1}, "1":{"id" : "fecha", "cabeza" : "Fecha", "ancho" : 60, "row" : 2}, "2":{"id" : "tipo", "cabeza" : "Tipo", "ancho" : 70, "row" : 3}},
-		"db" : direccionBaseDeDatos,
-		"tabla" : "remate",
-		"condiciones" : ' WHERE nombre LIKE  "%' + str(entryRemate.get()) + '%" AND estado = "activo"',
-		"dimensionesVentana" : "336x400"}
-		tablaElegir.tabla_elegir(dicc_buscar, funcsalirr)
-
-	def remateSeleccionador():
-		con = sql_connection()
-		condiciones = " WHERE nombre = '" + str(entryRemate.get()) + "' AND estado = 'activo'"
-		rows = actualizar_db(con, "remate", condiciones)
-
-		if (len(rows)==0):
-			messagebox.showerror("ERROR", "ERROR, ese remate no existe o está borrado")
-			return 0
-		else:
-			diccionario_objetos["textID"].set(rows[0][0])
-			diccionario_objetos["id_remate_alias"] = rows[0][1]
-			diccionario_objetos["textTitulo"].set("REMATE: " + str(rows[0][1]))
-			wind_select.destroy()
-
-	wind_select = Toplevel(window)
-	wind_select.title("SELECCIONAR REMATE")
-	wind_select.geometry("400x200")
-	wind_select.configure(backgroun="#E8F6FA") #E8F6FA
-
-	tk.Label(wind_select, text="REMATE", font=("Helvetica Neue",12,"bold"), anchor="n", backgroun="#E8F6FA", foreground = "#000000").grid(column=0, row=0, padx=10, pady=10)
-
-	entryRemate = Entry(wind_select, font=("Helvetica Neue",12,"bold"))
-	entryRemate.grid(column = 1, row = 0, padx = 10, pady = 10)
-	entryRemate.bind("<Return>", (lambda event: buscarRemate()))
-	entryRemate.bind("<Control-s>", (lambda event: remateSeleccionador()))
-	entryRemate.bind("<F1>", (lambda event: remateSeleccionador()))
-	entryRemate.focus()
-
-
-	btn_buscar = Button(wind_select, text="Buscar", command=buscarRemate)
-	btn_buscar.grid(column = 1, row = 1, padx = 10, pady = 10)
-
-	btn_seleccionar = Button(wind_select, text="Seleccionar", command= lambda: remateSeleccionador())
-	btn_seleccionar.grid(column = 1, row = 2, padx = 10, pady = 10)
-
-	wind_select.mainloop()
-def seleccionarCatalogo():
-	remateName = diccionario_objetos["textID"].get()
-
-	if remateName == "":
-		messagebox.showerror("ERROR", "Primero debe seleccionar un remate")
-		return 0
-
-	def buscarCatalogo():
-		def funcsalirCat(ssss):
-			con = sql_connection()
-			condiciones = " WHERE id = " + str(ssss)
-			rows = actualizar_db(con, "catalogo", condiciones)
-
-			entryCatalogo.delete(0, tk.END)
-			entryCatalogo.insert(0, rows[0][1])
-
-		dicc_buscar = {"seleccionar" : "catalogo",
-		"columnas" : {"0":{"id" : "nombre", "cabeza" : "Catalogo", "ancho" : 180, "row" : 1}, "1":{"id" : "nombre", "cabeza" : "Nombre", "ancho" : 60, "row" : 2}, "2":{"id" : "fecha", "cabeza" : "Fecha", "ancho" : 70, "row" : 4}},
-		"db" : direccionBaseDeDatos,
-		"tabla" : "catalogo",
-		"condiciones" : ' WHERE (nombre LIKE  "%' + str(entryCatalogo.get()) + '%" OR alias LIKE  "%' + str(entryCatalogo.get()) + '%") AND estado = "activo"',
-		"dimensionesVentana" : "336x400"}
-		tablaElegir.tabla_elegir(dicc_buscar, funcsalirCat)
-
-	def catalogoSeleccionador():
-		con = sql_connection()
-		condiciones = " WHERE alias = '" + str(entryCatalogo.get()) + "' AND estado = 'activo'"
-		rows = actualizar_db(con, "catalogo", condiciones)
-
-		if (len(rows)==0):
-			messagebox.showerror("ERROR", "ERROR, ese catalogo no existe o está borrado")
-			return 0
-		else:
-			diccionario_objetos["id_catalogo_id"] = rows[0][0]
-			diccionario_objetos["id_catalogo_alias"] = rows[0][1]
-			diccionario_objetos["textTitulo"].set("REMATE: " + str(diccionario_objetos["id_remate_alias"]) + "    -    CATALOGO: " + rows[0][1])
-			wind_select.destroy()
-			crearDiccionarioLotes()
-			cargarTablaLotes()
-
-	wind_select = Toplevel(window)
-	wind_select.title("SELECCIONAR CATALOGO EN REMATE: " + str(diccionario_objetos["id_remate_alias"]))
-	wind_select.geometry("400x200")
-	wind_select.configure(backgroun="#E8F6FA") #E8F6FA
-
-	tk.Label(wind_select, text="CATALOGO", font=("Helvetica Neue",12,"bold"), anchor="n", backgroun="#E8F6FA", foreground = "#000000").grid(column=0, row=0, padx=10, pady=10)
-
-	entryCatalogo = Entry(wind_select, font=("Helvetica Neue",12,"bold"))
-	entryCatalogo.grid(column = 1, row = 0, padx = 10, pady = 10)
-	entryCatalogo.bind("<Return>", (lambda event: buscarCatalogo()))
-	entryCatalogo.bind("<Control-s>", (lambda event: catalogoSeleccionador()))
-	entryCatalogo.bind("<F1>", (lambda event: catalogoSeleccionador()))
-	entryCatalogo.focus()
-
-
-	btn_buscar = Button(wind_select, text="Buscar", command=buscarCatalogo)
-	btn_buscar.grid(column = 1, row = 1, padx = 10, pady = 10)
-
-	btn_seleccionar = Button(wind_select, text="Seleccionar", command= lambda: catalogoSeleccionador())
-	btn_seleccionar.grid(column = 1, row = 2, padx = 10, pady = 10)
-
-	wind_select.mainloop()
-
-
-#EXPORTAR
-def exportarExcel():
-	tabla = diccionario_objetos["tabla"]
-
-	dire = filedialog.askdirectory()
-
-	if dire == () or dire == "":
-		messagebox.showinfo("Atencion", "El archivo no se exportó")
-		return 0
-
-	fileName = dire + "/Catalogo cargado - " + diccionario_objetos["id_remate_alias"] + " - " + diccionario_objetos["id_catalogo_alias"] + " --- " + str(time.strftime("%d-%m-%y")) + " - " + str(time.strftime("%H-%M-%S")) + "hs.csv"
-
-	archivoExportar = open(fileName, "w")
-
-	texto = "CORRAL;VENDEDOR;CANT;CATEGORIA;PINT;KG;PROM;PRECIO;COMPRADOR;TOTAL\n"
-
-	for i in tabla.get_children():
-		info = tabla.item(i)["values"]
-
-		x_corral = str(info[0])
-		x_vendedor = str(info[1])
-		x_cantidad = str(info[2])
-		x_categoria = str(info[3])
-		x_pintura = str(info[4])
-		x_kilogramos = str(info[5])
-		x_promedio = str(info[6])
-		x_precio = str(info[7])
-		x_comprador = str(info[8])
-		x_total = str(info[9])
-
-		texto = texto + x_corral + ";" + x_vendedor + ";" + x_cantidad + ";" + x_categoria + ";" + x_pintura + ";" + x_kilogramos + ";" + x_promedio + ";" + x_precio + ";" + x_comprador + ";" + x_total + "\n"
-
-	archivoExportar.write(texto)
-	archivoExportar.close()
-
-#BARRA DE MENU
-if(True):
-	def pantCompleta():
-		dicc_objetos["varFullScreen"] = not dicc_objetos["varFullScreen"]
-		window.attributes('-fullscreen', dicc_objetos["varFullScreen"])
-	
-	def salirWindow():
-		window.destroy()
-
-	barraMenu = Menu(window)
-	barraMenu.option_add('*tearOff', False)
-
-
-	mnuArchivo = Menu(barraMenu)
-	mnuArchivo.add_command(label="Abrir")
-	mnuArchivo.add_command(label="Nuevo")
-	mnuArchivo.add_command(label="Guardar")
-	mnuArchivo.add_command(label="Cerrar")
-	mnuArchivo.add_command(label="Salir", command = salirWindow)
-
-	mnuRemate = Menu(barraMenu)
-	mnuRemate.add_command(label="Remate", command = lambda: ventanaRemates.ventana1("NULL"))
-	mnuRemate.add_command(label="Listado de remates")
-	mnuRemate.add_separator()
-	mnuRemate.add_command(label="Seleccionar remate", command = lambda: seleccionarRemate())
-
-	mnuCategorias = Menu(barraMenu)
-	mnuCategorias.add_command(label="Cat. Venta")
-	mnuCategorias.add_command(label="Listado cat. venta")
-	mnuCategorias.add_separator()
-	mnuCategorias.add_command(label="Cat. Hacienda")
-	mnuCategorias.add_command(label="Listado cat. hacienda")
-
-	mnuProductores = Menu(barraMenu)
-	mnuProductores.add_command(label="Productor")
-	mnuProductores.add_command(label="Listado productores")
-	mnuProductores.add_separator()
-	mnuProductores.add_command(label="Nuevo productor AUX", command = nuevoProductorAuxiliar)
-	mnuProductores.add_command(label="Listar productores AUX")
-	mnuProductores.add_command(label="Asignar productores AUX", command = asignarProductoresAuxiliares)
-	mnuProductores.add_separator()
-	mnuProductores.add_command(label="Productores usados", command = compradorFiltrarUsados)
-
-
-	mnuLiquidaciones = Menu(barraMenu)
-	mnuLiquidaciones.add_command(label="Liq. Compras")
-	mnuLiquidaciones.add_command(label="Liq. Ventas")
-	mnuLiquidaciones.add_separator()
-	mnuLiquidaciones.add_command(label="Configuracion liq. compras")
-	mnuLiquidaciones.add_command(label="Configuracion liq. ventas")
-	mnuLiquidaciones.add_separator()
-	mnuLiquidaciones.add_command(label="Lote")
-	mnuLiquidaciones.add_command(label="Listado de lotes")
-	mnuLiquidaciones.add_separator()
-	mnuLiquidaciones.add_command(label="Alicuotas")
-
-
-	mnuCatalogo = Menu(barraMenu)
-	mnuCatalogo.add_command(label="Catalogo")
-	mnuCatalogo.add_separator()
-	mnuCatalogo.add_command(label="Seleccionar Catalogo", command= lambda: seleccionarCatalogo())
-
-	mnuConfiguracion = Menu(barraMenu)
-	mnuConfiguracion.add_command(label="Administrar Empresa")
-	mnuConfiguracion.add_separator()
-	mnuConfiguracion.add_command(label="Sincronizacion en la NUBE")
-	mnuConfiguracion.add_separator()
-	mnuConfiguracion.add_command(label="Copia de seguridad")
-	mnuConfiguracion.add_command(label="RESTAURAR copia de seguridad")
-	mnuConfiguracion.add_separator()
-	mnuConfiguracion.add_command(label="Pantalla detalles", command = pantallaDetalles)
-	mnuConfiguracion.add_separator()
-	mnuConfiguracion.add_command(label="Pantalla completa", command = pantCompleta)
-	mnuConfiguracion.add_command(label="Salir", command = salirWindow)
-
-	barraMenu.add_cascade(label="Archivo", menu = mnuArchivo)
-	barraMenu.add_cascade(label="Remate", menu = mnuRemate)
-	barraMenu.add_cascade(label="Categorias", menu = mnuCategorias)
-	barraMenu.add_cascade(label="Productores", menu = mnuProductores)
-	barraMenu.add_cascade(label="Liquidaciones", menu = mnuLiquidaciones)
-	barraMenu.add_cascade(label="Catalogo", menu = mnuCatalogo)
-	barraMenu.add_cascade(label="Configuracion", menu = mnuConfiguracion)
-	window.config(menu = barraMenu)
-
-	window.bind('<F11>', (lambda event: pantCompleta()))
-
-#BARRA DE HERRAMIENTAS
-if(True):
-	barraherr = tk.Frame(window, relief=SOLID, bd=2, backgroun="#242b33")
-	barraherr.pack(side=TOP, fill=X, pady = 2)
-
-	botBuscar = tk.Button(barraherr, text="AGREGAR NUEVO LOTE", compound="top", backgroun="#b3f2bc", font=("Helvetica", 10, "bold"))
-	botImprimir = tk.Button(barraherr, text="EDITAR LOTE", compound="top", backgroun="#f2f0b3", font=("Helvetica", 10, "bold"))
-	botAyuda = tk.Button(barraherr, text="EXPORTAR EXCEL", compound="top", backgroun="#f2f0b3", font=("Helvetica", 10, "bold"), command = exportarExcel)
-	botCerrar = tk.Button(barraherr, text="bot 5nasd", compound="top", backgroun="#FF6E6E", font=("Helvetica", 10, "bold"))
-
-	padX=3
-	padY=2
-
-	botBuscar.pack(side=LEFT, padx=padX, pady=padY)
-	botImprimir.pack(side=LEFT, padx=padX, pady=padY)
-	botAyuda.pack(side=LEFT, padx=padX, pady=padY)
-	botCerrar.pack(side=LEFT, padx=padX, pady=padY)
-
 #BARRA DE TITULO
 if(True):
 	barraTitulo = tk.Frame(window, relief=SOLID, bd=2, backgroun="#242b33")
 	barraTitulo.pack(side=TOP, fill=X)
 
-	textTitulo = StringVar()
-	textTitulo.set("REMATE:")
-	textID = StringVar()
-	textID.set("")
-
-	lbl_titulo = tk.Label(barraTitulo, font=("Helvetica Neue",12,"bold"), anchor="n", backgroun="#242b33", foreground = "#ffffff")
-	lbl_titulo.pack()
-	lbl_titulo.config(textvariable=textTitulo)
-
-	diccionario_objetos["textTitulo"] = textTitulo
-	diccionario_objetos["textID"] = textID
+	tk.Label(barraTitulo, text="LIQUIDACIONES DE COMPRA", font=("Helvetica Neue",12,"bold"), anchor="n", backgroun="#242b33", foreground = "#ffffff").pack()
 
 #BODY
 if(True):
@@ -1010,206 +716,121 @@ if(True):
 	padY=2
 
 	lbl_tabla = Label(lblBody)
-	lbl_tabla.place(x=2, y=0, width=1012, height=250)
+	lbl_tabla.place(x=2, y=0, width=1012, height=150)
+
+	lbl_tablaGastos = Label(lblBody)
+	lbl_tablaGastos.place(x=2, y=155, width=1012, height=95)
 
 	lbl_datos = Label(lblBody)
-	lbl_datos.place(x=2, y=254, width=1012, height=230)
+	lbl_datos.place(x=2, y=254, width=1012, height=270)
 
-	#TABLA
+	#TABLA LOTES
 	if(True):
 		sbr = Scrollbar(lbl_tabla)
 		sbr.pack(side=RIGHT, fill="y")
 
 
-		tabla = ttk.Treeview(lbl_tabla, columns=["CORRAL", "VENDEDOR", "CANTIDAD", "CATEGORIA", "PINTURA", "KGS", "PROMEDIO", "PRECIO", "COMPRADOR", "TOTAL"], selectmode=tk.BROWSE, show='headings') 
+		tabla = ttk.Treeview(lbl_tabla, columns=["CORRAL", "CLIENTE", "CATEGORIA", "PINTURA", "CANTIDAD", "KGS", "PRECIO", "BRUTO"], selectmode=tk.BROWSE, show='headings') 
 		tabla.pack(side=LEFT, fill="both", expand=True)
 		sbr.config(command=tabla.yview)
 		tabla.config(yscrollcommand=sbr.set)
 
 
 		tabla.heading("CORRAL", text="CORRAL", command=lambda: treeview_sort_column(tabla, "CORRAL", False))
-		tabla.heading("VENDEDOR", text="VENDEDOR", command=lambda: treeview_sort_column(tabla, "VENDEDOR", False))
-		tabla.heading("CANTIDAD", text="CANTIDAD", command=lambda: treeview_sort_column(tabla, "CANTIDAD", False))
+		tabla.heading("CLIENTE", text="CLIENTE", command=lambda: treeview_sort_column(tabla, "CLIENTE", False))
 		tabla.heading("CATEGORIA", text="CATEGORIA", command=lambda: treeview_sort_column(tabla, "CATEGORIA", False))
 		tabla.heading("PINTURA", text="PINTURA", command=lambda: treeview_sort_column(tabla, "PINTURA", False))
+		tabla.heading("CANTIDAD", text="CANTIDAD", command=lambda: treeview_sort_column(tabla, "CANTIDAD", False))
 		tabla.heading("KGS", text="KGS", command=lambda: treeview_sort_column(tabla, "KGS", False))
-		tabla.heading("PROMEDIO", text="PROMEDIO", command=lambda: treeview_sort_column(tabla, "PROMEDIO", False))
 		tabla.heading("PRECIO", text="PRECIO", command=lambda: treeview_sort_column(tabla, "PRECIO", False))
-		tabla.heading("COMPRADOR", text="COMPRADOR", command=lambda: treeview_sort_column(tabla, "COMPRADOR", False))
-		tabla.heading("TOTAL", text="TOTAL", command=lambda: treeview_sort_column(tabla, "TOTAL", False))
+		tabla.heading("BRUTO", text="BRUTO", command=lambda: treeview_sort_column(tabla, "BRUTO", False))
+
 
 		tabla.column("CORRAL", width=30)
-		tabla.column("VENDEDOR", width=150)
-		tabla.column("CANTIDAD", width=30)
-		tabla.column("CATEGORIA", width=30)
+		tabla.column("CLIENTE", width=150)
+		tabla.column("CATEGORIA", width=150)
 		tabla.column("PINTURA", width=30)
+		tabla.column("CANTIDAD", width=30)
 		tabla.column("KGS", width=30)
-		tabla.column("PROMEDIO", width=30)
 		tabla.column("PRECIO", width=30)
-		tabla.column("COMPRADOR", width=150)
-		tabla.column("TOTAL", width=30)
+		tabla.column("BRUTO", width=30)
+
 
 		tabla.bind("<Double-1>", (lambda event: elegirItem(tabla.item(tabla.selection()))))
 		tabla.bind("<Return>", (lambda event: elegirItem(tabla.item(tabla.selection()))))
 
 		diccionario_objetos["tabla"] = tabla
 
+	#TABLA GASTOS
+	if(True):
+		sbrGastos = Scrollbar(lbl_tablaGastos)
+		sbrGastos.pack(side=RIGHT, fill="y")
+
+
+		tablaGastos = ttk.Treeview(lbl_tablaGastos, columns=["GASTOS", "BASE IMPONIBLE", "ALICUOTA", "IMPORTE", "%IVA", "$IVA"], selectmode=tk.BROWSE, show='headings') 
+		tablaGastos.pack(side=LEFT, fill="both", expand=True)
+		sbrGastos.config(command=tablaGastos.yview)
+		tablaGastos.config(yscrollcommand=sbrGastos.set)
+
+
+		tablaGastos.heading("GASTOS", text="GASTOS", command=lambda: treeview_sort_column(tablaGastos, "GASTOS", False))
+		tablaGastos.heading("BASE IMPONIBLE", text="BASE IMPONIBLE", command=lambda: treeview_sort_column(tablaGastos, "BASE IMPONIBLE", False))
+		tablaGastos.heading("ALICUOTA", text="ALICUOTA", command=lambda: treeview_sort_column(tablaGastos, "ALICUOTA", False))
+		tablaGastos.heading("IMPORTE", text="IMPORTE", command=lambda: treeview_sort_column(tablaGastos, "IMPORTE", False))
+		tablaGastos.heading("%IVA", text="%IVA", command=lambda: treeview_sort_column(tablaGastos, "%IVA", False))
+		tablaGastos.heading("$IVA", text="$IVA", command=lambda: treeview_sort_column(tablaGastos, "$IVA", False))
+
+
+		tablaGastos.column("GASTOS", width=250)
+		tablaGastos.column("BASE IMPONIBLE", width=30)
+		tablaGastos.column("ALICUOTA", width=30)
+		tablaGastos.column("IMPORTE", width=30)
+		tablaGastos.column("%IVA", width=30)
+		tablaGastos.column("$IVA", width=30)
+
+
+
+		tablaGastos.bind("<Double-1>", (lambda event: elegirItem(tablaGastos.item(tablaGastos.selection()))))
+		tablaGastos.bind("<Return>", (lambda event: elegirItem(tablaGastos.item(tablaGastos.selection()))))
+
+		diccionario_objetos["tablaGastos"] = tablaGastos
+
+
 	#DATOS
 	if(True):
 		lblBuscador = tk.Label(lbl_datos, backgroun="#f0f0f0", text="PRODUCTOR", foreground="#FFFFFF", relief=SOLID, bd=2)
-		lblBuscador.place(x=2, y=2, width=300, height=226)
+		lblBuscador.place(x=2, y=2, width=300, height=266)
 
-		lblLote = tk.Label(lbl_datos, backgroun="#f0f0f0", text="PRODUCTOR", foreground="#FFFFFF", relief=SOLID, bd=2)
-		lblLote.place(x=304, y=2, width=300, height=226)
+		lblTotales = tk.Label(lbl_datos, backgroun="#f0f0f0", text="PRODUCTOR", foreground="#FFFFFF", relief=SOLID, bd=2)
+		lblTotales.place(x=304, y=2, width=300, height=266)
 
-		lblComprador = tk.Label(lbl_datos, backgroun="#f0f0f0", foreground="#FFFFFF", relief=SOLID, bd=2)
-		lblComprador.place(x=606, y=25, width=400, height=87)
-		lblPrecio = tk.Label(lbl_datos, backgroun="#f0f0f0", foreground="#FFFFFF", relief=SOLID, bd=2)
-		lblPrecio.place(x=606, y=137, width=200, height=91)
+		lblOtros = tk.Label(lbl_datos, backgroun="#f0f0f0", foreground="#FFFFFF", relief=SOLID, bd=2)
+		lblOtros.place(x=606, y=2, width=400, height=266)
 
-		tk.Label(lbl_datos, backgroun="#f2f0b3", text="COMPRADOR", font=("Helvetica", 10, "bold"), foreground="#000000", relief=SOLID, bd=2).place(x=606, y=2, width=400, height=25)
-		tk.Label(lbl_datos, backgroun="#f2f0b3", text="PRECIO", font=("Helvetica", 10, "bold"), foreground="#000000", relief=SOLID, bd=2).place(x=606, y=114, width=200, height=25)
+	#TOTALES
+	if(True):
+		pass
 
-		#LOTE
-		if(True):
+	#OTROS
+	if(True):
+		pass
 
-			texto_catHacienda = StringVar()
-			texto_catHacienda.set("")
-			texto_catVenta = StringVar()
-			texto_catVenta.set("")
+	#BOTONES
+	if(True):
+		btn_guardar = tk.Button(lbl_datos, text="GUARDAR", compound="top", backgroun="#b3f2bc", font=("Helvetica", 20, "bold"), state = "disabled", command=guardarCompraventa)
+		#btn_guardar.place(x=810, y=114, width=196, height=60)
 
-			lbl_catVenta = tk.Label(lblLote, font=("Helvetica Neue",12, "bold"), anchor="w", backgroun="#f0f0f0")
-			lbl_catVenta.place(x=0, y=0, width=290)
-			lbl_catVenta.config(textvariable=texto_catVenta)
+		btn_eliminar = tk.Button(lbl_datos, text="ELIMINAR", compound="top", backgroun="#FF6E6E", font=("Helvetica", 15, "bold"), state = "disabled", command=eliminarCompraventa)
+		#btn_eliminar.place(x=810, y=180, width=196, height=48)
 
-			lbl_catHacienda = tk.Label(lblLote, font=("Helvetica Neue",10,"bold"), anchor="w", backgroun="#f0f0f0")
-			lbl_catHacienda.place(x=0, y=20, width=290)
-			lbl_catHacienda.config(textvariable=texto_catHacienda)
-
-			tk.Label(lblLote, text="Corral", font=("Helvetica Neue",8), anchor="c", backgroun="#9bd1c1").place(x=0, y=50, width=75, height=13)
-			tk.Label(lblLote, text="Cantidad", font=("Helvetica Neue",8), anchor="c", backgroun="#9bd1c1").place(x=75, y=50, width=75, height=13)
-			tk.Label(lblLote, text="Peso Neto", font=("Helvetica Neue",8), anchor="c", backgroun="#9bd1c1").place(x=150, y=50, width=75, height=13)
-			tk.Label(lblLote, text="Peso Prom", font=("Helvetica Neue",8), anchor="c", backgroun="#9bd1c1").place(x=225, y=50, width=71, height=13)
+		diccionario_objetos["btn_guardar"] = btn_guardar
+		diccionario_objetos["btn_eliminar"] = btn_eliminar
 
 
-			texto_corral = StringVar()
-			texto_corral.set("")
-			texto_cantidad = StringVar()
-			texto_cantidad.set("")
-			texto_neto = StringVar()
-			texto_neto.set("")
-			texto_promedio = StringVar()
-			texto_promedio.set("")
-
-
-			lbl_corral = tk.Label(lblLote, font=("Helvetica Neue",15,"bold"), anchor="c", backgroun="#f0f0f0")
-			lbl_corral.place(x=0, y=67, width=75)
-			lbl_corral.config(textvariable=texto_corral)
-
-			lbl_cantidad = tk.Label(lblLote, font=("Helvetica Neue",15,"bold"), anchor="c", backgroun="#f0f0f0")
-			lbl_cantidad.place(x=75, y=67, width=75)
-			lbl_cantidad.config(textvariable=texto_cantidad)
-
-			lbl_neto = tk.Label(lblLote, font=("Helvetica Neue",15,"bold"), anchor="c", backgroun="#f0f0f0")
-			lbl_neto.place(x=150, y=67, width=75)
-			lbl_neto.config(textvariable=texto_neto)
-
-			lbl_promedio = tk.Label(lblLote, font=("Helvetica Neue",15,"bold"), anchor="c", backgroun="#f0f0f0")
-			lbl_promedio.place(x=225, y=67, width=71)
-			lbl_promedio.config(textvariable=texto_promedio)
-
-			txt_observaciones = scrolledtext.ScrolledText(lblLote, backgroun="#edfffa")
-			txt_observaciones.place(x = 0, y = 120, width = 225+71, height = 100)
-			txt_observaciones.insert("1.0", "Para comezar a cargar: \n1) Seleccione un remate\n2) Seleccione un catalogo\n3) Doble click sobre el lote\n4) Buscar comprador\n5) Colocar precio por kilo\n6) Guardar")
-			txt_observaciones.config(state="disabled")
-
-			diccionario_objetos["datosLote_texto_catHacienda"] = texto_catHacienda
-			diccionario_objetos["datosLote_texto_catVenta"] = texto_catVenta
-			diccionario_objetos["datosLote_texto_corral"] = texto_corral
-			diccionario_objetos["datosLote_texto_cantidad"] = texto_cantidad
-			diccionario_objetos["datosLote_texto_neto"] = texto_neto
-			diccionario_objetos["datosLote_texto_promedio"] = texto_promedio
-			diccionario_objetos["datosLote_txt_observaciones"] = txt_observaciones
-
-		#COMPRADOR
-		if(True):
-			texto_alias = StringVar()
-			texto_alias.set("")
-			texto_razon = StringVar()
-			texto_razon.set("")
-			texto_cuit = StringVar()
-			texto_cuit.set("")
-
-			lbl_alias = tk.Label(lblComprador, font=("Helvetica Neue", 10, "bold"), anchor="w", backgroun="#f0f0f0")
-			lbl_alias.place(x=2, y=2, width=250)
-			lbl_alias.config(textvariable=texto_alias)
-
-			lbl_razon = tk.Label(lblComprador, font=("Helvetica Neue", 10), anchor="w", backgroun="#f0f0f0")
-			lbl_razon.place(x=2, y=25, width=250)
-			lbl_razon.config(textvariable=texto_razon)
-
-			lbl_cuit = tk.Label(lblComprador, font=("verdana", 10, "bold"), anchor="w", backgroun="#f0f0f0")
-			lbl_cuit.place(x=43, y=55, width=150)
-			lbl_cuit.config(textvariable=texto_cuit)
-
-			Label(lblComprador, font=("verdana",10), text="CUIT:", backgroun="#f0f0f0").place(x=0, y=55)
-
-			Label(lblComprador, font=("verdana",8), text="KGs:", backgroun="#f0f0f0").place(x=273, y=0)
-			Label(lblComprador, font=("verdana",8), text="$ total:", backgroun="#f0f0f0").place(x=260, y=20)
-			Label(lblComprador, font=("verdana",8), text="Cabezas:", backgroun="#f0f0f0").place(x=247, y=40)
-
-			texto_kgs = StringVar()
-			texto_kgs.set("")
-			texto_total = StringVar()
-			texto_total.set("")
-			texto_cabezas = StringVar()
-			texto_cabezas.set("")
-
-			lbl_kgs = tk.Label(lblComprador, font=("Helvetica Neue", 10, "bold"), anchor="w", backgroun="#f0f0f0")
-			lbl_kgs.place(x=305, y=-2, width=90)
-			lbl_kgs.config(textvariable=texto_kgs)
-
-			lbl_total = tk.Label(lblComprador, font=("Helvetica Neue", 10, "bold"), anchor="w", backgroun="#f0f0f0")
-			lbl_total.place(x=305, y=18, width=90)
-			lbl_total.config(textvariable=texto_total)
-
-			lbl_cabezas = tk.Label(lblComprador, font=("Helvetica Neue", 10, "bold"), anchor="w", backgroun="#f0f0f0")
-			lbl_cabezas.place(x=305, y=38, width=90)
-			lbl_cabezas.config(textvariable=texto_cabezas)
-
-			btn_productorAuxiliar = tk.Button(lblComprador, text="Nuevo productor auxiliar", compound="top", backgroun="#dbdbdb", font=("Helvetica", 10, "bold"), command=nuevoProductorAuxiliar, state="disabled")
-			btn_productorAuxiliar.place(x=213, y=62, width=180, height=18)
-
-			diccionario_objetos["texto_alias"] = texto_alias
-			diccionario_objetos["texto_razon"] = texto_razon
-			diccionario_objetos["texto_cuit"] = texto_cuit
-			diccionario_objetos["texto_kgs"] = texto_kgs
-			diccionario_objetos["texto_total"] = texto_total
-			diccionario_objetos["texto_cabezas"] = texto_cabezas
-			diccionario_objetos["btn_productorAuxiliar"] = btn_productorAuxiliar
-
-		#BOTONES
-		if(True):
-			btn_guardar = tk.Button(lbl_datos, text="GUARDAR", compound="top", backgroun="#b3f2bc", font=("Helvetica", 20, "bold"), state = "disabled", command=guardarCompraventa)
-			btn_guardar.place(x=810, y=114, width=196, height=60)
-
-			btn_eliminar = tk.Button(lbl_datos, text="ELIMINAR", compound="top", backgroun="#FF6E6E", font=("Helvetica", 15, "bold"), state = "disabled", command=eliminarCompraventa)
-			btn_eliminar.place(x=810, y=180, width=196, height=48)
-
-			diccionario_objetos["btn_guardar"] = btn_guardar
-			diccionario_objetos["btn_eliminar"] = btn_eliminar
-
-		#PRECIO
-		if(True):
-			Label(lblPrecio, font=("verdana",18, "bold"), text="$/kg", backgroun="#f0f0f0").grid(column=0, row=0, padx = 5, pady = 20)
-			entry_precio = tk.Entry(lblPrecio, font=("verdana",18, "bold"), backgroun="#f0f0f0", width=6)
-			entry_precio.grid(column=1, row=0, padx = 5, pady = 20)
-
-			diccionario_objetos["entry_precio"] = entry_precio
 	#BUSCADOR PRODUCTORES
 	if(True):
 		lbl_comprador_aux = Label(lblBuscador, backgroun="#f0f0f0")
-		lbl_comprador_aux.place(x = 3, y = 0, width = 290, height = 222)
+		lbl_comprador_aux.place(x = 3, y = 0, width = 290, height = 262)
 
 		lbl_ventana_productor_buscador_entry = tk.LabelFrame(lbl_comprador_aux, text="Filtrar", backgroun="#f0f0f0")
 		lbl_ventana_productor_buscador_tabla = tk.LabelFrame(lbl_comprador_aux, text="Productores", backgroun="#f0f0f0")
@@ -1227,7 +848,7 @@ if(True):
 		sbr_productor = Scrollbar(lbl_ventana_productor_buscador_tabla)
 		sbr_productor.pack(side=RIGHT, fill="y")
 
-		tabla_productor = ttk.Treeview(lbl_ventana_productor_buscador_tabla, columns=("alias", "cuit"), selectmode=tk.BROWSE, height=6, show='headings') 
+		tabla_productor = ttk.Treeview(lbl_ventana_productor_buscador_tabla, columns=("alias", "cuit"), selectmode=tk.BROWSE, height=8, show='headings') 
 		tabla_productor.pack(side=LEFT, fill="both", expand=True)
 		sbr_productor.config(command=tabla_productor.yview)
 		tabla_productor.config(yscrollcommand=sbr_productor.set)
@@ -1244,18 +865,7 @@ if(True):
 		entry_filtrar_productor.bind("<Return>", (lambda event: compradorFiltrar()))
 		tabla_productor.bind('<Double-1>', (lambda event: seleccionarTablaComprador()))
 		tabla_productor.bind('<Return>', (lambda event: seleccionarTablaComprador()))
-		btn_produc_filtrar.bind("<Button-3>", (lambda event: compradorFiltrarUsados()))
 
-diccionario_objetos["textID"].set(1)
-diccionario_objetos["id_remate_alias"] = "remate1"
-
-
-diccionario_objetos["id_catalogo_id"] = 16
-diccionario_objetos["id_catalogo_alias"] = "nuevoCat"
-diccionario_objetos["textTitulo"].set("REMATE:")
-
-crearDiccionarioLotes()
-cargarTablaLotes()
 
 
 window.bind("<Control-s>", (lambda event: window.destroy()))
