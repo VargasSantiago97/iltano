@@ -27,7 +27,7 @@ import shutil
 
 import json
 
-dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : False}
+dicc_objetos={"varFullScreen" : False, "varFullScreenDetalles" : False}
 diccionario_objetos = {}
 
 diccionarioLotes = {}
@@ -74,7 +74,8 @@ def treeview_sort_column(tv, col, reverse):
 	# reverse sort next time
 	tv.heading(col, command=lambda: \
 	treeview_sort_column(tv, col, not reverse))
-
+def printDiccionario(diccionario):
+	print(json.dumps(diccionario, indent=4))
 
 #PRODUCTORES
 def compradorFiltrar():
@@ -160,507 +161,242 @@ def seleccionarTablaComprador():
 		prodAux = rows[0][1]
 		actualizarDicLotes(prodAux)
 
+	#printDiccionario(diccionarioLotes)
 	cargarDatosComprador(productor)
+	cargarTablaLotes()
+	calcularSubtotal()
+	calcularIntereses()
+	calcularIvaHacienda()
+	calcularIvaInteres()
+	cargarTablaGastos()
+	calcularTOTAL()
+
 def cargarDatosComprador(productor):
 	con = sql_connection()
 	condiciones = " WHERE nombre = '" + str(productor) + "'"
 	rows = actualizar_db(con, "productores", condiciones)
 
 	#CARGAR
-#prod. auxiliars
-def nuevoProductorAuxiliar():
+	row = rows[0]
 
-	def guardarProductorAuxiliar():
-		try:
-			remate = str(diccionario_objetos["id_remate_alias"])
-			catalogo = str(diccionario_objetos["id_catalogo_alias"])
-			alias = str(entry_prodAuxiliar.get())
+	diccionario_objetos["entry_nombre"].delete(0, tk.END)
+	diccionario_objetos["entry_cuit"].delete(0, tk.END)
+	diccionario_objetos["entry_iva"].delete(0, tk.END)
+	diccionario_objetos["entry_iibb"].delete(0, tk.END)
+	diccionario_objetos["entry_caracter"].delete(0, tk.END)
+	diccionario_objetos["entry_domicilio"].delete(0, tk.END)
+	diccionario_objetos["entry_localidad"].delete(0, tk.END)
+	diccionario_objetos["entry_provincia"].delete(0, tk.END)
+	diccionario_objetos["entry_codPostal"].delete(0, tk.END)
+	diccionario_objetos["entry_renspa"].delete(0, tk.END)
+	diccionario_objetos["entry_ruca"].delete(0, tk.END)
 
-			con = sql_connection()
-			condiciones = " WHERE alias = '" + alias + "' AND remate = '" + remate + "' AND catalogo = '" + catalogo + "' AND estado='activo'"
-			rows = actualizar_db(con, "productoresAuxiliares", condiciones)
-
-			entities = [alias, remate, catalogo, "", "activo"]
-
-			con = sql_connection()
-			condiciones = " WHERE nombre = '" + alias + "' AND estado='activo'"
-			rows_verif = actualizar_db(con, "productores", condiciones)
-			if len(rows_verif) != 0:
-				messagebox.showerror("ERROR", "Este alias ya existe en base de datos 'Productores'")
-				return 0
-
-		except:
-			messagebox.showerror("ERROR", "Error al leer datos")
-			return 0
-
-		if len(rows)==0:
-			try:
-				con = sql_connection()
-				cursorObj = con.cursor()
-				cursorObj.execute("INSERT INTO productoresAuxiliares VALUES(NULL, ?, ?, ?, ?, ?)", entities)
-				con.commit()
-				messagebox.showinfo("Éxito", "Productor ingresado con éxito!")
-
-				winProd.destroy()
-
-				diccionario_objetos["texto_alias"].set(alias)
-				diccionario_objetos["texto_razon"].set("productor auxiliar")
-				diccionario_objetos["texto_cuit"].set("")
-				diccionario_objetos["texto_kgs"].set("")
-				diccionario_objetos["texto_total"].set("")
-				diccionario_objetos["texto_cabezas"].set("")
-
-				diccionario_objetos["btn_guardar"].configure(state="normal")
-			except:
-				messagebox.showerror("ERROR", "Error al guardar")
-		else:
-			messagebox.showerror("ERROR", "Ya existe un productor auxiliar con ese alias")
-
-	winProd = Toplevel(window)
-	winProd.title("NUEVO PRODUCTOR AUXILIAR")
-	winProd.geometry("350x200")
-	winProd.configure(backgroun="#E8F6FA") #E8F6FA
-
-	winProd1 = Label(winProd, backgroun="#E8F6FA")
-	winProd2 = Label(winProd, backgroun="#E8F6FA")
-
-	winProd1.grid(column=0, row=0, pady = 10, padx = 10)
-	winProd2.grid(column=0, row=1, pady = 10, padx = 10)
-
-	tk.Label(winProd1, text="Alias", font=("Helvetica", 15), backgroun="#E8F6FA").grid(column=0, row=0, padx=20, pady=20)
-
-
-	entry_prodAuxiliar = Entry(winProd1, font=("Helvetica", 15))
-	entry_prodAuxiliar.grid(column=1, row=0)
-	entry_prodAuxiliar.focus()
-	entry_prodAuxiliar.bind("<Return>", (lambda event: guardarProductorAuxiliar()))
-
-	btn_guardarProdAux = tk.Button(winProd2, text="GUARDAR", font=("Helvetica", 15, "bold"), command=guardarProductorAuxiliar, backgroun="#b3f2bc")
-	btn_guardarProdAux.grid(column=0, row=0)
-
-	winProd.mainloop()
-def asignarProductoresAuxiliares():
-	try:
-		remate = diccionario_objetos["id_remate_alias"]
-		catalogo = diccionario_objetos["id_catalogo_alias"]
-	except:
-		messagebox.showinfo("ATENCION", "Primero seleccione remate y catalogo")
-		return 0
-
-	def asignarProductor():
-		prodAux = texto_prodAux.get()
-		prodOrigin = entry_productor.get()
-
-		#verif prod aux
-		con = sql_connection()
-		condiciones =  " WHERE estado = 'activo' AND remate = '" + remate + "' AND catalogo = '" + catalogo + "' AND alias = '" + prodAux + "'"
-		rows = actualizar_db(con, "productoresAuxiliares", condiciones)
-
-		if (len(rows)==0):
-			messagebox.showerror("ERROR", "Productor auxiliar invalido")
-			return 0
-		else:
-			id_prod_aux = rows[0][0]
-
-		#verif prod
-		con = sql_connection()
-		condiciones =  " WHERE estado = 'activo' AND nombre = '" + prodOrigin + "'"
-		rows = actualizar_db(con, "productores", condiciones)
-
-		if (len(rows)==0):
-			messagebox.showerror("ERROR", "Productor invalido")
-			return 0
-
-		#cargar
-		try:
-			entities = [prodOrigin, str(id_prod_aux)]
-			con = sql_connection()
-			cursorObj = con.cursor()
-			cursorObj.execute('UPDATE productoresAuxiliares SET productor = ? where id = ?', entities)
-			con.commit()
-			messagebox.showinfo("Éxito", "Productor cargado con éxito!")
-		except:
-			messagebox.showerror("ERROR", "ERROR al cargar en la base de datos")
-			return 0
-
-		actualizarTablaProductoresAuxiliares()
-
-	def buscarProductorAuxiliar():
-		def funcSalirAux(ssss):
-			con = sql_connection()
-			condiciones = " WHERE id = " + str(ssss)
-			rows = actualizar_db(con, "productores", condiciones)
-
-			entry_productor.delete(0, tk.END)
-			entry_productor.insert(0, rows[0][1])
-
-		dicc_buscar = {"seleccionar" : "productor",
-		"columnas" : {"0":{"id" : "alias", "cabeza" : "Alias", "ancho" : 180, "row" : 1}, "1":{"id" : "razon", "cabeza" : "Razon Social", "ancho" : 180, "row" : 2}, "2":{"id" : "cuit", "cabeza" : "CUIT", "ancho" : 110, "row" : 3}},
-		"db" : direccionBaseDeDatos,
-		"tabla" : "productores",
-		"condiciones" : ' WHERE (nombre LIKE  "%' + str(entry_productor.get()) + '%" OR razon LIKE "%' + str(entry_productor.get()) + '%" OR ndoc LIKE "%' + str(entry_productor.get()) + '%") AND estado = "activo"',
-		"dimensionesVentana" : "500x400"}
-		tablaElegir.tabla_elegir(dicc_buscar, funcSalirAux)
-
-	def actualizarTablaProductoresAuxiliares():
-		try:
-			con = sql_connection()
-			condiciones = " WHERE estado = 'activo' AND remate = '" + remate + "' AND catalogo = '" + catalogo + "'"
-			rows = actualizar_db(con, "productoresAuxiliares", condiciones)
-		except:
-			messagebox.showinfo("No se puedo actualizar la base de datos","No se puedo actualizar la base de datos")
-			return 0
-
-		try:
-			for i in tabla_aux.get_children():
-				tabla_aux.delete(i)
-
-			for row in rows:
-				textoProdAux = str(row[1])
-				textoProd = str(row[4])
-
-				tabla_aux.insert("", tk.END, tags=(str(row[0]), str(row[1])), values = (textoProdAux, textoProd,))
-		except:
-			messagebox.showinfo("ERROR", "No se pudo cargar la tabla")
-
-	def elegirItemAux(seleccion):
-		prodSelec = str(seleccion["values"][0])
-		texto_prodAux.set(prodSelec)
-
-		entry_productor.delete(0, tk.END)
-
-	window_asignar = Toplevel(window)
-	window_asignar.title("Asignar productores auxiliares  - " + remate + " - " + catalogo)
-	window_asignar.geometry("520x500")
-	window_asignar.configure(backgroun="#E8F6FA")
-
-	lbl_tablaAux = tk.Label(window_asignar, backgroun="#E8F6FA")
-	lbl_tablaAux.place(x = 10, y = 10, width = 500, height = 300)
-
-	lbl_prodAux = tk.Label(window_asignar, backgroun="#c7e5ed")
-	lbl_prodAux.place(x = 10, y = 320, width = 500, height = 50)
-
-	lbl_entry = tk.Label(window_asignar, backgroun="#c7e5ed")
-	lbl_entry.place(x = 10, y = 380, width = 500, height = 50)
-
-	lbl_btnAsignar = tk.Label(window_asignar, backgroun="#E8F6FA")
-	lbl_btnAsignar.place(x = 10, y = 440, width = 500, height = 50)
-
-
-	#tabla productores auxiliares
-	if(True):
-		sbr_aux = Scrollbar(lbl_tablaAux)
-		sbr_aux.pack(side=RIGHT, fill="y")
-
-
-		tabla_aux = ttk.Treeview(lbl_tablaAux, columns=["AUX", "PRODUCTOR"], selectmode=tk.BROWSE, show='headings') 
-		tabla_aux.pack(side=LEFT, fill="both", expand=True)
-		sbr_aux.config(command=tabla_aux.yview)
-		tabla_aux.config(yscrollcommand=sbr_aux.set)
-
-
-		tabla_aux.heading("AUX", text="PRODUCTOR AUX", command=lambda: treeview_sort_column(tabla_aux, "AUX", False))
-		tabla_aux.heading("PRODUCTOR", text="PRODUCTOR", command=lambda: treeview_sort_column(tabla_aux, "PRODUCTOR", False))
-		
-		tabla_aux.column("AUX", width=100)
-		tabla_aux.column("PRODUCTOR", width=100)
-
-
-		tabla_aux.bind("<Double-1>", (lambda event: elegirItemAux(tabla_aux.item(tabla_aux.selection()))))
-		tabla_aux.bind("<Return>", (lambda event: elegirItemAux(tabla_aux.item(tabla_aux.selection()))))
-
-	#prod aux
-	if(True):
-		tk.Label(lbl_prodAux, backgroun="#c7e5ed", text = "Prod. auxiliar:", font=("Helvetica", 15, "bold"), anchor = "e").place(x = 5, y = 5, width = 150, height = 35)
-
-		texto_prodAux = StringVar()
-		texto_prodAux.set("")
-
-		lbl_prodAux_text = tk.Label(lbl_prodAux, font=("Helvetica Neue",15), anchor="c", backgroun="#c7e5ed")
-		lbl_prodAux_text.place(x=160, y=5, width=330, height = 35)
-		lbl_prodAux_text.config(textvariable=texto_prodAux)
-
-	#prod
-	if(True):
-		tk.Label(lbl_entry, backgroun="#c7e5ed", text = "Productor:", font=("Helvetica", 15, "bold"), anchor = "e").place(x = 5, y = 5, width = 150, height = 35)
-
-		entry_productor = Entry(lbl_entry, font=("Helvetica Neue",15,"bold"))
-		entry_productor.place(x = 160, y = 5, width=330, height = 35)
-		entry_productor.bind("<Return>", (lambda event: buscarProductorAuxiliar()))
-		entry_productor.bind("<Control-s>", (lambda event: remateSeleccionador()))
-		entry_productor.bind("<F1>", (lambda event: remateSeleccionador()))
-		entry_productor.focus()
-
-	#btn
-	if(True):
-		btn_buscar = tk.Button(lbl_btnAsignar, text="GUARDAR", compound="top", backgroun="#b3f2bc", font=("Helvetica", 20, "bold"), command=asignarProductor)
-		btn_buscar.pack()
-
-
-	actualizarTablaProductoresAuxiliares()
-
-
-
-
-	window_asignar.mainloop()
+	diccionario_objetos["entry_nombre"].insert(0, str(row[2]))
+	diccionario_objetos["entry_cuit"].insert(0, str(row[3]))
+	diccionario_objetos["entry_iva"].insert(0, str(row[6]))
+	diccionario_objetos["entry_iibb"].insert(0, str(""))
+	diccionario_objetos["entry_caracter"].insert(0, str(""))
+	diccionario_objetos["entry_domicilio"].insert(0, str(row[7]))
+	diccionario_objetos["entry_localidad"].insert(0, str(row[8]))
+	diccionario_objetos["entry_provincia"].insert(0, str(row[9]))
+	diccionario_objetos["entry_codPostal"].insert(0, str(row[10]))
+	diccionario_objetos["entry_renspa"].insert(0, str(""))
+	diccionario_objetos["entry_ruca"].insert(0, str(row[19]))
 
 
 #CARGAR LOTES
 def actualizarDicLotes(productor):
-	pass
-	#ACTUALIZAR DICLOTES CON TES DEL PRODUCTOR
+	remate = diccionario_objetos["id_remate_alias"]
 
-def crearDiccionarioLotes():
-	remate = str(diccionario_objetos["id_remate_alias"])
-	catalogo = str(diccionario_objetos["id_catalogo_alias"])
+	con = sql_connection()
+	condiciones = " WHERE estado = 'activo' AND remate = '" + remate + "' AND comprador = '" + productor + "'"
+	rows = actualizar_db(con, "compraventa", condiciones)
 
-	#Leer diccionarios
-	try:
-		ubicGuardar = "catalogos"
+	i = len(diccionarioLotes)
+	for row in rows:
 
-		nombreArchivoLotes = "remate_" + remate + "_-_catalogo_" + catalogo + "_lot.json"
-		nombreArchivoCat = "remate_" + remate + "_-_catalogo_" + catalogo + "_cat.json"
+		con = sql_connection()
+		condiciones = " WHERE id = " + str(row[1])
+		row_lote = actualizar_db(con, "lotes", condiciones)[0]
 
-		archivo = open(ubicGuardar + "/" + nombreArchivoLotes, "r")
-		dicLotes = json.loads(archivo.read())
-		archivo.close()
+		con = sql_connection()
+		condiciones = " WHERE remate = '" + remate + "' AND productor = '" + str(row_lote[2]) + "'"
+		row_pintura = actualizar_db_selec(con, "pintura", "pintura", condiciones)
 
-		archivoCat = open(ubicGuardar + "/" + nombreArchivoCat, "r")
-		dicCat = json.loads(archivoCat.read())
-		archivoCat.close()
-
-	except:
-		messagebox.showerror("ERROR", "Error, no se pudo cargar")
-		return 0
-
-	k = 0
-	diccionarioLotes.clear()
-	for i in range(0, len(dicCat)):
-		id_cat = dicCat[str(i)]
-		for j in range(0, len(dicLotes[id_cat])):
-			id_lote = dicLotes[id_cat][str(j)]
-
-			con = sql_connection()
-			condiciones = " WHERE id = " + str(id_lote)
-			rows = actualizar_db(con, "lotes", condiciones)
-
-			con = sql_connection()
-			condiciones = " WHERE remate = '" + remate + "' AND productor = '" + str(rows[0][2]) + "'"
-			rows_pintura = actualizar_db_selec(con, "pintura", "pintura", condiciones)
-			if(len(rows_pintura) > 0):
-				x_pintura = rows_pintura[0][0]
-			else:
-				x_pintura = ""
-
-			con = sql_connection()
-			condiciones = " WHERE lote = '" + str(rows[0][0]) + "' AND estado = 'activo'"
-			rows_compraventa = actualizar_db(con, "compraventa", condiciones)
-
-			if(len(rows_compraventa) > 0):
-				x_precio = rows_compraventa[0][3]
-				x_comprador = rows_compraventa[0][2]
-				x_precioCalculo = rows_compraventa[0][3]
-			else:
-				x_precio = ""
-				x_comprador = ""
-				x_precioCalculo = 0
-
-			x_id = rows[0][0]
-			x_corral = rows[0][4]
-			x_vendedor = rows[0][2]
-			x_cantidad = rows[0][3]
-			x_categoriaVenta = rows[0][5]
-			x_categoria = rows[0][6]
-			x_kilogramos = rows[0][12]
-			x_promedio = rows[0][13]
-			x_total = round(float(x_kilogramos) * float(x_precioCalculo), 2)
+		if len(row_pintura) == 0:
+			pintura = "-"
+		else:
+			pintura = str(row_pintura[0][0])
 
 
-			diccionarioLotes[str(k)] = {
-			"id" : str(x_id),
-			"corral" : str(x_corral),
-			"vendedor" : str(x_vendedor),
-			"cantidad" : str(x_cantidad),
-			"categoria" : str(x_categoria),
-			"categoriaVenta" : str(x_categoriaVenta),
-			"pintura" : str(x_pintura),
-			"kilogramos" : str(x_kilogramos),
-			"promedio" : str(x_promedio),
-			"precio" : str(x_precio),
-			"comprador" : str(x_comprador),
-			"total" : str(x_total)
-			}
-			k += 1
+		x_id = str(row[1])
+		x_corral = str(row_lote[4])
+		x_cliente = str(row_lote[2])
+		x_categoria = str(row_lote[6])
+		x_pintura = pintura
+		x_cantidad = str(row_lote[3])
+		x_kgs = str(row_lote[12])
+		x_precio = str(row[3])
+
+		try:
+			bruto = round(float(row_lote[12]) * float(row[3]), 2)
+		except:
+			bruto = 0
+
+		x_bruto = str(bruto)
+
+		diccionarioLotes[str(i)] = {
+		"id" : x_id,
+		"corral" : x_corral,
+		"cliente" : x_cliente,
+		"categoria" : x_categoria,
+		"pintura" : x_pintura,
+		"cantidad" : x_cantidad,
+		"kgs" : x_kgs,
+		"precio" : x_precio,
+		"bruto" : x_bruto,
+		}
+		i += 1
 def cargarTablaLotes():
-
 	tabla = diccionario_objetos["tabla"]
+
+	subtotalMarillo = 0
 
 	for i in tabla.get_children():
 		tabla.delete(i)
-
 
 	cant_lotes = len(diccionarioLotes)
 
 	for i in range(0, cant_lotes):
 		tabla.insert("", str(i), tags=str(i), text = diccionarioLotes[str(i)]["id"], iid= diccionarioLotes[str(i)]["id"], values = (diccionarioLotes[str(i)]["corral"],
-			diccionarioLotes[str(i)]["vendedor"],
-			diccionarioLotes[str(i)]["cantidad"],
+			diccionarioLotes[str(i)]["cliente"],
 			diccionarioLotes[str(i)]["categoria"],
 			diccionarioLotes[str(i)]["pintura"],
-			diccionarioLotes[str(i)]["kilogramos"],
-			diccionarioLotes[str(i)]["promedio"],
+			diccionarioLotes[str(i)]["cantidad"],
+			diccionarioLotes[str(i)]["kgs"],
 			diccionarioLotes[str(i)]["precio"],
-			diccionarioLotes[str(i)]["comprador"],
-			diccionarioLotes[str(i)]["total"]))
-def elegirItem(loteseleccion):
-	diccionario_objetos["btn_productorAuxiliar"].configure(state="normal")
+			diccionarioLotes[str(i)]["bruto"]))
+		subtotalMarillo = subtotalMarillo + float(diccionarioLotes[str(i)]["bruto"])
 
-	#DATOS DEL LOTE
-	id_lote = str(loteseleccion["text"])
-	diccionario_objetos["id_lote"] = id_lote
+	diccionario_objetos["subtotalMarillo"] = subtotalMarillo
 
-	con = sql_connection()
-	condiciones = " WHERE id = " + id_lote
-	rows = actualizar_db(con, "lotes", condiciones)
-
-	row = rows[0]
-
-	texto_catHacienda = str(row[6])
-	texto_catVenta = str(row[5])
-	texto_corral = str(row[4])
-	texto_cantidad = str(row[3])
-	texto_neto = str(row[12])
-	texto_promedio = str(row[13])
-	txt_observaciones = str(row[14]) + "  -  " + str(row[15])
-
-	diccionario_objetos["datosLote_texto_catHacienda"].set(texto_catHacienda)
-	diccionario_objetos["datosLote_texto_catVenta"].set(texto_catVenta)
-	diccionario_objetos["datosLote_texto_corral"].set(texto_corral)
-	diccionario_objetos["datosLote_texto_cantidad"].set(texto_cantidad)
-	diccionario_objetos["datosLote_texto_neto"].set(texto_neto)
-	diccionario_objetos["datosLote_texto_promedio"].set(texto_promedio)
-
-	diccionario_objetos["datosLote_txt_observaciones"].config(state="normal")
-	diccionario_objetos["datosLote_txt_observaciones"].delete("1.0", tk.END)
-	diccionario_objetos["datosLote_txt_observaciones"].insert("1.0", txt_observaciones)
-	diccionario_objetos["datosLote_txt_observaciones"].config(state="disabled")
-
-	#DATOS DE LA COMPRA
-	id_remate_alias = str(diccionario_objetos["id_remate_alias"])
-
-	con = sql_connection()
-	condiciones = " WHERE estado = 'activo' AND lote = '" + id_lote + "' AND remate = '" + id_remate_alias + "'"
-	rows = actualizar_db(con, "compraventa", condiciones)
-
-	if(len(rows)==0):
-		diccionario_objetos["texto_alias"].set("")
-		diccionario_objetos["texto_razon"].set("")
-		diccionario_objetos["texto_cuit"].set("")
-		diccionario_objetos["texto_kgs"].set(0)
-		diccionario_objetos["texto_total"].set(0)
-		diccionario_objetos["texto_cabezas"].set(0)
-
-		diccionario_objetos["entry_precio"].delete(0, tk.END)
-		diccionario_objetos["btn_guardar"].configure(text="GUARDAR", state="disabled", command=guardarCompraventa)
-		diccionario_objetos["btn_eliminar"].configure(state="disabled")
-
-		diccionario_objetos["id_compraventa"] = ""
-	else:
-		diccionario_objetos["id_compraventa"] = str(rows[0][0])
-
-		#verificar productor
-		if(rows[0][2]!=""):
-			cargarDatosComprador(rows[0][2])
-		else:
-			diccionario_objetos["texto_alias"].set("")
-			diccionario_objetos["texto_razon"].set("")
-			diccionario_objetos["texto_cuit"].set("")
-			diccionario_objetos["texto_kgs"].set(0)
-			diccionario_objetos["texto_total"].set(0)
-			diccionario_objetos["texto_cabezas"].set(0)
-
-		#verificar precio
-		diccionario_objetos["entry_precio"].delete(0, tk.END)
-		if(rows[0][3]!=""):
-			diccionario_objetos["entry_precio"].insert(0, rows[0][3])
-
-		#Cambiar botones
-		diccionario_objetos["btn_guardar"].configure(text="EDITAR", state="normal", command=editarCompraventa)
-		diccionario_objetos["btn_eliminar"].configure(state="normal")
-
-
-#COMPRAVENTA
-def eliminarCompraventa():
+#Calculos
+def calcularSubtotal():
+	subtotalMarillo = diccionario_objetos["subtotalMarillo"]
 	try:
-		id_compraventa = diccionario_objetos["id_compraventa"]
-
-		MsgBox = messagebox.askquestion('ATENCION', '¿Desea BORRAR?', icon = 'warning')
-		if(MsgBox == 'yes'):
-			con = sql_connection()
-			cursorObj = con.cursor()
-			cursorObj.execute('UPDATE compraventa SET estado = "borrado" where id = ' + id_compraventa)
-			con.commit()
-			messagebox.showinfo("Borrado", "Borrado con Éxito")
-			crearDiccionarioLotes()
-			cargarTablaLotes()
-			
+		porcDescuento = float(diccionario_objetos["entry_porcDescuento"].get())
 	except:
-		messagebox.showerror("ERROR", "No se pudo borrar")
-def guardarCompraventa():
+		messagebox.showinfo("Atencion", "Porcentaje de descuento no aceptado")
+		diccionario_objetos["entry_porcDescuento"].delete(0, tk.END)
+		diccionario_objetos["entry_porcDescuento"].insert(0, 0)
+		porcDescuento = 0
+
+	descuento = round(porcDescuento / 100 * subtotalMarillo, 2)
 	try:
-		x_lote = diccionario_objetos["id_lote"]
-		x_comprador = diccionario_objetos["texto_alias"].get()
-		x_precio = diccionario_objetos["entry_precio"].get()
-		x_estado = "activo"
-		x_remate = str(diccionario_objetos["id_remate_alias"])
-		x_vendedor = ""
-
-		entities = [x_lote,
-		x_comprador,
-		x_precio,
-		x_remate,
-		x_estado,
-		x_vendedor]
-
+		subtotal = round(subtotalMarillo - descuento, 2)
 	except:
-		messagebox.showerror("ERROR", "Error al obtener los datos")
+		subtotal = 0
+
+	diccionario_objetos["entry_subtotalMartillo"].delete(0, tk.END)
+	diccionario_objetos["entry_descuento"].delete(0, tk.END)
+	diccionario_objetos["entry_subtotal"].delete(0, tk.END)
+
+	diccionario_objetos["entry_subtotalMartillo"].insert(0, subtotalMarillo)
+	diccionario_objetos["entry_descuento"].insert(0, descuento)
+	diccionario_objetos["entry_subtotal"].insert(0, subtotal)
+def calcularIntereses():
+	subtotal = float(diccionario_objetos["entry_subtotal"].get())
+
+	try:
+		entry_interesDias = float(diccionario_objetos["entry_interesDias"].get())
+	except:
+		messagebox.showinfo("Atencion", "Dias de intereses no aceptado")
+		diccionario_objetos["entry_interesDias"].delete(0, tk.END)
+		diccionario_objetos["entry_interesDias"].insert(0, 0)
+		entry_interesDias = 0
+
+	try:
+		entry_interesPorcentaje = float(diccionario_objetos["entry_interesPorcentaje"].get())
+	except:
+		messagebox.showinfo("Atencion", "Porcentaje de intereses no aceptado")
+		diccionario_objetos["entry_interesPorcentaje"].delete(0, tk.END)
+		diccionario_objetos["entry_interesPorcentaje"].insert(0, 0.0)
+		entry_interesPorcentaje = 0
+
+	intereses = round(subtotal *entry_interesDias * entry_interesPorcentaje / 100, 2)
+
+	diccionario_objetos["entry_intereses"].delete(0, tk.END)
+	diccionario_objetos["entry_intereses"].insert(0, intereses)
+def calcularIvaHacienda():
+	try:
+		subtotal = float(diccionario_objetos["entry_subtotal"].get())
+	except:
+		messagebox.showinfo("Atencion", "Subtotal no aceptado")
+		subtotal = 0
+
+	ivaHacienda = round(subtotal*0.105 ,2)
+
+	diccionario_objetos["entry_ivaHacienda"].delete(0, tk.END)
+	diccionario_objetos["entry_ivaHacienda"].insert(0, ivaHacienda)
+def calcularIvaInteres():
+	try:
+		subtotal = float(diccionario_objetos["entry_intereses"].get())
+	except:
+		messagebox.showinfo("Atencion", "Intereses no aceptado")
+		subtotal = 0
+
+	ivaInteres = round(subtotal*0.21 ,2)
+
+	diccionario_objetos["entry_ivaInteres"].delete(0, tk.END)
+	diccionario_objetos["entry_ivaInteres"].insert(0, ivaInteres)
+def cargarTablaGastos():
+	tabla = diccionario_objetos["tablaGastos"]
+
+	try:
+		subtotal = float(diccionario_objetos["entry_subtotal"].get())
+	except:
+		subtotal = 0
+
+	try:
+		comisionPorcentaje = float(diccionario_objetos["entry_comisionPorcentaje"].get())
+	except:
+		comisionPorcentaje = 0
+
+	comision = round(subtotal * comisionPorcentaje / 100, 2)
+	ivaComision = round(comision*0.105 ,2)
+
+	diccionario_objetos["entry_comisionIva"].delete(0, tk.END)
+	diccionario_objetos["entry_comisionIva"].insert(0, round(comision + ivaComision, 2))
+
+	for i in tabla.get_children():
+		tabla.delete(i)
+
+	tabla.insert("", tk.END, values = ("Comision", str(subtotal), str(comisionPorcentaje), str(comision), str("10.5"), str(ivaComision)))
+
+
+def calcularTOTAL():
+	try:
+		subtotal = float(diccionario_objetos["entry_subtotal"].get())
+		intereses = float(diccionario_objetos["entry_intereses"].get())
+		ivaHacienda = float(diccionario_objetos["entry_ivaHacienda"].get())
+		ivaIntereses = float(diccionario_objetos["entry_ivaInteres"].get())
+		comisionIva = float(diccionario_objetos["entry_comisionIva"].get())
+	except:
+		messagebox.showinfo("Atencion", "Error obteniendo datos para el calculo del total")
 		return 0
 
-	try:
-		con = sql_connection()
-		cursorObj = con.cursor()
-		cursorObj.execute("INSERT INTO compraventa VALUES(NULL, ?, ?, ?, ?, ?, ?)", entities)
-		con.commit()
-		messagebox.showinfo("Éxito", "Productor ingresado con éxito!")
-		crearDiccionarioLotes()
-		cargarTablaLotes()
-	except:
-		messagebox.showerror("ERROR", "Error al guardar")
-def editarCompraventa():
-	try:
-		x_idCompraventa = diccionario_objetos["id_compraventa"]
-		x_comprador = diccionario_objetos["texto_alias"].get()
-		x_precio = diccionario_objetos["entry_precio"].get()
+	TOTAL = round(subtotal + intereses + ivaHacienda + ivaIntereses + comisionIva, 2)
 
-		entities = [str(x_comprador),
-		str(x_precio),
-		str(x_idCompraventa)]
+	diccionario_objetos["entry_total"].delete(0, tk.END)
+	diccionario_objetos["entry_total"].insert(0, TOTAL)
 
-	except:
-		messagebox.showerror("ERROR", "Error al obtener los datos")
-		return 0
-
-	try:
-		con = sql_connection()
-		cursorObj = con.cursor()
-		cursorObj.execute('UPDATE compraventa SET comprador = ?, precio = ? where id = ?', entities)
-		con.commit()
-		messagebox.showinfo("Éxito", "Lote EDITADO con éxito!")
-		crearDiccionarioLotes()
-		cargarTablaLotes()
-	except:
-		messagebox.showerror("ERROR", "Error al guardar")
-
+def REALIZARCalculos():
+	calcularSubtotal()
+	calcularIntereses()
+	calcularIvaHacienda()
+	calcularIvaInteres()
+	cargarTablaGastos()
+	calcularTOTAL()
 
 #BARRA DE TITULO
 if(True):
@@ -720,8 +456,8 @@ if(True):
 		tabla.column("BRUTO", width=30)
 
 
-		tabla.bind("<Double-1>", (lambda event: elegirItem(tabla.item(tabla.selection()))))
-		tabla.bind("<Return>", (lambda event: elegirItem(tabla.item(tabla.selection()))))
+		#tabla.bind("<Double-1>", (lambda event: elegirItem(tabla.item(tabla.selection()))))
+		#tabla.bind("<Return>", (lambda event: elegirItem(tabla.item(tabla.selection()))))
 
 		diccionario_objetos["tabla"] = tabla
 
@@ -765,30 +501,213 @@ if(True):
 		lblBuscador = tk.Label(lbl_datos, backgroun="#f0f0f0", text="PRODUCTOR", foreground="#FFFFFF", relief=SOLID, bd=2)
 		lblBuscador.place(x=2, y=2, width=300, height=306)
 
-		lblTotales = tk.Label(lbl_datos, backgroun="#f0f0f0", text="PRODUCTOR", foreground="#FFFFFF", relief=SOLID, bd=2)
-		lblTotales.place(x=304, y=2, width=300, height=306)
+		lblDatosComprador1 = tk.Label(lbl_datos, backgroun="#f0f0f0", text="PRODUCTOR", foreground="#FFFFFF", relief=SOLID, bd=2)
+		lblDatosComprador1.place(x=304, y=2, width=300, height=306)
 
-		lblOtros = tk.Label(lbl_datos, backgroun="#f0f0f0", foreground="#FFFFFF", relief=SOLID, bd=2)
-		lblOtros.place(x=606, y=2, width=400, height=306)
+		lblTotales = tk.Label(lbl_datos, backgroun="#f0f0f0", foreground="#FFFFFF", relief=SOLID, bd=2)
+		lblTotales.place(x=606, y=2, width=400, height=306)
+
+
+		pestañas = ttk.Notebook(lblDatosComprador1)
+
+		lblDatosComprador = Label(lblDatosComprador1)
+		lblDatosVarios = Label(lblDatosComprador1)
+
+		pestañas.add(lblDatosVarios, text="DATOS LIQUIDACION", padding = 5)
+		pestañas.add(lblDatosComprador, text="DATOS COMPRADOR", padding = 3)
+
+		#pestañas.place(x = 0, y = 0, relwidth = 1, relheight = 1)
+		pestañas.pack()
+
+
+
+
+
+
+
+
+
+
+
+	#DATOS VARIOS
+	if(True):
+		tk.Label(lblDatosVarios, text="N°:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 0, pady=1, padx=5)
+		tk.Label(lblDatosVarios, text="Fecha:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 1, pady=1, padx=5)
+		tk.Label(lblDatosVarios, text="DTE:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 2, pady=1, padx=5)
+		tk.Label(lblDatosVarios, text="Cond. Pago:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 3, pady=1, padx=5)
+		tk.Label(lblDatosVarios, text="Destino:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 4, pady=1, padx=5)
+		tk.Label(lblDatosVarios, text="Contacto:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 5, pady=1, padx=5)
+		tk.Label(lblDatosVarios, text="Total KG:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 6, pady=1, padx=5)
+		tk.Label(lblDatosVarios, text="Tot. Cabezas:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 7, pady=1, padx=5)
+		tk.Label(lblDatosVarios, text="Observaciones:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 8, pady=1, padx=5)
+
+		entry_num = Entry(lblDatosVarios, font=("Helvetica", 10), width=24, justify='center')
+		entry_fecha = Entry(lblDatosVarios, font=("Helvetica", 10), width=24, justify='center')
+		entry_dte = Entry(lblDatosVarios, font=("Helvetica", 10), width=24, justify='center')
+		entry_condPago = Entry(lblDatosVarios, font=("Helvetica", 10), width=24, justify='center')
+		entry_destino = Entry(lblDatosVarios, font=("Helvetica", 10), width=24, justify='center')
+		entry_contacto = Entry(lblDatosVarios, font=("Helvetica", 10), width=24, justify='center')
+		entry_totalKg = Entry(lblDatosVarios, font=("Helvetica", 10), width=24, justify='center')
+		entry_totalCabezas = Entry(lblDatosVarios, font=("Helvetica", 10), width=24, justify='center')
+		#entry_observaciones = Entry(lblDatosVarios, font=("Helvetica", 10), width=24, justify='center')
+
+		txt_observaciones = scrolledtext.ScrolledText(lblDatosVarios, width=24, height=3)
+		txt_observaciones.grid(column=1, row=8)
+
+		entry_num.grid(sticky="W", column=1, row=0)
+		entry_fecha.grid(sticky="W", column=1, row=1)
+		entry_dte.grid(sticky="W", column=1, row=2)
+		entry_condPago.grid(sticky="W", column=1, row=3)
+		entry_destino.grid(sticky="W", column=1, row=4)
+		entry_contacto.grid(sticky="W", column=1, row=5)
+		entry_totalKg.grid(sticky="W", column=1, row=6)
+		entry_totalCabezas.grid(sticky="W", column=1, row=7)
+		#entry_observaciones.grid(sticky="W", column=1, row=8)
+
+	#DATOS COMPRADOR
+	if(True):
+		tk.Label(lblDatosComprador, text="Nombre:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 0, pady=1, padx=5)
+		tk.Label(lblDatosComprador, text="CUIT:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 1, pady=1, padx=5)
+		tk.Label(lblDatosComprador, text="IVA:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 2, pady=1, padx=5)
+		tk.Label(lblDatosComprador, text="IIBB:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 3, pady=1, padx=5)
+		tk.Label(lblDatosComprador, text="Carácter:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 4, pady=1, padx=5)
+		tk.Label(lblDatosComprador, text="Domicilio:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 5, pady=1, padx=5)
+		tk.Label(lblDatosComprador, text="Localidad:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 6, pady=1, padx=5)
+		tk.Label(lblDatosComprador, text="Provincia:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 7, pady=1, padx=5)
+		tk.Label(lblDatosComprador, text="Cod Postal:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 8, pady=1, padx=5)
+		tk.Label(lblDatosComprador, text="Renspa:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 9, pady=1, padx=5)
+		tk.Label(lblDatosComprador, text="Ruca:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 10, pady=1, padx=5)
+
+		entry_nombre = Entry(lblDatosComprador, font=("Helvetica", 10), width=28, justify='center')
+		entry_cuit = Entry(lblDatosComprador, font=("Helvetica", 10), width=28, justify='center')
+		entry_iva = Entry(lblDatosComprador, font=("Helvetica", 10), width=28, justify='center')
+		entry_iibb = Entry(lblDatosComprador, font=("Helvetica", 10), width=28, justify='center')
+		entry_caracter = Entry(lblDatosComprador, font=("Helvetica", 10), width=28, justify='center')
+		entry_domicilio = Entry(lblDatosComprador, font=("Helvetica", 10), width=28, justify='center')
+		entry_localidad = Entry(lblDatosComprador, font=("Helvetica", 10), width=28, justify='center')
+		entry_provincia = Entry(lblDatosComprador, font=("Helvetica", 10), width=28, justify='center')
+		entry_codPostal = Entry(lblDatosComprador, font=("Helvetica", 10), width=28, justify='center')
+		entry_renspa = Entry(lblDatosComprador, font=("Helvetica", 10), width=28, justify='center')
+		entry_ruca = Entry(lblDatosComprador, font=("Helvetica", 10), width=28, justify='center')
+
+		entry_nombre.grid(column=1, row=0)
+		entry_cuit.grid(column=1, row=1)
+		entry_iva.grid(column=1, row=2)
+		entry_iibb.grid(column=1, row=3)
+		entry_caracter.grid(column=1, row=4)
+		entry_domicilio.grid(column=1, row=5)
+		entry_localidad.grid(column=1, row=6)
+		entry_provincia.grid(column=1, row=7)
+		entry_codPostal.grid(column=1, row=8)
+		entry_renspa.grid(column=1, row=9)
+		entry_ruca.grid(column=1, row=10)
+
+		diccionario_objetos["entry_nombre"] = entry_nombre
+		diccionario_objetos["entry_cuit"] = entry_cuit
+		diccionario_objetos["entry_iva"] = entry_iva
+		diccionario_objetos["entry_iibb"] = entry_iibb
+		diccionario_objetos["entry_caracter"] = entry_caracter
+		diccionario_objetos["entry_domicilio"] = entry_domicilio
+		diccionario_objetos["entry_localidad"] = entry_localidad
+		diccionario_objetos["entry_provincia"] = entry_provincia
+		diccionario_objetos["entry_codPostal"] = entry_codPostal
+		diccionario_objetos["entry_renspa"] = entry_renspa
+		diccionario_objetos["entry_ruca"] = entry_ruca
+
 
 	#TOTALES
 	if(True):
-		pass
+		tk.Label(lblTotales, text="Subtotal Martillo:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 0, pady=1, padx=5)
+		tk.Label(lblTotales, text="Descuento pago contado:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 1, pady=1, padx=5)
+		tk.Label(lblTotales, text="SUBTOTAL:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10, "bold")).grid(sticky="E", column = 0, row = 2, pady=1, padx=5)
+		tk.Label(lblTotales, text="Interes dias de pago diferido:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 3, pady=1, padx=5)
+		tk.Label(lblTotales, text="IVA hacienda:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 4, pady=1, padx=5)
+		tk.Label(lblTotales, text="IVA interes:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 5, pady=1, padx=5)
+		tk.Label(lblTotales, text="Comision + IVA:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 6, pady=1, padx=5)
+		tk.Label(lblTotales, text="TOTAL LIQUIDADO:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 12, "bold")).grid(sticky="E", column = 0, row = 7, pady=1, padx=5)
 
-	#OTROS
-	if(True):
-		pass
+		tk.Label(lblTotales, text="$", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10, "bold")).grid(sticky="E", column = 1, row = 0, pady=1)
+		tk.Label(lblTotales, text="$", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10, "bold")).grid(sticky="E", column = 1, row = 1, pady=1)
+		tk.Label(lblTotales, text="$", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10, "bold")).grid(sticky="E", column = 1, row = 2, pady=1)
+		tk.Label(lblTotales, text="$", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10, "bold")).grid(sticky="E", column = 1, row = 3, pady=1)
+		tk.Label(lblTotales, text="$", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10, "bold")).grid(sticky="E", column = 1, row = 4, pady=1)
+		tk.Label(lblTotales, text="$", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10, "bold")).grid(sticky="E", column = 1, row = 5, pady=1)
+		tk.Label(lblTotales, text="$", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10, "bold")).grid(sticky="E", column = 1, row = 6, pady=1)
+		tk.Label(lblTotales, text="$", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 12, "bold")).grid(sticky="E", column = 1, row = 7, pady=1)
+
+		entry_subtotalMartillo = Entry(lblTotales, font=("Helvetica", 10), width=13, justify='right')
+		entry_descuento = Entry(lblTotales, font=("Helvetica", 10), width=13, justify='right')
+		entry_subtotal = Entry(lblTotales, font=("Helvetica", 10, "bold"), width=13, justify='right')
+		entry_intereses = Entry(lblTotales, font=("Helvetica", 10), width=13, justify='right')
+		entry_ivaHacienda = Entry(lblTotales, font=("Helvetica", 10), width=13, justify='right')
+		entry_ivaInteres = Entry(lblTotales, font=("Helvetica", 10), width=13, justify='right')
+		entry_comisionIva = Entry(lblTotales, font=("Helvetica", 10), width=13, justify='right')
+		entry_total = Entry(lblTotales, font=("Helvetica", 12, "bold"), width=10, justify='right')
+
+
+
+		entry_subtotalMartillo.grid(column=2, row=0)
+		entry_descuento.grid(column=2, row=1)
+		entry_subtotal.grid(column=2, row=2)
+		entry_intereses.grid(column=2, row=3)
+		entry_ivaHacienda.grid(column=2, row=4)
+		entry_ivaInteres.grid(column=2, row=5)
+		entry_comisionIva.grid(column=2, row=6)
+		entry_total.grid(column=2, row=7)
+
+		diccionario_objetos["entry_subtotalMartillo"] = entry_subtotalMartillo
+		diccionario_objetos["entry_descuento"] = entry_descuento
+		diccionario_objetos["entry_subtotal"] = entry_subtotal
+		diccionario_objetos["entry_intereses"] = entry_intereses
+		diccionario_objetos["entry_ivaHacienda"] = entry_ivaHacienda
+		diccionario_objetos["entry_ivaInteres"] = entry_ivaInteres
+		diccionario_objetos["entry_comisionIva"] = entry_comisionIva
+		diccionario_objetos["entry_total"] = entry_total
+
+		#porcentajes
+		tk.Label(lblTotales, text="%", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10, "bold")).grid(sticky="E", column = 3, row = 1, pady=1)
+		entry_porcDescuento = Entry(lblTotales, font=("Helvetica", 10), width=4)
+		entry_porcDescuento.grid(column=4, row=1, padx = 2)
+		entry_porcDescuento.insert(0, 0.0)
+
+		tk.Label(lblTotales, text="dias", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 8)).grid(sticky="S", column = 3, row = 2, pady=1)
+		tk.Label(lblTotales, text="%", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 8)).grid(sticky="S", column = 4, row = 2, pady=1)
+
+		entry_interesPorcentaje = Entry(lblTotales, font=("Helvetica", 10), width=5)
+		entry_interesDias = Entry(lblTotales, font=("Helvetica", 10), width=5)
+
+		entry_interesPorcentaje.grid(sticky="N", column = 3, row = 3, pady=1, padx = 2)
+		entry_interesDias.grid(sticky="N", column = 4, row = 3, pady=1, padx = 2)
+
+		entry_interesPorcentaje.insert(0, 0.0)
+		entry_interesDias.insert(0, 0)
+
+		tk.Label(lblTotales, text="%", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10, "bold")).grid(sticky="E", column = 3, row = 6, pady=1)
+
+		entry_comisionPorcentaje = Entry(lblTotales, font=("Helvetica", 10), width=5)
+		entry_comisionPorcentaje.grid(column=4, row=6)
+		entry_comisionPorcentaje.insert(0, 0.0)
+
+		diccionario_objetos["entry_porcDescuento"] = entry_porcDescuento
+		diccionario_objetos["entry_interesPorcentaje"] = entry_interesPorcentaje
+		diccionario_objetos["entry_interesDias"] = entry_interesDias
+		diccionario_objetos["entry_comisionPorcentaje"] = entry_comisionPorcentaje
+
+		entry_porcDescuento.bind("<Return>", (lambda event: REALIZARCalculos()))
+		entry_interesPorcentaje.bind("<Return>", (lambda event: REALIZARCalculos()))
+		entry_interesDias.bind("<Return>", (lambda event: REALIZARCalculos()))
+		entry_comisionPorcentaje.bind("<Return>", (lambda event: REALIZARCalculos()))
 
 	#BOTONES
-	if(True):
-		btn_guardar = tk.Button(lbl_datos, text="GUARDAR", compound="top", backgroun="#b3f2bc", font=("Helvetica", 20, "bold"), state = "disabled", command=guardarCompraventa)
+	#if(True):
+		#btn_guardar = tk.Button(lbl_datos, text="GUARDAR", compound="top", backgroun="#b3f2bc", font=("Helvetica", 20, "bold"), state = "disabled", command=guardarCompraventa)
 		#btn_guardar.place(x=810, y=114, width=196, height=60)
 
-		btn_eliminar = tk.Button(lbl_datos, text="ELIMINAR", compound="top", backgroun="#FF6E6E", font=("Helvetica", 15, "bold"), state = "disabled", command=eliminarCompraventa)
+		#btn_eliminar = tk.Button(lbl_datos, text="ELIMINAR", compound="top", backgroun="#FF6E6E", font=("Helvetica", 15, "bold"), state = "disabled", command=eliminarCompraventa)
 		#btn_eliminar.place(x=810, y=180, width=196, height=48)
 
-		diccionario_objetos["btn_guardar"] = btn_guardar
-		diccionario_objetos["btn_eliminar"] = btn_eliminar
+		#diccionario_objetos["btn_guardar"] = btn_guardar
+		#diccionario_objetos["btn_eliminar"] = btn_eliminar
 
 
 	#BUSCADOR PRODUCTORES
