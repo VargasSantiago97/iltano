@@ -27,7 +27,7 @@ import shutil
 
 import json
 
-dicc_objetos={"varFullScreen" : False, "varFullScreenDetalles" : False}
+dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : False}
 diccionario_objetos = {}
 
 diccionarioLotes = {}
@@ -43,6 +43,7 @@ window.attributes('-fullscreen', dicc_objetos["varFullScreen"])
 
 diccionario_objetos["id_remate_alias"] = "remate1"
 diccionario_objetos["id_catalogo_alias"] = "nuevoCat"
+diccionario_objetos["numero_remate"] = "200702"
 
 def sql_connection():
 	try:
@@ -146,9 +147,19 @@ def seleccionarTablaComprador():
 
 	diccionarioLotes.clear()
 
+	diccionario_objetos["totalCabezas"] = 0
+	diccionario_objetos["totalKg"] = 0
+
+	diccionario_objetos["entry_num"].delete(0, tk.END)
+	diccionario_objetos["entry_dte"].delete(0, tk.END)
+	diccionario_objetos["txt_observaciones"].delete("1.0", tk.END)
+
 	tabla = diccionario_objetos["tabla_compradores"]
 	seleccion = tabla.item(tabla.selection())
 	productor = seleccion["tags"][1]
+
+
+	diccionario_objetos["entry_num"].insert(0, numeroLiquidacion(productor))
 
 	actualizarDicLotes(productor)
 
@@ -202,7 +213,46 @@ def cargarDatosComprador(productor):
 	diccionario_objetos["entry_codPostal"].insert(0, str(row[10]))
 	diccionario_objetos["entry_renspa"].insert(0, str(""))
 	diccionario_objetos["entry_ruca"].insert(0, str(row[19]))
+def numeroLiquidacion(productor):
+	remate = diccionario_objetos["id_remate_alias"]
+	remateNumero = diccionario_objetos["numero_remate"]
 
+	con = sql_connection()
+	condiciones = " WHERE remate = '" + remate + "' AND productor = '" + productor + "'"
+	rows = actualizar_db(con, "numeroLiquidacionesCompra", condiciones)
+
+	numero = "0"
+
+	if len(rows) == 1:
+		numero = rows[0][3]
+	if len(rows) == 0:
+		con = sql_connection()
+		condiciones = " WHERE remate = '" + remate + "'"
+		rows = actualizar_db(con, "numeroLiquidacionesCompra", condiciones)
+
+		try:
+			numObtenido = int(rows[len(rows)-1][3]) + 1
+		except:
+			numObtenido = 1
+
+		try:
+			entities = [str(remate), str(productor), str(numObtenido)]
+
+			con = sql_connection()
+			cursorObj = con.cursor()
+			cursorObj.execute("INSERT INTO numeroLiquidacionesCompra VALUES(NULL, ?, ?, ?)", entities)
+			con.commit()
+		except:
+			messagebox.showerror("ERROR", "Error guardando el numero de liquidacion en la base de datos")
+
+
+		numero = str(numObtenido)
+
+
+
+
+	return remateNumero + "-" + numero.zfill(3)
+	
 
 #CARGAR LOTES
 def actualizarDicLotes(productor):
@@ -213,6 +263,9 @@ def actualizarDicLotes(productor):
 	rows = actualizar_db(con, "compraventa", condiciones)
 
 	i = len(diccionarioLotes)
+	totalCabezas = diccionario_objetos["totalCabezas"]
+	totalKg = diccionario_objetos["totalKg"]
+
 	for row in rows:
 
 		con = sql_connection()
@@ -257,6 +310,25 @@ def actualizarDicLotes(productor):
 		"bruto" : x_bruto,
 		}
 		i += 1
+
+		try:
+			totalCabezas = totalCabezas + int(x_cantidad)
+			diccionario_objetos["totalCabezas"] = totalCabezas
+		except:
+			messagebox.showerror("ERROR", "Error calculando total de cabezas")
+		try:
+			totalKg = totalKg + float(x_kgs)
+			diccionario_objetos["totalKg"] = totalKg
+		except:
+			messagebox.showerror("ERROR", "Error calculando total de kilogramos")
+
+
+	diccionario_objetos["entry_totalCabezas"].delete(0, tk.END)
+	diccionario_objetos["entry_totalCabezas"].insert(0, totalCabezas)
+
+	diccionario_objetos["entry_totalKg"].delete(0, tk.END)
+	diccionario_objetos["entry_totalKg"].insert(0, round(totalKg, 2))
+
 def cargarTablaLotes():
 	tabla = diccionario_objetos["tabla"]
 
@@ -398,6 +470,156 @@ def REALIZARCalculos():
 	cargarTablaGastos()
 	calcularTOTAL()
 
+#CREAR LIQUIDACION DE COMPRA
+def preLiquidacionDeCompra():
+	diccionarioEnviar = {}
+
+	try:
+		dire = filedialog.askdirectory()
+		dire = dire + "/PreLiquidacion de Compra " + fechaActual + " " + str(dicReceptorLiquidacionCompra["nombre"]) +".pdf"
+
+		diccionarioDatos = {
+		"ruta" : dire,	
+		"fecha" : dicRemateLiquidacionCompra["fecha"],
+		"tipoDocumento" : dicRemateLiquidacionCompra["tipoDocumento"],
+		"numeroDocumento" : dicRemateLiquidacionCompra["numeroDocumento"],
+		"remate" : dicRemateLiquidacionCompra["titulo"],
+		"condicion" : dicRemateLiquidacionCompra["condicion"],
+		"destino" : dicRemateLiquidacionCompra["destino"],
+		"titulo" : "Pre-Liquidacion de compra de " + str(dicReceptorLiquidacionCompra["nombre"]),
+		}
+	except:
+		messagebox.showerror("ERROR", "Error al obtener los datos del remate")
+		return 0
+
+	try:
+		diccionarioReceptor = {
+		"CUIT" : dicReceptorLiquidacionCompra["cuit"],
+		"situacionIVA" : dicReceptorLiquidacionCompra["iva"],
+		"domicilio" : dicReceptorLiquidacionCompra["domicilio"],
+		"codpostal" : dicReceptorLiquidacionCompra["postal"],
+		"nombreyapellido" : dicReceptorLiquidacionCompra["nombre"],
+		"IIBB" : dicReceptorLiquidacionCompra["iibb"],
+		"localidad" : dicReceptorLiquidacionCompra["localidad"],
+		"renspa" : dicReceptorLiquidacionCompra["renspa"],
+		"caracter" : dicReceptorLiquidacionCompra["caracter"],
+		"provincia" : dicReceptorLiquidacionCompra["provincia"],
+		"ruca" : dicReceptorLiquidacionCompra["ruca"],
+		"DTE" : "",
+		"contacto" : dicReceptorLiquidacionCompra["telefono"],
+		}
+	except:
+		messagebox.showerror("ERROR", "Error al obtener los datos del receptor")
+		return 0
+	try:
+		diccionarioEmisor = {
+		"CUIT" : dicFirmaLiquidacionCompra["cuit"],
+		"nombreyapellido" : dicFirmaLiquidacionCompra["nombre"],
+		}
+	except:
+		messagebox.showerror("ERROR", "Error al obtener los datos del emisor (firmas)")
+		return 0
+
+	try:
+		diccionarioConceptos = {}
+		tabla = diccionario_objetos["tabla_compras"]
+		j=0
+		for i in tabla.get_children():
+			diccionarioConceptos[str(j)] = {
+			"cliente" : tabla.item(i)["values"][0],
+			"categoria" : str(tabla.item(i)["values"][2]),
+			"um" : str(tabla.item(i)["values"][3]),
+			"cantidad" : str(tabla.item(i)["values"][4]),
+			"$um" : str(tabla.item(i)["values"][5]),
+			"$bruto" : str(tabla.item(i)["values"][6]),
+			"iva" : str(tabla.item(i)["values"][7]),
+			"$iva" : str(tabla.item(i)["values"][8]),
+			}
+			j += 1
+	except:
+		messagebox.showerror("ERROR", "Error al obtener los datos de los conceptos")
+		return 0
+
+	try:
+		diccionarioGastos = {}
+		tabla = diccionario_objetos["tabla_comprasGastos"]
+
+		llaves = list(diccionario_gastos.keys())
+
+		for i in range(0, len(diccionario_gastos)):
+			diccionarioGastos[str(i)] = {
+			"gastos" : str(diccionario_gastos[llaves[i]]["gasto"]),
+			"base" : str(diccionario_gastos[llaves[i]]["base"]),
+			"alicuota" : str(diccionario_gastos[llaves[i]]["alicuota"]),
+			"importe" : str(diccionario_gastos[llaves[i]]["importe"]),
+			"iva" : str(diccionario_gastos[llaves[i]]["porcentajeIva"]),
+			"$iva" : str(diccionario_gastos[llaves[i]]["precioIva"]),
+			}
+	except:
+		messagebox.showerror("ERROR", "Error al obtener los datos de los gastos")
+		return 0
+
+
+	try:
+		interesPorcentaje = str(diccionario_objetos["texto_alicuotaInteres"].get())
+		interesDias = str(diccionario_objetos["texto_alicuotaInteresDias"].get())
+		ivaHaciendaPorcentaje = str("10.5")
+		ivaInteresPorcentaje = str("21.0")
+		subtotalMartillo = str(diccionario_objetos["compras_texto_martillo"].get())
+		descuento = str(diccionario_objetos["compras_texto_descuento"].get())
+		subtotal = str(diccionario_objetos["compras_texto_subtotal"].get())
+		interes = str(diccionario_objetos["compras_texto_interes"].get())
+		ivaHacienda = str(diccionario_objetos["compras_texto_ivaHacienda"].get())
+		ivaInteres = str(diccionario_objetos["compras_texto_ivaInteres"].get())
+		comisionIva = str(diccionario_objetos["compras_texto_comisionIva"].get())
+		retencion = str(diccionario_objetos["compras_texto_retencion"].get())
+		total = str(diccionario_objetos["compras_texto_total"].get())
+
+		diccionarioTotales = {
+		"interesPorcentaje" : interesPorcentaje,
+		"interesDias" : interesDias,
+		"ivaHaciendaPorcentaje" : ivaHaciendaPorcentaje,
+		"ivaInteresPorcentaje" : ivaInteresPorcentaje,
+		"subtotalMartillo" : subtotalMartillo,
+		"descuento" : descuento,
+		"subtotal" : subtotal,
+		"interes" : interes,
+		"ivaHacienda" : ivaHacienda,
+		"ivaInteres" : ivaInteres,
+		"comisionIva" : comisionIva,
+		"retencion" : retencion,
+		"total" : total,
+		}
+	except:
+		messagebox.showerror("ERROR", "Error al obtener los datos de Totales")
+		return 0
+
+	try:
+		diccionarioObservaciones = {}
+		tabla = diccionario_objetos["tabla_comprasObservaciones"]
+		j=0
+		for i in tabla.get_children():
+			diccionarioObservaciones[str(j)] = {
+			"cuota" : str(tabla.item(i)["values"][0]),
+			"fecha" : str(tabla.item(i)["values"][1]),
+			"monto" : str(tabla.item(i)["values"][2]),
+			}
+			j += 1
+	except:
+		messagebox.showerror("ERROR", "Error al obtener los datos de las observaciones")
+		return 0
+
+
+	diccionarioEnviar["datos"] = diccionarioDatos
+	diccionarioEnviar["receptor"] = diccionarioReceptor
+	diccionarioEnviar["emisor"] = diccionarioEmisor
+	diccionarioEnviar["conceptos"] = diccionarioConceptos
+	diccionarioEnviar["gastos"] = diccionarioGastos
+	diccionarioEnviar["totales"] = diccionarioTotales
+	diccionarioEnviar["observaciones"] = diccionarioObservaciones
+
+	pdf_preliquidacion.preliquidacionPDF(diccionarioEnviar)
+
 #BARRA DE TITULO
 if(True):
 	barraTitulo = tk.Frame(window, relief=SOLID, bd=2, backgroun="#242b33")
@@ -520,15 +742,6 @@ if(True):
 		pestañas.pack()
 
 
-
-
-
-
-
-
-
-
-
 	#DATOS VARIOS
 	if(True):
 		tk.Label(lblDatosVarios, text="N°:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 0, pady=1, padx=5)
@@ -564,6 +777,15 @@ if(True):
 		entry_totalCabezas.grid(sticky="W", column=1, row=7)
 		#entry_observaciones.grid(sticky="W", column=1, row=8)
 
+		diccionario_objetos["entry_num"] = entry_num
+		diccionario_objetos["entry_fecha"] = entry_fecha
+		diccionario_objetos["entry_dte"] = entry_dte
+		diccionario_objetos["entry_condPago"] = entry_condPago
+		diccionario_objetos["entry_destino"] = entry_destino
+		diccionario_objetos["entry_contacto"] = entry_contacto
+		diccionario_objetos["entry_totalKg"] = entry_totalKg
+		diccionario_objetos["entry_totalCabezas"] = entry_totalCabezas
+		diccionario_objetos["txt_observaciones"] = txt_observaciones
 	#DATOS COMPRADOR
 	if(True):
 		tk.Label(lblDatosComprador, text="Nombre:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 0, pady=1, padx=5)
@@ -754,4 +976,3 @@ compradorFiltrar()
 
 window.bind("<Control-s>", (lambda event: window.destroy()))
 window.mainloop()
-
