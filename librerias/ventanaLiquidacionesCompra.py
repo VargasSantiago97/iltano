@@ -7,6 +7,7 @@ import logging
 import datetime
 
 import tablaElegir
+import pdf_preliquidacion2
 
 from tkinter import *
 from tkinter.ttk import *
@@ -27,12 +28,19 @@ import shutil
 
 import json
 
-dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : False}
+dicc_objetos={"varFullScreen" : 0, "varFullScreenDetalles" : False}
 diccionario_objetos = {}
 
 diccionarioLotes = {}
 
 direccionBaseDeDatos = "database/iltanohacienda.db"
+
+diccionario_objetos["direccion"] = "C:/Users/Santiago/Desktop/exportaciones"
+
+ubicLiquidaciones = "C:/Users/Santiago/Desktop/exportaciones/liquidaciones"
+
+diccionarioEnviar = {}
+
 
 window = Tk()
 window.title("IL TANO HACIENDA SAS")
@@ -182,6 +190,10 @@ def seleccionarTablaComprador():
 	cargarTablaGastos()
 	calcularTOTAL()
 
+	diccionario_objetos["btn_guardar"].config(state = "normal")
+	#diccionario_objetos["btn_eliminar"].config(state = "normal")
+	diccionario_objetos["btn_exportar"].config(state = "normal")
+
 def cargarDatosComprador(productor):
 	con = sql_connection()
 	condiciones = " WHERE nombre = '" + str(productor) + "'"
@@ -213,6 +225,8 @@ def cargarDatosComprador(productor):
 	diccionario_objetos["entry_codPostal"].insert(0, str(row[10]))
 	diccionario_objetos["entry_renspa"].insert(0, str(""))
 	diccionario_objetos["entry_ruca"].insert(0, str(row[19]))
+
+	diccionario_objetos["id_productor_alias"] = str(row[1])
 def numeroLiquidacion(productor):
 	remate = diccionario_objetos["id_remate_alias"]
 	remateNumero = diccionario_objetos["numero_remate"]
@@ -471,22 +485,22 @@ def REALIZARCalculos():
 	calcularTOTAL()
 
 #CREAR LIQUIDACION DE COMPRA
-def preLiquidacionDeCompra():
-	diccionarioEnviar = {}
+def guardar():
+	diccionarioEnviar.clear()
 
 	try:
-		dire = filedialog.askdirectory()
-		dire = dire + "/PreLiquidacion de Compra " + fechaActual + " " + str(dicReceptorLiquidacionCompra["nombre"]) +".pdf"
+		dire = diccionario_objetos["direccion"]
+		dire = dire + "/PreLiquidacion de Compra " + str(diccionario_objetos["entry_num"].get()) + " ~ " + diccionario_objetos["id_productor_alias"] + " ~ " + str(time.strftime("%d-%m-%y")) + " ~ " + str(time.strftime("%H-%M-%S")) + "hs.pdf"
 
 		diccionarioDatos = {
 		"ruta" : dire,	
-		"fecha" : dicRemateLiquidacionCompra["fecha"],
-		"tipoDocumento" : dicRemateLiquidacionCompra["tipoDocumento"],
-		"numeroDocumento" : dicRemateLiquidacionCompra["numeroDocumento"],
-		"remate" : dicRemateLiquidacionCompra["titulo"],
-		"condicion" : dicRemateLiquidacionCompra["condicion"],
-		"destino" : dicRemateLiquidacionCompra["destino"],
-		"titulo" : "Pre-Liquidacion de compra de " + str(dicReceptorLiquidacionCompra["nombre"]),
+		"fecha" : str(diccionario_objetos["entry_fecha"].get()),
+		"tipoDocumento" : "PRE-LIQUIDACION DE COMPRA",
+		"numeroDocumento" : str(diccionario_objetos["entry_num"].get()),
+		"remate" : diccionario_objetos["id_remate_alias"],
+		"condicion" : str(diccionario_objetos["entry_condPago"].get()),
+		"destino" : str(diccionario_objetos["entry_destino"].get()),
+		"titulo" : "Pre-Liquidacion de compra de " + str(diccionario_objetos["entry_nombre"].get()),
 		}
 	except:
 		messagebox.showerror("ERROR", "Error al obtener los datos del remate")
@@ -494,27 +508,27 @@ def preLiquidacionDeCompra():
 
 	try:
 		diccionarioReceptor = {
-		"CUIT" : dicReceptorLiquidacionCompra["cuit"],
-		"situacionIVA" : dicReceptorLiquidacionCompra["iva"],
-		"domicilio" : dicReceptorLiquidacionCompra["domicilio"],
-		"codpostal" : dicReceptorLiquidacionCompra["postal"],
-		"nombreyapellido" : dicReceptorLiquidacionCompra["nombre"],
-		"IIBB" : dicReceptorLiquidacionCompra["iibb"],
-		"localidad" : dicReceptorLiquidacionCompra["localidad"],
-		"renspa" : dicReceptorLiquidacionCompra["renspa"],
-		"caracter" : dicReceptorLiquidacionCompra["caracter"],
-		"provincia" : dicReceptorLiquidacionCompra["provincia"],
-		"ruca" : dicReceptorLiquidacionCompra["ruca"],
-		"DTE" : "",
-		"contacto" : dicReceptorLiquidacionCompra["telefono"],
+		"CUIT" : str(diccionario_objetos["entry_cuit"].get()),
+		"situacionIVA" : str(diccionario_objetos["entry_iva"].get()),
+		"domicilio" :str(diccionario_objetos["entry_domicilio"].get()),
+		"codpostal" : str(diccionario_objetos["entry_codPostal"].get()),
+		"nombreyapellido" : str(diccionario_objetos["entry_nombre"].get()),
+		"IIBB" : str(diccionario_objetos["entry_iibb"].get()),
+		"localidad" : str(diccionario_objetos["entry_localidad"].get()),
+		"renspa" : str(diccionario_objetos["entry_renspa"].get()),
+		"caracter" : str(diccionario_objetos["entry_caracter"].get()),
+		"provincia" : str(diccionario_objetos["entry_provincia"].get()),
+		"ruca" : str(diccionario_objetos["entry_ruca"].get()),
+		"DTE" : str(diccionario_objetos["entry_dte"].get()),
+		"contacto" : str(diccionario_objetos["entry_contacto"].get()),
 		}
 	except:
 		messagebox.showerror("ERROR", "Error al obtener los datos del receptor")
 		return 0
 	try:
 		diccionarioEmisor = {
-		"CUIT" : dicFirmaLiquidacionCompra["cuit"],
-		"nombreyapellido" : dicFirmaLiquidacionCompra["nombre"],
+		"CUIT" : "30-71648051-4",
+		"nombreyapellido" : "P/P IL TANO HACIENDA S.A.S.",
 		}
 	except:
 		messagebox.showerror("ERROR", "Error al obtener los datos del emisor (firmas)")
@@ -522,18 +536,18 @@ def preLiquidacionDeCompra():
 
 	try:
 		diccionarioConceptos = {}
-		tabla = diccionario_objetos["tabla_compras"]
+		tabla = diccionario_objetos["tabla"]
 		j=0
 		for i in tabla.get_children():
 			diccionarioConceptos[str(j)] = {
-			"cliente" : tabla.item(i)["values"][0],
-			"categoria" : str(tabla.item(i)["values"][2]),
-			"um" : str(tabla.item(i)["values"][3]),
-			"cantidad" : str(tabla.item(i)["values"][4]),
-			"$um" : str(tabla.item(i)["values"][5]),
-			"$bruto" : str(tabla.item(i)["values"][6]),
-			"iva" : str(tabla.item(i)["values"][7]),
-			"$iva" : str(tabla.item(i)["values"][8]),
+			"cliente" : str(tabla.item(i)["values"][1]),
+			"categoria" : str(tabla.item(i)["values"][2]), #
+			"corral" : str(tabla.item(i)["values"][0]), #corral
+			"pintura" : str(tabla.item(i)["values"][3]), #pintura
+			"cantidad" : str(tabla.item(i)["values"][4]), #cantidad
+			"kg" : str(tabla.item(i)["values"][5]), #kg
+			"$kg" : str(tabla.item(i)["values"][6]), #$kg
+			"total" : str(tabla.item(i)["values"][7]), #importe
 			}
 			j += 1
 	except:
@@ -542,38 +556,39 @@ def preLiquidacionDeCompra():
 
 	try:
 		diccionarioGastos = {}
-		tabla = diccionario_objetos["tabla_comprasGastos"]
-
-		llaves = list(diccionario_gastos.keys())
-
-		for i in range(0, len(diccionario_gastos)):
-			diccionarioGastos[str(i)] = {
-			"gastos" : str(diccionario_gastos[llaves[i]]["gasto"]),
-			"base" : str(diccionario_gastos[llaves[i]]["base"]),
-			"alicuota" : str(diccionario_gastos[llaves[i]]["alicuota"]),
-			"importe" : str(diccionario_gastos[llaves[i]]["importe"]),
-			"iva" : str(diccionario_gastos[llaves[i]]["porcentajeIva"]),
-			"$iva" : str(diccionario_gastos[llaves[i]]["precioIva"]),
+		tabla = diccionario_objetos["tablaGastos"]
+		j=0
+		for i in tabla.get_children():
+			diccionarioGastos[str(j)] = {
+			"gastos" : str(tabla.item(i)["values"][0]),
+			"base" : str(tabla.item(i)["values"][1]),
+			"alicuota" : str(tabla.item(i)["values"][2]),
+			"importe" : str(tabla.item(i)["values"][3]),
+			"iva" : str(tabla.item(i)["values"][4]),
+			"$iva" : str(tabla.item(i)["values"][5]),
 			}
+			j += 1
 	except:
 		messagebox.showerror("ERROR", "Error al obtener los datos de los gastos")
 		return 0
 
-
 	try:
-		interesPorcentaje = str(diccionario_objetos["texto_alicuotaInteres"].get())
-		interesDias = str(diccionario_objetos["texto_alicuotaInteresDias"].get())
+		interesPorcentaje = str(diccionario_objetos["entry_interesPorcentaje"].get())
+		interesDias = str(diccionario_objetos["entry_interesDias"].get())
 		ivaHaciendaPorcentaje = str("10.5")
 		ivaInteresPorcentaje = str("21.0")
-		subtotalMartillo = str(diccionario_objetos["compras_texto_martillo"].get())
-		descuento = str(diccionario_objetos["compras_texto_descuento"].get())
-		subtotal = str(diccionario_objetos["compras_texto_subtotal"].get())
-		interes = str(diccionario_objetos["compras_texto_interes"].get())
-		ivaHacienda = str(diccionario_objetos["compras_texto_ivaHacienda"].get())
-		ivaInteres = str(diccionario_objetos["compras_texto_ivaInteres"].get())
-		comisionIva = str(diccionario_objetos["compras_texto_comisionIva"].get())
-		retencion = str(diccionario_objetos["compras_texto_retencion"].get())
-		total = str(diccionario_objetos["compras_texto_total"].get())
+		subtotalMartillo = str(diccionario_objetos["entry_subtotalMartillo"].get())
+		descuento = str(diccionario_objetos["entry_descuento"].get())
+		subtotal = str(diccionario_objetos["entry_subtotal"].get())
+		interes = str(diccionario_objetos["entry_intereses"].get())
+		ivaHacienda = str(diccionario_objetos["entry_ivaHacienda"].get())
+		ivaInteres = str(diccionario_objetos["entry_ivaInteres"].get())
+		comisionIva = str(diccionario_objetos["entry_comisionIva"].get())
+		retencion = "0"
+		total = str(diccionario_objetos["entry_total"].get())
+		totalCabezas = str(diccionario_objetos["totalCabezas"])
+		totalKg = str(diccionario_objetos["totalKg"])
+		observaciones = str(diccionario_objetos["txt_observaciones"].get("1.0", tk.END)).replace("\n", ' ')
 
 		diccionarioTotales = {
 		"interesPorcentaje" : interesPorcentaje,
@@ -589,26 +604,26 @@ def preLiquidacionDeCompra():
 		"comisionIva" : comisionIva,
 		"retencion" : retencion,
 		"total" : total,
+		"totalCabezas" : totalCabezas,
+		"totalKg" : totalKg,
+		"observaciones" : observaciones,
 		}
+
 	except:
 		messagebox.showerror("ERROR", "Error al obtener los datos de Totales")
 		return 0
 
 	try:
 		diccionarioObservaciones = {}
-		tabla = diccionario_objetos["tabla_comprasObservaciones"]
-		j=0
-		for i in tabla.get_children():
-			diccionarioObservaciones[str(j)] = {
-			"cuota" : str(tabla.item(i)["values"][0]),
-			"fecha" : str(tabla.item(i)["values"][1]),
-			"monto" : str(tabla.item(i)["values"][2]),
-			}
-			j += 1
+		diccionarioObservaciones["0"] = {
+		"cuota" : str("nanana"),
+		"fecha" : str("nanana"),
+		"monto" : str("10"),
+		}
+
 	except:
 		messagebox.showerror("ERROR", "Error al obtener los datos de las observaciones")
 		return 0
-
 
 	diccionarioEnviar["datos"] = diccionarioDatos
 	diccionarioEnviar["receptor"] = diccionarioReceptor
@@ -618,7 +633,19 @@ def preLiquidacionDeCompra():
 	diccionarioEnviar["totales"] = diccionarioTotales
 	diccionarioEnviar["observaciones"] = diccionarioObservaciones
 
-	pdf_preliquidacion.preliquidacionPDF(diccionarioEnviar)
+	try:
+		ubic = ubicLiquidaciones + "/liq_comp_" + str(diccionario_objetos["entry_num"].get()) + "_" + diccionario_objetos["id_productor_alias"] + ".json"
+		archivo = open(ubic, "w")
+		archivo.write(json.dumps(diccionarioEnviar, indent=4))
+		archivo.close()
+	except:
+		messagebox.showerror("ERROR", "Error al guardar liquidacion")
+def guardarExportar():
+	guardar()
+	try:
+		pdf_preliquidacion2.preliquidacionPDF(diccionarioEnviar)
+	except:
+		messagebox.showerror("ERROR", "Error al guardar PDF liquidacion")
 
 #BARRA DE TITULO
 if(True):
@@ -683,6 +710,7 @@ if(True):
 
 		diccionario_objetos["tabla"] = tabla
 
+
 	#TABLA GASTOS
 	if(True):
 		sbrGastos = Scrollbar(lbl_tablaGastos)
@@ -726,9 +754,14 @@ if(True):
 		lblDatosComprador1 = tk.Label(lbl_datos, backgroun="#f0f0f0", text="PRODUCTOR", foreground="#FFFFFF", relief=SOLID, bd=2)
 		lblDatosComprador1.place(x=304, y=2, width=300, height=306)
 
-		lblTotales = tk.Label(lbl_datos, backgroun="#f0f0f0", foreground="#FFFFFF", relief=SOLID, bd=2)
-		lblTotales.place(x=606, y=2, width=400, height=306)
+		lblTotalesPadre = tk.Label(lbl_datos, backgroun="#f0f0f0", foreground="#FFFFFF", relief=SOLID, bd=2)
+		lblTotalesPadre.place(x=606, y=2, width=400, height=306)
 
+		lblTotales = tk.Label(lblTotalesPadre, backgroun="#f0f0f0")
+		lblTotales.grid(column=0, row=0)
+
+		lblBotonesAxiones = tk.Label(lblTotalesPadre, backgroun="#f0f0f0")
+		lblBotonesAxiones.grid(column=0, row=1)
 
 		pestañas = ttk.Notebook(lblDatosComprador1)
 
@@ -764,7 +797,7 @@ if(True):
 		entry_totalCabezas = Entry(lblDatosVarios, font=("Helvetica", 10), width=24, justify='center')
 		#entry_observaciones = Entry(lblDatosVarios, font=("Helvetica", 10), width=24, justify='center')
 
-		txt_observaciones = scrolledtext.ScrolledText(lblDatosVarios, width=24, height=3)
+		txt_observaciones = scrolledtext.ScrolledText(lblDatosVarios, width=19, height=3)
 		txt_observaciones.grid(column=1, row=8)
 
 		entry_num.grid(sticky="W", column=1, row=0)
@@ -786,6 +819,8 @@ if(True):
 		diccionario_objetos["entry_totalKg"] = entry_totalKg
 		diccionario_objetos["entry_totalCabezas"] = entry_totalCabezas
 		diccionario_objetos["txt_observaciones"] = txt_observaciones
+
+
 	#DATOS COMPRADOR
 	if(True):
 		tk.Label(lblDatosComprador, text="Nombre:", backgroun="#f0f0f0", foreground="#000000", font=("Helvetica", 10)).grid(sticky="E", column = 0, row = 0, pady=1, padx=5)
@@ -867,7 +902,6 @@ if(True):
 		entry_total = Entry(lblTotales, font=("Helvetica", 12, "bold"), width=10, justify='right')
 
 
-
 		entry_subtotalMartillo.grid(column=2, row=0)
 		entry_descuento.grid(column=2, row=1)
 		entry_subtotal.grid(column=2, row=2)
@@ -921,15 +955,19 @@ if(True):
 		entry_comisionPorcentaje.bind("<Return>", (lambda event: REALIZARCalculos()))
 
 	#BOTONES
-	#if(True):
-		#btn_guardar = tk.Button(lbl_datos, text="GUARDAR", compound="top", backgroun="#b3f2bc", font=("Helvetica", 20, "bold"), state = "disabled", command=guardarCompraventa)
-		#btn_guardar.place(x=810, y=114, width=196, height=60)
+	if(True):
+		btn_guardar = tk.Button(lblBotonesAxiones, text="GUARDAR", compound="top", backgroun="#b3f2bc", font=("Helvetica", 15, "bold"), state = "disabled", command = guardar)
+		btn_guardar.grid(column=0, row=0, pady = 20, padx = 10)
 
-		#btn_eliminar = tk.Button(lbl_datos, text="ELIMINAR", compound="top", backgroun="#FF6E6E", font=("Helvetica", 15, "bold"), state = "disabled", command=eliminarCompraventa)
-		#btn_eliminar.place(x=810, y=180, width=196, height=48)
+		#btn_eliminar = tk.Button(lblBotonesAxiones, text="ELIMINAR", compound="top", backgroun="#FF6E6E", font=("Helvetica", 15, "bold"), state = "disabled")
+		#btn_eliminar.grid(column=1, row=0, pady = 20, padx = 10)
 
-		#diccionario_objetos["btn_guardar"] = btn_guardar
+		btn_exportar = tk.Button(lblBotonesAxiones, text="GUARDAR Y\nEXPORTAR PDF", compound="top", backgroun="#b3f2bc", font=("Helvetica", 9, "bold"), state = "disabled", command=guardarExportar)
+		btn_exportar.grid(column=2, row=0, pady = 20, padx = 10)
+
+		diccionario_objetos["btn_guardar"] = btn_guardar
 		#diccionario_objetos["btn_eliminar"] = btn_eliminar
+		diccionario_objetos["btn_exportar"] = btn_exportar
 
 
 	#BUSCADOR PRODUCTORES
