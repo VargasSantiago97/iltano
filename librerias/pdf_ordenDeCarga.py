@@ -25,9 +25,9 @@ from reportlab.rl_config import defaultPageSize
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
 
-dire = "PDF\\fecha_" + str(time.strftime("%d-%m-%y")) + "_hora_" + str(time.strftime("%H-%M-%S")) + ".pdf"
+dire = "C:\\Users\\Santiago\\Desktop\\exportaciones\\pruebas\\fecha_" + str(time.strftime("%d-%m-%y")) + "_hora_" + str(time.strftime("%H-%M-%S")) + ".pdf"
 
-imagenLogo = "tano.jpeg"
+imagenLogo = "librerias/tano.jpeg"
 
 
 
@@ -53,8 +53,8 @@ entrada2 = {
 	"datos" : {
 		"ruta" : dire,	
 		"fecha" : "10/10/10",
-		"tipoDocumento" : "PRE-LIQUIDACION DE COMPRA",
-		"numeroDocumento" : "00001-00000001",
+		"tipoDocumento" : "ORDEN DE CARGA",
+		"numeroLiquidacion" : "202020-999",
 		"remate" : "XIV° EXPOSICION GANADERA",
 		"condicion" : "Cta. Corriente",
 		"destino" : "Faena",
@@ -80,52 +80,45 @@ entrada2 = {
 		"nombreyapellido" : "Santiago Manuel Vargas",
 		},
 	"conceptos" : {
-		"0" : {"cliente" : "23121242559 - Santiago CA", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "Cabeza", "pintura" : "1", "cantidad" : "92000", "kg" : "92000", "$kg" : "10.5", "total" : "9660"},
-		"1" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "Cabeza", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"0" : {"cliente" : "23121242559 - Santiago CA", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "92000", "kg" : "92000", "$kg" : "10.5", "total" : "9660"},
+		"1" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"2" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"3" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"4" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"5" : {"cliente" : "23121242559 - Santiago CA", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "92000", "kg" : "92000", "$kg" : "10.5", "total" : "9660"},
+		"6" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"7" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"8" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"9" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"10" : {"cliente" : "23121242559 - Santiago CA", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "92000", "kg" : "92000", "$kg" : "10.5", "total" : "9660"},
+		"11" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"12" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"13" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"14" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"15" : {"cliente" : "23121242559 - Santiago CA", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "92000", "kg" : "92000", "$kg" : "10.5", "total" : "9660"},
+		"16" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"17" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"18" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"19" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"20" : {"cliente" : "23121242559 - Santiago CA", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "92000", "kg" : "92000", "$kg" : "10.5", "total" : "9660"},
+		"21" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"22" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"23" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"24" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"25" : {"cliente" : "23121242559 - Santiago CA", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "92000", "kg" : "92000", "$kg" : "10.5", "total" : "9660"},
+		"26" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"27" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"28" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+		"29" : {"cliente" : "20085993780 - ROBLEDO CARLOS EDUARDO", "categoria" : "Bovino Toro Reproductor /Brahman", "corral" : "12bis", "pintura" : "1", "cantidad" : "96000", "kg" : "96000", "$kg" : "10.5", "total" : "10080"},
+
 		},
-	"gastos" : {
-		"0" : {"gastos" : "Comisión", "base" : "649000", "alicuota" : "5.00", "importe" : "32450", "iva" : "10.5", "$iva" : "3407.25"},
-		"1" : {"gastos" : "RET IIBB Chaco", "base" : "649000", "alicuota" : "0.75", "importe" : "15421", "iva" : "0.00", "$iva" : "0.00"},
-		"2" : {"gastos" : "ADICIONAL CHACO 10% LEY 666 K", "base" : "649000", "alicuota" : "0.075", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"3" : {"gastos" : "ADICIONAL CHACO 10% LEY 666 K", "base" : "649000", "alicuota" : "0.075", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"4" : {"gastos" : "ADICIONAL CHACO 10% LEY 666 K", "base" : "649000", "alicuota" : "0.075", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"5" : {"gastos" : "ADICIONAL CHACO 10% LEY 666 K", "base" : "649000", "alicuota" : "0.075", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"6" : {"gastos" : "ADICIONAL CHACO 10% LEY 666 K", "base" : "649000", "alicuota" : "0.075", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"7" : {"gastos" : "ADICIONAL CHACO 10% LEY 666 K", "base" : "649000", "alicuota" : "0.075", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"8" : {"gastos" : "ADICIONAL CHACO 10% LEY 666 K", "base" : "649000", "alicuota" : "0.075", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"9" : {"gastos" : "ADICIONAL CHACO 10% LEY 666 K", "base" : "649000", "alicuota" : "0.075", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"10" : {"gastos" : "ADICIONAL CHACO 10% LEY 666 K", "base" : "649000", "alicuota" : "0.075", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"11" : {"gastos" : "ADICIONAL CHACO 10% LEY 666 K", "base" : "649000", "alicuota" : "0.075", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"12" : {"gastos" : "ADICIONAL CHACO 10% LEY 666 K", "base" : "649000", "alicuota" : "0.075", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"13" : {"gastos" : "RET IIBB Chaco", "base" : "649000", "alicuota" : "0.75", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"14" : {"gastos" : "RET IIBB Chaco", "base" : "649000", "alicuota" : "0.75", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"15" : {"gastos" : "RET IIBB Chaco", "base" : "649000", "alicuota" : "0.75", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"16" : {"gastos" : "RET IIBB Chaco", "base" : "649000", "alicuota" : "0.75", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"17" : {"gastos" : "RET IIBB Chaco", "base" : "649000", "alicuota" : "0.75", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"18" : {"gastos" : "RET IIBB Chaco", "base" : "649000", "alicuota" : "0.75", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"19" : {"gastos" : "RET IIBB Chaco", "base" : "649000", "alicuota" : "0.75", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		"20" : {"gastos" : "RET IIBB Chaco", "base" : "649000", "alicuota" : "0.75", "importe" : "154214.15", "iva" : "0.00", "$iva" : "0.00"},
-		},
+
 	"totales" : {
-		"interesPorcentaje" : "0.61%",
-		"interesDias" : "30",
-		"ivaHaciendaPorcentaje" : "10.50%",
-		"ivaInteresPorcentaje" : "21.00%",
-		"subtotalMartillo" : "56876549.1",
-		"descuento" : "56876549.1",
-		"subtotal" : "56876549.1",
-		"interes" : "56876549.1",
-		"ivaHacienda" : "56549.1",
-		"ivaInteres" : "566549.1",
-		"comisionIva" : "5686549.1",
-		"retencion" : "12545600.12",
 		"total" : "156618550",
 		"totalCabezas" : "123",
 		"totalKg" : "123",
-		"observaciones" : "lalalal",
 		},
 }
-
 
 
 def centrar(x, y, texto, font, size, c):
@@ -182,15 +175,16 @@ def insertar_cabecera(c, entrada):
 	c.drawString(440, 725, "N° Renspa:    -")
 
 
-	c.setFont("Helvetica", 13)
-	centrar(440, 805, entrada["datos"]["tipoDocumento"], "Helvetica", 13, c)
+	c.setFont("Helvetica-Bold", 13)
+	centrar(440, 790, "ORDEN DE CARGA", "Helvetica-Bold", 22, c)
 	#c.drawString(398, 805, "LIQUIDACION")
 
-	c.setFont("Helvetica-Bold", 17)
-	c.drawString(360, 780, "N°:  " + entrada["datos"]["numeroDocumento"])
-
-	c.setFont("Helvetica-Bold", 12)
+	c.setFont("Helvetica-Bold", 14)
 	c.drawString(307, 760, "Fecha: " + entrada["datos"]["fecha"])
+	c.drawString(440, 760, "N° Liq.:")
+
+	c.drawString(490, 760, entrada["datos"]["numeroDocumento"])
+
 
 	#Cuadros
 	c.setLineWidth(1)
@@ -286,66 +280,49 @@ def insertar_concepto_cabeza(c, i):
 	c.setFillColorRGB(0,0,0)
 
 	c.setFont("Helvetica-Bold", 10)
-	c.drawString(60, 549 + i, "Cliente")
-	c.drawString(160, 549 + i, "Categoria/Raza")
-	c.drawString(265, 549 + i, "Corral")
-	c.drawString(302, 549 + i, "Pintura")
-	c.drawString(350, 549 + i, "Cant.")
-	c.drawString(410, 549 + i, "Kg")
-	c.drawString(460, 549 + i, "$ Kg")
-	c.drawString(520, 549 + i, "Importe")
+	c.drawString(30, 549 + i, "PINTURA")
+	c.drawString(150, 549 + i, "CLIENTE")
+	c.drawString(265, 549 + i, "CORRAL")
+	c.drawString(360, 549 + i, "CATEGORIA/RAZA")
+	c.drawString(510, 549 + i, "CANTIDAD")
 
 	c.line(500, 545 + i, 500, 560 + i)
-	c.line(445, 545 + i, 445, 560 + i)
-	c.line(385, 545 + i, 385, 560 + i)
-	c.line(340, 545 + i, 340, 560 + i)
-	c.line(300, 545 + i, 300, 560 + i)
+	c.line(310, 545 + i, 310, 560 + i)
 	c.line(260, 545 + i, 260, 560 + i)
-	c.line(130, 545 + i, 130, 560 + i)
+	c.line(80, 545 + i, 80, 560 + i)
 
 def insertar_concepto(c, i, entrada, concep):
 
 	c.setFillColorRGB(0,0,0)
 	c.rect(20, 545 + i, 555, 20)
 
-	
+	centrar(50, 551 + i, entrada["conceptos"][str(concep)]["pintura"], "Helvetica-Bold", 12, c)
+	centrar(285, 551 + i, entrada["conceptos"][str(concep)]["corral"], "Helvetica-Bold", 12, c)
+	centrar(540, 551 + i, entrada["conceptos"][str(concep)]["cantidad"], "Helvetica-Bold", 12, c)
 
-	if (len(entrada["conceptos"][str(concep)]["cliente"])>25):
-		c.setFont("Helvetica", 7)
-		c.drawString(23, 557 + i, (entrada["conceptos"][str(concep)]["cliente"])[0:25])
-		c.drawString(23, 548 + i, (entrada["conceptos"][str(concep)]["cliente"])[25:])
+
+	if (len(entrada["conceptos"][str(concep)]["cliente"])<25):
+		centrar(170, 551 + i, entrada["conceptos"][str(concep)]["cliente"], "Helvetica", 12, c)
+	elif(len(entrada["conceptos"][str(concep)]["cliente"])<32):
+		centrar(170, 551 + i, entrada["conceptos"][str(concep)]["cliente"], "Helvetica", 10, c)
 	else:
-		c.setFont("Helvetica", 7)
-		c.drawString(23, 551 + i, entrada["conceptos"][str(concep)]["cliente"])
+		centrar(170, 555 + i, entrada["conceptos"][str(concep)]["cliente"][0:30], "Helvetica", 9, c)
+		centrar(170, 547 + i, entrada["conceptos"][str(concep)]["cliente"][30:60], "Helvetica", 9, c)
 
 
-	if (len(entrada["conceptos"][str(concep)]["categoria"])>26):
-		c.setFont("Helvetica", 7)
-		c.drawString(135, 557 + i, (entrada["conceptos"][str(concep)]["categoria"])[0:25])
-		c.drawString(135, 548 + i, (entrada["conceptos"][str(concep)]["categoria"])[25:])
+	if (len(entrada["conceptos"][str(concep)]["categoria"])<25):
+		centrar(405, 551 + i, entrada["conceptos"][str(concep)]["categoria"], "Helvetica", 12, c)
+	elif(len(entrada["conceptos"][str(concep)]["categoria"])<32):
+		centrar(405, 551 + i, entrada["conceptos"][str(concep)]["categoria"], "Helvetica", 10, c)
 	else:
-		c.setFont("Helvetica", 7)
-		c.drawString(135, 551 + i, entrada["conceptos"][str(concep)]["categoria"])
+		centrar(405, 555 + i, entrada["conceptos"][str(concep)]["categoria"][0:30], "Helvetica", 9, c)
+		centrar(405, 547 + i, entrada["conceptos"][str(concep)]["categoria"][30:60], "Helvetica", 9, c)
 
-	c.setFont("Helvetica", 9)
-	c.drawString(265, 551 + i, entrada["conceptos"][str(concep)]["corral"])
-	c.drawString(315, 551 + i, entrada["conceptos"][str(concep)]["pintura"])
-
-	c.drawString(350, 551 + i, entrada["conceptos"][str(concep)]["cantidad"])
-
-	numero(440, 551 + i, entrada["conceptos"][str(concep)]["kg"], "Helvetica", 9, c)
-	numero(490, 551 + i, entrada["conceptos"][str(concep)]["$kg"], "Helvetica", 9, c)
-	numero(572, 551 + i, entrada["conceptos"][str(concep)]["total"], "Helvetica", 9, c)
 
 	c.line(500, 545 + i, 500, 565 + i)
-	c.line(445, 545 + i, 445, 565 + i)
-	c.line(385, 545 + i, 385, 565 + i)
-	c.line(340, 545 + i, 340, 565 + i)
-	c.line(300, 545 + i, 300, 565 + i)
+	c.line(310, 545 + i, 310, 565 + i)
 	c.line(260, 545 + i, 260, 565 + i)
-	c.line(130, 545 + i, 130, 565 + i)
-
-
+	c.line(80, 545 + i, 80, 565 + i)
 
 
 def insertar_gasto_cabeza(c, i):
@@ -532,8 +509,6 @@ def preliquidacionPDF(entrada):
 	insertar_datos_evento(c, entrada)
 
 	cant_conceptos = len(entrada["conceptos"])
-	cant_gastos = len(entrada["gastos"])
-
 
 	insertar_concepto_cabeza(c, -10)
 
@@ -549,26 +524,13 @@ def preliquidacionPDF(entrada):
 			CANTIDADPAGINAS += 1
 			ubicacionY = 0
 
-	altura_gastos = -40-(ubicacionY*20)
-	ubicacionY = 0
-	for i in range(0, cant_gastos):
-		ubicacionY += 1
-		if(altura_gastos-15-(15*ubicacionY)<-280):
-			CANTIDADPAGINAS += 1
-			ubicacionY = 0
-			altura_gastos = -40
-
-
-
 	#COLOCAR CUERPO
 	ubicacionY = 0
-
 
 	for i in range(0, cant_conceptos):
 		insertar_concepto(c, -30-(20*ubicacionY), entrada, i)
 		ubicacionY += 1
-		if(ubicacionY>10):
-			insertar_totales(c, entrada)
+		if(ubicacionY>19):
 			insertar_firmas(c, entrada)
 			insertar_npag(c, str(PAGINAACTUAL), str(CANTIDADPAGINAS))
 			c.showPage()
@@ -579,40 +541,14 @@ def preliquidacionPDF(entrada):
 			insertar_concepto_cabeza(c, -10)
 			ubicacionY = 0
 
-
-
-	altura_gastos = -40-(ubicacionY*20)
-	insertar_gasto_cabeza(c, altura_gastos)
-	ubicacionY = 0
-	for i in range(0, cant_gastos):
-		insertar_gasto(c, altura_gastos-15-(15*ubicacionY), entrada, i)
-		ubicacionY += 1
-		if(altura_gastos-15-(15*ubicacionY)<-280):
-			insertar_totales(c, entrada)
-			insertar_firmas(c, entrada)
-			insertar_npag(c, str(PAGINAACTUAL), str(CANTIDADPAGINAS))
-			c.showPage()
-			PAGINAACTUAL += 1
-			insertar_cabecera(c, entrada)
-			insertar_datos_receptor(c, entrada)	
-			insertar_datos_evento(c, entrada)
-			insertar_gasto_cabeza(c, -10)
-			ubicacionY = 0
-			altura_gastos = -40
-	
-
-
-
-
 	#insertar_comision(c)
 
-	insertar_totales(c, entrada)
 	insertar_firmas(c, entrada)
 	insertar_npag(c, str(CANTIDADPAGINAS), str(CANTIDADPAGINAS))
 
 
 
-	c.setTitle(entrada["datos"]["titulo"])
+	c.setTitle("ORDEN DE CARGA")
 	c.save()
 	#archivo = os.popen(entrada["datos"]["ruta"])
 

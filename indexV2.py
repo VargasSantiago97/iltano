@@ -7,6 +7,10 @@ import logging
 import datetime
 
 from librerias import tablaElegir
+from librerias import pdf_ordenDeCarga
+from librerias import ventanaRemates
+
+
 
 from tkinter import *
 from tkinter.ttk import *
@@ -870,10 +874,10 @@ def exportarExcel():
 		x_categoria = str(info[3])
 		x_pintura = str(info[4])
 		x_kilogramos = str(info[5])
-		x_promedio = str(info[6])
-		x_precio = str(info[7])
+		x_promedio = str(info[6]).replace(".", ",")
+		x_precio = str(info[7]).replace(".", ",")
 		x_comprador = str(info[8])
-		x_total = str(info[9])
+		x_total = str(info[9]).replace(".", ",")
 
 		texto = texto + x_corral + ";" + x_vendedor + ";" + x_cantidad + ";" + x_categoria + ";" + x_pintura + ";" + x_kilogramos + ";" + x_promedio + ";" + x_precio + ";" + x_comprador + ";" + x_total + "\n"
 
@@ -955,6 +959,82 @@ def exportarExcelTotalesVentas():
 	archivoExportar.write(texto)
 	archivoExportar.close()
 
+#ORDENES DE CARGA
+def ordenesDeCarga():
+
+	def exportarOrdenesTodas():
+		for i in tablaOrdenes.get_children():
+			id_preliq = tablaOrdenes.item(i)["text"]
+
+			con = sql_connection()
+			condiciones = " WHERE id = " + str(id_preliq)
+			row_dat = actualizar_db(con, "liquidacionesCompraGuardadas", condiciones)
+
+			direArchivo = ubicLiquidaciones + "/" + str(row_dat[0][4])
+
+			archivo = open(direArchivo, "r")
+			dicc = json.loads(archivo.read())
+			archivo.close()
+
+			pdf_ordenDeCarga.preliquidacionPDF(dicc)
+
+	def exportarOrden(entrada):
+		id_preliq = entrada["text"]
+
+		con = sql_connection()
+		condiciones = " WHERE id = " + str(id_preliq)
+		row_dat = actualizar_db(con, "liquidacionesCompraGuardadas", condiciones)
+
+		direArchivo = ubicLiquidaciones + "/" + str(row_dat[0][4])
+
+		archivo = open(direArchivo, "r")
+		dicc = json.loads(archivo.read())
+		archivo.close()
+
+		pdf_ordenDeCarga.preliquidacionPDF(dicc)
+
+
+	remate = diccionario_objetos["id_remate_alias"]
+	wind_ordenes = Toplevel(window)
+	wind_ordenes.title("ORDENES DE CARGA")
+	wind_ordenes.geometry("500x400")
+	wind_ordenes.configure(backgroun="#E8F6FA") #E8F6FA
+
+	lbl_tablaOrdenes = Label(wind_ordenes, backgroun="#d1f5ff")
+	lbl_tablaOrdenes.place(x = 5, y = 5, width=490, height=200)
+
+	sbrOrdenes = Scrollbar(lbl_tablaOrdenes)
+	sbrOrdenes.pack(side=RIGHT, fill="y")
+
+	tablaOrdenes = ttk.Treeview(lbl_tablaOrdenes, columns=["PRODUCTOR", "LIQUIDACION"], selectmode=tk.BROWSE, show='headings') 
+	tablaOrdenes.pack(side=LEFT, fill="both", expand=True)
+	sbrOrdenes.config(command=tablaOrdenes.yview)
+	tablaOrdenes.config(yscrollcommand=sbrOrdenes.set)
+
+	tablaOrdenes.heading("PRODUCTOR", text="PRODUCTOR", command=lambda: treeview_sort_column(tablaOrdenes, "PRODUCTOR", False))
+	tablaOrdenes.heading("LIQUIDACION", text="LIQUIDACION", command=lambda: treeview_sort_column(tablaOrdenes, "LIQUIDACION", False))
+
+	tablaOrdenes.column("PRODUCTOR", width=150)
+	tablaOrdenes.column("LIQUIDACION", width=30)
+
+	tablaOrdenes.bind("<Double-1>", (lambda event: exportarOrden(tablaOrdenes.item(tablaOrdenes.selection()))))
+	tablaOrdenes.bind("<Return>", (lambda event: exportarOrden(tablaOrdenes.item(tablaOrdenes.selection()))))
+
+	for i in tablaOrdenes.get_children():
+		tablaOrdenes.delete(i)
+
+	con = sql_connection()
+	condiciones = " WHERE remate = '" + remate + "'"
+	rows = actualizar_db(con, "liquidacionesCompraGuardadas", condiciones)
+
+	for row in rows:
+		tablaOrdenes.insert("", tk.END, tags=str(row[0]), text = str(row[0]), iid= str(row[0]), values = (str(row[2]),
+		str(row[3])))
+
+	btn_todas = tk.Button(wind_ordenes, text="Exportar todas", command=exportarOrdenesTodas, font=("Helvetica Neue",12, "bold"), backgroun="#b3f2bc")
+	btn_todas.place(x = 200, y = 250, width=130, height=40)
+
+	wind_ordenes.mainloop()
 
 
 #BARRA DE MENU
@@ -971,14 +1051,14 @@ if(True):
 
 
 	mnuArchivo = Menu(barraMenu)
-	mnuArchivo.add_command(label="Abrir")
-	mnuArchivo.add_command(label="Nuevo")
-	mnuArchivo.add_command(label="Guardar")
-	mnuArchivo.add_command(label="Cerrar")
+	#mnuArchivo.add_command(label="Abrir")
+	#mnuArchivo.add_command(label="Nuevo")
+	#mnuArchivo.add_command(label="Guardar")
+	#mnuArchivo.add_command(label="Cerrar")
 	mnuArchivo.add_command(label="Salir", command = salirWindow)
 
 	mnuRemate = Menu(barraMenu)
-	mnuRemate.add_command(label="Remate", command = lambda: ventanaRemates.ventana1("NULL"))
+	mnuRemate.add_command(label="Remate", command = lambda: ventanaRemates.ventana1("NULL", window))
 	mnuRemate.add_command(label="Listado de remates")
 	mnuRemate.add_separator()
 	mnuRemate.add_command(label="Seleccionar remate", command = lambda: seleccionarRemate())
@@ -1012,6 +1092,8 @@ if(True):
 	mnuLiquidaciones.add_command(label="Listado de lotes")
 	mnuLiquidaciones.add_separator()
 	mnuLiquidaciones.add_command(label="Alicuotas")
+	mnuLiquidaciones.add_separator()
+	mnuLiquidaciones.add_command(label="Ordenes de carga", command = ordenesDeCarga)
 	mnuLiquidaciones.add_separator()
 	mnuLiquidaciones.add_command(label="Exportar .csv compras totales", command=exportarExcelTotales)
 	mnuLiquidaciones.add_command(label="Exportar .csv ventas totales", command=exportarExcelTotalesVentas)
@@ -1288,6 +1370,7 @@ if(True):
 			entry_precio.grid(column=1, row=0, padx = 5, pady = 20)
 
 			diccionario_objetos["entry_precio"] = entry_precio
+
 	#BUSCADOR PRODUCTORES
 	if(True):
 		lbl_comprador_aux = Label(lblBuscador, backgroun="#f0f0f0")
@@ -1329,15 +1412,7 @@ if(True):
 		btn_produc_filtrar.bind("<Button-3>", (lambda event: compradorFiltrarUsados()))
 
 diccionario_objetos["textID"].set(1)
-diccionario_objetos["id_remate_alias"] = "remate1"
 
-
-diccionario_objetos["id_catalogo_id"] = 16
-diccionario_objetos["id_catalogo_alias"] = "nuevoCat"
-diccionario_objetos["textTitulo"].set("REMATE:")
-
-crearDiccionarioLotes()
-cargarTablaLotes()
 
 
 window.bind("<Control-s>", (lambda event: window.destroy()))

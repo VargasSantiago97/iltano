@@ -8,8 +8,8 @@ import time
 import logging
 import datetime
 
-import tablaElegir
-#from librerias import tablaElegir
+#import tablaElegir
+from librerias import tablaElegir
 
 from tkinter import *
 from tkinter.ttk import *
@@ -333,14 +333,14 @@ def bodyRemate(window):
 	entryNombre.bind('<F5>', (lambda event: buscar()))
 
 
-def ventana1(idRemate):
+def ventana1(idRemate, winIni):
 
 	def cerrarVentana():
 		window.destroy()
 
 	dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : True}
 
-	window = Tk()
+	window = Toplevel(winIni)
 	window.title("REMATE")
 	window.geometry("700x500+200+50")
 	window.configure(backgroun="#E6F5FF") #E8F6FA
@@ -421,4 +421,4 @@ def ventana1(idRemate):
 
 	window.mainloop()
 
-ventana1("NULL")
+#ventana1("NULL")
