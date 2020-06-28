@@ -34,8 +34,6 @@ diccionarioLotes = {}
 
 direccionBaseDeDatos = "librerias/database/iltanohacienda.db"
 
-ubicLiquidaciones = "C:/Users/Santiago/Desktop/exportaciones/liquidaciones"
-
 window = Tk()
 window.title("IL TANO HACIENDA SAS")
 window.geometry("1024x600")
@@ -879,83 +877,6 @@ def exportarExcel():
 
 	archivoExportar.write(texto)
 	archivoExportar.close()
-def exportarExcelTotales():
-
-	dire = filedialog.askdirectory()
-	if dire == () or dire == "":
-		messagebox.showinfo("Atencion", "El archivo no se exportó")
-		return 0
-
-	fileName = dire + "/TOTALES COMPRAS - " + diccionario_objetos["id_remate_alias"] + " --- " + str(time.strftime("%d-%m-%y")) + " - " + str(time.strftime("%H-%M-%S")) + "hs.csv"
-
-	archivoExportar = open(fileName, "w")
-
-	texto = "LIQUIDACION;COMPRADOR;CABEZAS;SUBTOTAL;COMISION;IVA HACIENDA; IVA COMISION; TOTAL LIQUIDACION\n"
-
-	con = sql_connection()
-	condiciones = " WHERE remate = '" + diccionario_objetos["id_remate_alias"] + "'"
-	rows = actualizar_db(con, "liquidacionesCompraGuardadas", condiciones)
-
-	for row in rows:
-		direArchivo = ubicLiquidaciones + "/" + str(row[4])
-
-		archivo = open(direArchivo, "r")
-		dicc = json.loads(archivo.read())
-		archivo.close()
-
-		x_liquidacion = str(row[3])
-		x_comprador = str(row[2])
-		x_cabezas = str(dicc["totales"]["totalCabezas"])
-		x_subtotal = str(dicc["totales"]["subtotalMartillo"]).replace(".", ",")
-		x_comision = str(dicc["gastos"]["0"]["importe"]).replace(".", ",")
-		x_ivaHacienda = str(dicc["totales"]["ivaHacienda"]).replace(".", ",")
-		x_ivaComision = str(dicc["gastos"]["0"]["$iva"]).replace(".", ",")
-		x_total = str(dicc["totales"]["total"]).replace(".", ",")
-
-		texto = texto + x_liquidacion + ";" + x_comprador + ";" + x_cabezas + ";" + x_subtotal + ";" + x_comision + ";" + x_ivaHacienda + ";" + x_ivaComision + ";" + x_total + "\n"
-
-	archivoExportar.write(texto)
-	archivoExportar.close()
-def exportarExcelTotalesVentas():
-
-	dire = filedialog.askdirectory()
-	if dire == () or dire == "":
-		messagebox.showinfo("Atencion", "El archivo no se exportó")
-		return 0
-
-	fileName = dire + "/TOTALES VENTAS - " + diccionario_objetos["id_remate_alias"] + " --- " + str(time.strftime("%d-%m-%y")) + " - " + str(time.strftime("%H-%M-%S")) + "hs.csv"
-
-	archivoExportar = open(fileName, "w")
-
-	texto = "LIQUIDACION;VENDEDOR;CABEZAS;SUBTOTAL;COMISION;IVA HACIENDA; IVA COMISION; RETENCION IIBB;TOTAL LIQUIDACION\n"
-
-	con = sql_connection()
-	condiciones = " WHERE remate = '" + diccionario_objetos["id_remate_alias"] + "'"
-	rows = actualizar_db(con, "liquidacionesVentaGuardadas", condiciones)
-
-	for row in rows:
-		direArchivo = ubicLiquidaciones + "/" + str(row[4])
-
-		archivo = open(direArchivo, "r")
-		dicc = json.loads(archivo.read())
-		archivo.close()
-
-		x_liquidacion = str(row[3])
-		x_comprador = str(row[2])
-		x_cabezas = str(dicc["totales"]["totalCabezas"])
-		x_subtotal = str(dicc["totales"]["subtotalMartillo"]).replace(".", ",")
-		x_comision = str(dicc["gastos"]["0"]["importe"]).replace(".", ",")
-		x_ivaHacienda = str(dicc["totales"]["ivaHacienda"]).replace(".", ",")
-		x_ivaComision = str(dicc["gastos"]["0"]["$iva"]).replace(".", ",")
-		x_retencion = str(dicc["totales"]["retencion"]).replace(".", ",")
-		x_total = str(dicc["totales"]["total"]).replace(".", ",")
-
-		texto = texto + x_liquidacion + ";" + x_comprador + ";" + x_cabezas + ";" + x_subtotal + ";" + x_comision + ";" + x_ivaHacienda + ";" + x_ivaComision + ";" + x_retencion + ";" + x_total + "\n"
-
-	archivoExportar.write(texto)
-	archivoExportar.close()
-
-
 
 #BARRA DE MENU
 if(True):
@@ -1012,15 +933,12 @@ if(True):
 	mnuLiquidaciones.add_command(label="Listado de lotes")
 	mnuLiquidaciones.add_separator()
 	mnuLiquidaciones.add_command(label="Alicuotas")
-	mnuLiquidaciones.add_separator()
-	mnuLiquidaciones.add_command(label="Exportar .csv compras totales", command=exportarExcelTotales)
-	mnuLiquidaciones.add_command(label="Exportar .csv ventas totales", command=exportarExcelTotalesVentas)
+
 
 	mnuCatalogo = Menu(barraMenu)
 	mnuCatalogo.add_command(label="Catalogo")
 	mnuCatalogo.add_separator()
 	mnuCatalogo.add_command(label="Seleccionar Catalogo", command= lambda: seleccionarCatalogo())
-	mnuCatalogo.add_command(label="Exportar .csv catalogo cargado", command= lambda: exportarExcel())
 
 	mnuConfiguracion = Menu(barraMenu)
 	mnuConfiguracion.add_command(label="Administrar Empresa")

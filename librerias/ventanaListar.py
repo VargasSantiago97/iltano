@@ -515,4 +515,4 @@ dicLotes = {
 		},
 	},
 	}
-ventana1(dicLotes)
+ventana1(dicRemates)
