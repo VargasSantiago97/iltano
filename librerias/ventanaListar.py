@@ -460,7 +460,7 @@ dicLotes = {
 		"1":{
 			"id" : "num2", 
 			"cabeza" : "VENDEDOR", 
-			"ancho" : 200, 
+			"ancho" : 150, 
 			"row" : 2},
 		"2":{
 			"id" : "num3", 
@@ -469,16 +469,21 @@ dicLotes = {
 			"row" : 3},
 		"3":{
 			"id" : "num4", 
-			"cabeza" : "CATEGORIA", 
-			"ancho" : 200, 
-			"row" : 6},
+			"cabeza" : "CATEGORIA VENTA", 
+			"ancho" : 150, 
+			"row" : 5},
 		"4":{
 			"id" : "num5", 
+			"cabeza" : "CATEGORIA HACIENDA", 
+			"ancho" : 150, 
+			"row" : 6},
+		"5":{
+			"id" : "num6", 
 			"cabeza" : "KGs", 
 			"ancho" : 20, 
 			"row" : 12},
-		"5":{
-			"id" : "num6", 
+		"6":{
+			"id" : "num7", 
 			"cabeza" : "Promedio", 
 			"ancho" : 20, 
 			"row" : 13},
@@ -515,4 +520,4 @@ dicLotes = {
 		},
 	},
 	}
-ventana1(dicRemates)
+ventana1(dicLotes)

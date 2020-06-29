@@ -11,7 +11,6 @@ from librerias import pdf_ordenDeCarga
 from librerias import ventanaRemates
 
 
-
 from tkinter import *
 from tkinter.ttk import *
 from tkinter import messagebox
@@ -32,7 +31,7 @@ import shutil
 import json
 
 dicc_objetos={"varFullScreen" : False, "varFullScreenDetalles" : False}
-diccionario_objetos = {}
+diccionario_objetos = {"id_remate_alias" : "NULL"}
 
 diccionarioLotes = {}
 
@@ -848,6 +847,67 @@ def seleccionarCatalogo():
 
 	wind_select.mainloop()
 
+def cargarTodosLosLotes():
+	remate = str(diccionario_objetos["id_remate_alias"])
+
+	diccionarioLotes.clear()
+
+	con = sql_connection()
+	condiciones = " WHERE remate = '" + str(remate) + "' AND estado = 'activo'"
+	rows = actualizar_db(con, "lotes", condiciones)
+
+	k=0
+	for row in rows:
+		con = sql_connection()
+		condiciones = " WHERE remate = '" + remate + "' AND productor = '" + str(row[2]) + "'"
+		rows_pintura = actualizar_db_selec(con, "pintura", "pintura", condiciones)
+
+		if(len(rows_pintura) > 0):
+			x_pintura = rows_pintura[0][0]
+		else:
+			x_pintura = ""
+
+		con = sql_connection()
+		condiciones = " WHERE lote = '" + str(row[0]) + "' AND estado = 'activo'"
+		rows_compraventa = actualizar_db(con, "compraventa", condiciones)
+
+		if(len(rows_compraventa) > 0):
+			x_precio = rows_compraventa[0][3]
+			x_comprador = rows_compraventa[0][2]
+			x_precioCalculo = rows_compraventa[0][3]
+		else:
+			x_precio = ""
+			x_comprador = ""
+			x_precioCalculo = 0
+
+		x_id = row[0]
+		x_corral = row[4]
+		x_vendedor = row[2]
+		x_cantidad = row[3]
+		x_categoriaVenta = row[5]
+		x_categoria = row[6]
+		x_kilogramos = row[12]
+		x_promedio = row[13]
+		x_total = round(float(x_kilogramos) * float(x_precioCalculo), 2)
+
+
+		diccionarioLotes[str(k)] = {
+		"id" : str(x_id),
+		"corral" : str(x_corral),
+		"vendedor" : str(x_vendedor),
+		"cantidad" : str(x_cantidad),
+		"categoria" : str(x_categoria),
+		"categoriaVenta" : str(x_categoriaVenta),
+		"pintura" : str(x_pintura),
+		"kilogramos" : str(x_kilogramos),
+		"promedio" : str(x_promedio),
+		"precio" : str(x_precio),
+		"comprador" : str(x_comprador),
+		"total" : str(x_total)
+		}
+		k += 1
+
+	cargarTablaLotes()
 
 #EXPORTAR
 def exportarExcel():
@@ -1050,13 +1110,6 @@ if(True):
 	barraMenu.option_add('*tearOff', False)
 
 
-	mnuArchivo = Menu(barraMenu)
-	#mnuArchivo.add_command(label="Abrir")
-	#mnuArchivo.add_command(label="Nuevo")
-	#mnuArchivo.add_command(label="Guardar")
-	#mnuArchivo.add_command(label="Cerrar")
-	mnuArchivo.add_command(label="Salir", command = salirWindow)
-
 	mnuRemate = Menu(barraMenu)
 	mnuRemate.add_command(label="Remate", command = lambda: ventanaRemates.ventana1("NULL", window))
 	mnuRemate.add_command(label="Listado de remates")
@@ -1102,6 +1155,7 @@ if(True):
 	mnuCatalogo.add_command(label="Catalogo")
 	mnuCatalogo.add_separator()
 	mnuCatalogo.add_command(label="Seleccionar Catalogo", command= lambda: seleccionarCatalogo())
+	mnuCatalogo.add_command(label="Cargar todos los lotes", command= lambda: cargarTodosLosLotes())
 	mnuCatalogo.add_command(label="Exportar .csv catalogo cargado", command= lambda: exportarExcel())
 
 	mnuConfiguracion = Menu(barraMenu)
@@ -1110,14 +1164,13 @@ if(True):
 	mnuConfiguracion.add_command(label="Sincronizacion en la NUBE")
 	mnuConfiguracion.add_separator()
 	mnuConfiguracion.add_command(label="Copia de seguridad")
-	mnuConfiguracion.add_command(label="RESTAURAR copia de seguridad")
-	mnuConfiguracion.add_separator()
-	mnuConfiguracion.add_command(label="Pantalla detalles", command = pantallaDetalles)
+	#mnuConfiguracion.add_command(label="RESTAURAR copia de seguridad")
+	#mnuConfiguracion.add_separator()
+	#mnuConfiguracion.add_command(label="Pantalla detalles", command = pantallaDetalles)
 	mnuConfiguracion.add_separator()
 	mnuConfiguracion.add_command(label="Pantalla completa", command = pantCompleta)
 	mnuConfiguracion.add_command(label="Salir", command = salirWindow)
 
-	barraMenu.add_cascade(label="Archivo", menu = mnuArchivo)
 	barraMenu.add_cascade(label="Remate", menu = mnuRemate)
 	barraMenu.add_cascade(label="Categorias", menu = mnuCategorias)
 	barraMenu.add_cascade(label="Productores", menu = mnuProductores)
