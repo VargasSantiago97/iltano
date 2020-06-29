@@ -9,7 +9,7 @@ import datetime
 from librerias import tablaElegir
 from librerias import pdf_ordenDeCarga
 from librerias import ventanaRemates
-
+#from librerias import ventanaIngreso2
 
 from tkinter import *
 from tkinter.ttk import *
@@ -31,7 +31,7 @@ import shutil
 import json
 
 dicc_objetos={"varFullScreen" : False, "varFullScreenDetalles" : False}
-diccionario_objetos = {"id_remate_alias" : "NULL"}
+diccionario_objetos = {"id_remate_alias" : "NULL", "id_catalogo_alias" : "NULL"}
 
 diccionarioLotes = {}
 
@@ -76,7 +76,6 @@ def treeview_sort_column(tv, col, reverse):
 	# reverse sort next time
 	tv.heading(col, command=lambda: \
 	treeview_sort_column(tv, col, not reverse))
-
 
 #PRODUCTORES
 def compradorFiltrar():
@@ -169,7 +168,7 @@ def cargarDatosComprador(productor):
 		rows_aux = actualizar_db(con, "productoresAuxiliares", condiciones)
 
 		if(len(rows_aux)==0):
-			messagebox.showerror("ERROR", "No se pudo encontrar productor")
+			messagebox.showerror("ERROR", "No se pudo encontrar productor auxiliar, seleccione un catalogo")
 			return 0
 		else:
 			texto_alias = rows_aux[0][1]
@@ -580,6 +579,7 @@ def cargarTablaLotes():
 			diccionarioLotes[str(i)]["total"]))
 def elegirItem(loteseleccion):
 	diccionario_objetos["btn_productorAuxiliar"].configure(state="normal")
+	diccionario_objetos["btn_editarLote"].configure(state="normal")
 
 	#DATOS DEL LOTE
 	id_lote = str(loteseleccion["text"])
@@ -1340,6 +1340,13 @@ if(True):
 			txt_observaciones.insert("1.0", "Para comezar a cargar: \n1) Seleccione un remate\n2) Seleccione un catalogo\n3) Doble click sobre el lote\n4) Buscar comprador\n5) Colocar precio por kilo\n6) Guardar")
 			txt_observaciones.config(state="disabled")
 
+			def editarLote():
+				id_lote = diccionario_objetos["id_lote"]
+				ventanaIngreso2.ventana1(id_lote, "NULL", "NULL", window)
+
+			btn_editarLote = tk.Button(lblLote, text="Editar", compound="top", backgroun="#dbdbdb", font=("Helvetica", 10, "bold"), command=editarLote, state="disabled")
+			btn_editarLote.place(x=230, y=5, width=60, height=18)
+
 			diccionario_objetos["datosLote_texto_catHacienda"] = texto_catHacienda
 			diccionario_objetos["datosLote_texto_catVenta"] = texto_catVenta
 			diccionario_objetos["datosLote_texto_corral"] = texto_corral
@@ -1347,6 +1354,7 @@ if(True):
 			diccionario_objetos["datosLote_texto_neto"] = texto_neto
 			diccionario_objetos["datosLote_texto_promedio"] = texto_promedio
 			diccionario_objetos["datosLote_txt_observaciones"] = txt_observaciones
+			diccionario_objetos["btn_editarLote"] = btn_editarLote
 
 		#COMPRADOR
 		if(True):
