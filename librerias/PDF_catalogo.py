@@ -57,6 +57,8 @@ entrada = {
 		"predio" : "Asoc. Civil Sociedad Rural Almirante Brown",
 		"lugar" : "Pampa del Infierno - Chaco",
 		"remata" : "J. L. Daniel Sada",
+		"totalIngresados" : "22",
+		"totalCorrales" : "22",
 		},
 	"lotes" : {
 		"ABASTO-CONaSERVA" : {
@@ -109,10 +111,10 @@ entrada = {
 entrada["lotes"]["OTRO TITULO"] = {}
 entrada["lotes"]["NUEVO"] = {}
 for i in range(0, 200):
-	entrada["lotes"]["OTRO TITULO"][str(i)] = {"corral" : str (i), "vendedor" : "LA PROVIDENCIA DIVINAo", "cantidad" : "54ot", "categoria" : "NOVILLO-CHORRIADO", "pintura" : str (i), "peso" : "1801,4" ,"promedio" : "145,4"}
+	entrada["lotes"]["OTRO TITULO"][str(i)] = {"corral" : str (i), "vendedor" : "LA PROVIDENCIA DIVINAo", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : str (i), "peso" : "18.4" ,"promedio" : "14.4"}
 
 for i in range(0, 46):
-	entrada["lotes"]["NUEVO"][str(i)] = {"corral" : str (i+200), "vendedor" : "LA PROVIDENCIA DIVINAot", "cantidad" : "54ot", "categoria" : "NOVILLO-CHORRIADO", "pintura" : str (i), "peso" : "1801,4" ,"promedio" : "145,4"}
+	entrada["lotes"]["NUEVO"][str(i)] = {"corral" : str (i+200), "vendedor" : "LA PROVIDENCIA DIVINAot", "cantidad" : "54", "categoria" : "NOVILLO-CHORRIADO", "pintura" : str (i), "peso" : "18.4" ,"promedio" : "14.4"}
 
 
 def centrar(x, y, texto, font, size, c):
@@ -195,7 +197,7 @@ def insertar_titulo_categoria(c, y, texto):
 
 	text_width = stringWidth(texto, "Helvetica-Bold", 14)
 
-	c.setFillColorRGB(0.93 , 0.93 , 0.93)
+	c.setFillColorRGB(0.96 , 0.96 , 0.96)
 	#c.rect(20, y, 555, 20, fill=True)
 	c.roundRect(20, y, 555, 20, 4, stroke=1, fill=True)
 
@@ -247,12 +249,37 @@ def insertar_cuerpo_lotes(c, i, entrada):
 		centrar(280, i+7.5, entrada["categoria"][0:24], "Helvetica", 6, c)
 		centrar(280, i+1.5, entrada["categoria"][24:53], "Helvetica", 6, c)
 
+	try:
+		peso = float(entrada["peso"])
+		try:
+			peso = str(int(peso))
+		except:
+			pass
+	except:
+		peso = "0"
+
+	try:
+		promedio = float(entrada["promedio"])
+		try:
+			promedio = str(int(promedio))
+		except:
+			pass
+	except:
+		promedio = "0"
+
 
 	cuadroDeCuerpo(330, i, 14, 30, 3, entrada["pintura"], "Helvetica-Bold", 9, c)
-	cuadroDeCuerpo(360, i, 14, 40, 3, entrada["peso"], "Helvetica", 9, c)
-	cuadroDeCuerpo(400, i, 14, 40, 3, entrada["promedio"], "Helvetica", 9, c)
+	cuadroDeCuerpo(360, i, 14, 40, 3, peso, "Helvetica", 9, c)
+	cuadroDeCuerpo(400, i, 14, 40, 3, promedio, "Helvetica", 9, c)
 	cuadroDeCuerpo(440, i, 14, 40, 3, "", "Helvetica", 9, c)
 	cuadroDeCuerpo(480, i, 14, 95, 3, "", "Helvetica", 9, c)
+
+def insertar_totales_categoria(c, i, cabezas, kgs, proms):
+
+
+	cuadroDeCuerpo(200, i, 14, 30, 3, str(cabezas), "Helvetica-Bold", 10, c)
+	cuadroDeCuerpo(360, i, 14, 40, 3, str(kgs), "Helvetica-Bold", 10, c)
+	cuadroDeCuerpo(400, i, 14, 40, 3, str(proms), "Helvetica-Bold", 10, c)
 
 
 def insertar_concepto(c, i, entrada, concep):
@@ -369,18 +396,48 @@ def preliquidacionPDF(entrada):
 	var = 0
 	vari = 0
 	cant_titulosxpag = 0
+	varBajarParaTotales = -10
 
 	for i in range(0, cant_categorias):
-		insertar_titulo_categoria(c, 718-(14*var)-(vari*30), categorias[i])
-		insertar_titulo_lotes(c, 700-(14*var)-(vari*30))
+		varBajarParaTotales = varBajarParaTotales + 20
+
+		insertar_titulo_categoria(c, 718-(14*var)-(vari*30)-varBajarParaTotales, categorias[i])
+		insertar_titulo_lotes(c, 700-(14*var)-(vari*30)-varBajarParaTotales)
 
 		cant_titulosxpag = cant_titulosxpag + 1
 
 		cant_lotes = len(entrada["lotes"][categorias[i]])
 
+		cabezas = 0
+		kgs = 0
+		proms = 0
 
 		for j in range(0, cant_lotes):
-			insertar_cuerpo_lotes(c, 686-(var*14)-(vari*30), entrada["lotes"][categorias[i]][str(j)])
+			insertar_cuerpo_lotes(c, 686-(var*14)-(vari*30)-varBajarParaTotales, entrada["lotes"][categorias[i]][str(j)])
+
+
+			try:
+				cabeza = float(entrada["lotes"][categorias[i]][str(j)]["cantidad"])
+				cabeza = int(cabeza)
+			except:
+				cabeza = 0
+
+			try:
+				kg = float(entrada["lotes"][categorias[i]][str(j)]["peso"])
+				kg = int(kg)
+			except:
+				kg = 0
+
+			try:
+				prom = float(entrada["lotes"][categorias[i]][str(j)]["promedio"])
+				prom = int(prom)
+			except:
+				prom = 0
+
+			cabezas = cabezas + cabeza
+			kgs = kgs + kg
+			proms = proms + prom
+
 			var = var + 1
 			if (var>45-(cant_titulosxpag*2)):
 				c.showPage()
@@ -388,10 +445,14 @@ def preliquidacionPDF(entrada):
 				insertar_npag(c, str(n_pag), str(cant_pag))
 				var=0
 				vari=0
+				varBajarParaTotales = 10
 				insertar_cabecera(c, entrada)
-				insertar_titulo_categoria(c, 718-(14*var)-(vari*30), categorias[i])
-				insertar_titulo_lotes(c, 700-(14*var)-(vari*30))
+				#insertar_titulo_categoria(c, 718-(14*var)-(vari*30)-varBajarParaTotales, categorias[i])
+				#insertar_titulo_lotes(c, 700-(14*var)-(vari*30)-varBajarParaTotales)
 				cant_titulosxpag = 0
+
+		insertar_totales_categoria(c, 686-(var*14)-(vari*30)-varBajarParaTotales, cabezas, kgs, proms)
+
 		totalEnHoja = var
 		var = var + 2
 		vari = vari + 1
@@ -430,7 +491,7 @@ def preliquidacionPDF(entrada):
 	c.save()
 	archivo = os.popen(entrada["datos"]["ruta"])
 
-#preliquidacionPDF(entrada)
+preliquidacionPDF(entrada)
 
 
 #TERMINAR DOMICILIO
