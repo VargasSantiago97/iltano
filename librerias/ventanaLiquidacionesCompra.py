@@ -41,6 +41,7 @@ ubicLiquidaciones = "C:/Users/Santiago/Desktop/exportaciones/liquidaciones"
 
 diccionarioEnviar = {}
 
+dicOrdenesDeCarga = {}
 
 window = Tk()
 window.title("IL TANO HACIENDA SAS")
@@ -154,6 +155,7 @@ def seleccionarTablaComprador():
 	catalogo = diccionario_objetos["id_catalogo_alias"]
 
 	diccionarioLotes.clear()
+	dicOrdenesDeCarga.clear()
 
 	diccionario_objetos["totalCabezas"] = 0
 	diccionario_objetos["totalKg"] = 0
@@ -190,6 +192,7 @@ def seleccionarTablaComprador():
 	calcularIvaInteres()
 	cargarTablaGastos()
 	calcularTOTAL()
+	actualizarDicOrdenes()
 
 	diccionario_objetos["btn_guardar"].config(state = "normal")
 	#diccionario_objetos["btn_eliminar"].config(state = "normal")
@@ -366,6 +369,19 @@ def cargarTablaLotes():
 		subtotalMarillo = subtotalMarillo + float(diccionarioLotes[str(i)]["bruto"])
 
 	diccionario_objetos["subtotalMarillo"] = subtotalMarillo
+
+def actualizarDicOrdenes():
+	productor = diccionario_objetos["id_productor_alias"]
+	remate = diccionario_objetos["id_remate_alias"]
+
+	con = sql_connection()
+	condiciones = " WHERE productor = '" + productor + "' AND remate = '" + remate + "' AND estado = 'activo'"
+	rows = actualizar_db(con, "ordenesDeCarga", condiciones)
+
+	i = 0
+	for row in rows:
+		dicOrdenesDeCarga[str(i)] = str(row[2])
+		i += 1
 
 #Calculos
 def calcularSubtotal():
@@ -617,13 +633,20 @@ def guardar():
 	try:
 		diccionarioObservaciones = {}
 		diccionarioObservaciones["0"] = {
-		"cuota" : str("nanana"),
-		"fecha" : str("nanana"),
-		"monto" : str("10"),
+		"cuota" : str(""),
+		"fecha" : str(""),
+		"monto" : str(""),
 		}
 
 	except:
 		messagebox.showerror("ERROR", "Error al obtener los datos de las observaciones")
+		return 0
+	try:
+		texto_ordenes = ""
+		for i in range(0, len(dicOrdenesDeCarga)):
+			texto_ordenes = texto_ordenes + str(dicOrdenesDeCarga[str(i)]) + "; "
+	except:
+		messagebox.showerror("ERROR", "Error al obtener los datos de las ordenes de carga")
 		return 0
 
 	diccionarioEnviar["datos"] = diccionarioDatos
@@ -633,6 +656,7 @@ def guardar():
 	diccionarioEnviar["gastos"] = diccionarioGastos
 	diccionarioEnviar["totales"] = diccionarioTotales
 	diccionarioEnviar["observaciones"] = diccionarioObservaciones
+	diccionarioEnviar["dicOrdenesDeCarga"] = texto_ordenes
 
 	try:
 		ubic = ubicLiquidaciones + "/"

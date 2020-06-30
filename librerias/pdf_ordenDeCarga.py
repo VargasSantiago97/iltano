@@ -27,7 +27,7 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 
 dire = "C:\\Users\\Santiago\\Desktop\\exportaciones\\pruebas\\fecha_" + str(time.strftime("%d-%m-%y")) + "_hora_" + str(time.strftime("%H-%M-%S")) + ".pdf"
 
-imagenLogo = "librerias/tano.jpeg"
+imagenLogo = "tano.jpeg"
 
 
 
@@ -54,7 +54,7 @@ entrada2 = {
 		"ruta" : dire,	
 		"fecha" : "10/10/10",
 		"tipoDocumento" : "ORDEN DE CARGA",
-		"numeroLiquidacion" : "202020-999",
+		"numeroDocumento" : "202020-999",
 		"remate" : "XIV° EXPOSICION GANADERA",
 		"condicion" : "Cta. Corriente",
 		"destino" : "Faena",
@@ -181,9 +181,9 @@ def insertar_cabecera(c, entrada):
 
 	c.setFont("Helvetica-Bold", 14)
 	c.drawString(307, 760, "Fecha: " + entrada["datos"]["fecha"])
-	c.drawString(440, 760, "N° Liq.:")
+	c.drawString(440, 760, "N°:")
 
-	c.drawString(490, 760, entrada["datos"]["numeroDocumento"])
+	c.drawString(470, 760, entrada["datos"]["numeroDocumento"])
 
 
 	#Cuadros
@@ -323,6 +323,15 @@ def insertar_concepto(c, i, entrada, concep):
 	c.line(310, 545 + i, 310, 565 + i)
 	c.line(260, 545 + i, 260, 565 + i)
 	c.line(80, 545 + i, 80, 565 + i)
+def insertar_concepto_totales(c, i, entrada, concep):
+
+	c.setFillColorRGB(0,0,0)
+	c.setLineWidth(2)
+	c.rect(500, 545 + i, 75, 20)
+	c.setLineWidth(1)
+
+
+	centrar(540, 551 + i, entrada["conceptos"][str(concep)]["cantidad"], "Helvetica-Bold", 15, c)
 
 
 def insertar_gasto_cabeza(c, i):
@@ -520,7 +529,7 @@ def preliquidacionPDF(entrada):
 
 	for i in range(0, cant_conceptos):
 		ubicacionY += 1
-		if(ubicacionY>10):
+		if(ubicacionY>19):
 			CANTIDADPAGINAS += 1
 			ubicacionY = 0
 
@@ -542,6 +551,7 @@ def preliquidacionPDF(entrada):
 			ubicacionY = 0
 
 	#insertar_comision(c)
+	insertar_concepto_totales(c, -30-(20*(ubicacionY)), entrada, i)
 
 	insertar_firmas(c, entrada)
 	insertar_npag(c, str(CANTIDADPAGINAS), str(CANTIDADPAGINAS))
@@ -550,6 +560,6 @@ def preliquidacionPDF(entrada):
 
 	c.setTitle("ORDEN DE CARGA")
 	c.save()
-	#archivo = os.popen(entrada["datos"]["ruta"])
+	archivo = os.popen(entrada["datos"]["ruta"])
 
 #preliquidacionPDF(entrada2)

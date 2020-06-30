@@ -25,7 +25,7 @@ from reportlab.rl_config import defaultPageSize
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
 
-dire = "PDF\\fecha_" + str(time.strftime("%d-%m-%y")) + "_hora_" + str(time.strftime("%H-%M-%S")) + ".pdf"
+dire = "C:\\Users\\Santiago\\Desktop\\exportaciones\\pruebas\\fecha_" + str(time.strftime("%d-%m-%y")) + "_hora_" + str(time.strftime("%H-%M-%S")) + ".pdf"
 
 imagenLogo = "tano.jpeg"
 
@@ -122,9 +122,162 @@ entrada2 = {
 		"total" : "156618550",
 		"totalCabezas" : "123",
 		"totalKg" : "123",
-		"observaciones" : "lalalal",
+		"observaciones" : "",
 		},
-}
+	"ordenesDeCarga" : {
+		"0" : "202020-001",
+		"1" : "202020-002",
+		"2" : "202020-003",
+	}}
+
+dicPrueba = {
+    "datos": {
+        "ruta": "C:/Users/Santiago/Desktop/exportaciones/PreLiquidacion de Compra 200702-001 ~ Santiago ~ 29-06-20 ~ 20-23-04hs.pdf",
+        "fecha": "",
+        "tipoDocumento": "PRE-LIQUIDACION DE COMPRA",
+        "numeroDocumento": "200702-001",
+        "remate": "remate1",
+        "condicion": "",
+        "destino": "",
+        "titulo": "Pre-Liquidacion de compra de Vargas, Santiago Manuel"
+    },
+    "receptor": {
+        "CUIT": "20-40500364-4",
+        "situacionIVA": "Consumidor Final",
+        "domicilio": "HP 900",
+        "codpostal": "3708",
+        "nombreyapellido": "Vargas, Santiago Manuel",
+        "IIBB": "",
+        "localidad": "PI",
+        "renspa": "",
+        "caracter": "",
+        "provincia": "Ch",
+        "ruca": "12ruca12",
+        "DTE": "",
+        "contacto": ""
+    },
+    "emisor": {
+        "CUIT": "30-71648051-4",
+        "nombreyapellido": "P/P IL TANO HACIENDA S.A.S."
+    },
+    "conceptos": {
+        "0": {
+            "cliente": "Santiago",
+            "categoria": "Novillito",
+            "corral": "14",
+            "pintura": "45",
+            "cantidad": "10",
+            "kg": "1470.0",
+            "$kg": "10.0",
+            "total": "14700.0"
+        },
+        "1": {
+            "cliente": "Santiago",
+            "categoria": "ternero",
+            "corral": "1",
+            "pintura": "45",
+            "cantidad": "1",
+            "kg": "9",
+            "$kg": "50",
+            "total": "450.0"
+        },
+        "2": {
+            "cliente": "Santiago",
+            "categoria": "Novillito",
+            "corral": "1",
+            "pintura": "45",
+            "cantidad": "1",
+            "kg": "5.0",
+            "$kg": "123",
+            "total": "615.0"
+        },
+        "3": {
+            "cliente": "Santiago",
+            "categoria": "Vaca",
+            "corral": "2",
+            "pintura": "45",
+            "cantidad": "3",
+            "kg": "1190.0",
+            "$kg": "50.5",
+            "total": "60095.0"
+        },
+        "4": {
+            "cliente": "Santiago",
+            "categoria": "ternero",
+            "corral": "1",
+            "pintura": "45",
+            "cantidad": "1",
+            "kg": "9",
+            "$kg": "12",
+            "total": "108.0"
+        }
+    },
+    "gastos": {
+        "0": {
+            "gastos": "Comision",
+            "base": "75968.0",
+            "alicuota": "0.0",
+            "importe": "0.0",
+            "iva": "10.5",
+            "$iva": "0.0"
+        }
+    },
+    "totales": {
+        "interesPorcentaje": "0.0",
+        "interesDias": "0",
+        "ivaHaciendaPorcentaje": "10.5",
+        "ivaInteresPorcentaje": "21.0",
+        "subtotalMartillo": "75968.0",
+        "descuento": "0.0",
+        "subtotal": "75968.0",
+        "interes": "0.0",
+        "ivaHacienda": "7976.64",
+        "ivaInteres": "0.0",
+        "comisionIva": "0.0",
+        "retencion": "0",
+        "total": "83944.64",
+        "totalCabezas": "16",
+        "totalKg": "2683.0",
+        "observaciones": "asd"
+    },
+    "observaciones": {
+        "0": {
+            "cuota": "cuota1",
+            "fecha": "12/12/12",
+            "monto": "1000"
+        },
+        "1": {
+            "cuota": "cuota2",
+            "fecha": "11/12/12",
+            "monto": "1000"
+        },
+        "2": {
+            "cuota": "cuota3",
+            "fecha": "10/12/12",
+            "monto": "1000"
+        },
+        "3": {
+            "cuota": "cuota3",
+            "fecha": "10/12/12",
+            "monto": "1000"
+        },
+        "4": {
+            "cuota": "cuota3",
+            "fecha": "10/12/12",
+            "monto": "1000"
+        },
+        "5": {
+            "cuota": "cuota3",
+            "fecha": "10/12/12",
+            "monto": "1000"
+        },
+
+
+
+    },
+    "dicOrdenesDeCarga" : "202020-001; 202020-002; 202020-003",
+    }
+
 
 
 
@@ -157,6 +310,23 @@ def numero(x, y, texto, font, size, c):
 
 	c.setFont(font, size)
 	c.drawString(posx, posy, nuevoNumero)
+def numeroEntero(x, y, texto, font, size, c):
+	#print(ent)
+	numero = float(texto)
+	numero = int(numero)
+	nuevoNumero = "{:,}".format(numero).replace(',','~').replace('.',',').replace('~','.')
+	if (nuevoNumero[len(nuevoNumero)-2] == ','):
+		nuevoNumero = nuevoNumero + "0"
+
+
+	text_width = stringWidth(nuevoNumero, font, size)
+
+	posy = y
+	posx = x - (text_width)
+
+	c.setFont(font, size)
+	c.drawString(posx, posy, nuevoNumero)
+
 
 def insertar_cabecera(c, entrada):
 	#logo
@@ -333,7 +503,7 @@ def insertar_concepto(c, i, entrada, concep):
 
 	c.drawString(350, 551 + i, entrada["conceptos"][str(concep)]["cantidad"])
 
-	numero(440, 551 + i, entrada["conceptos"][str(concep)]["kg"], "Helvetica", 9, c)
+	numeroEntero(440, 551 + i, entrada["conceptos"][str(concep)]["kg"], "Helvetica", 9, c)
 	numero(490, 551 + i, entrada["conceptos"][str(concep)]["$kg"], "Helvetica", 9, c)
 	numero(572, 551 + i, entrada["conceptos"][str(concep)]["total"], "Helvetica", 9, c)
 
@@ -344,8 +514,6 @@ def insertar_concepto(c, i, entrada, concep):
 	c.line(300, 545 + i, 300, 565 + i)
 	c.line(260, 545 + i, 260, 565 + i)
 	c.line(130, 545 + i, 130, 565 + i)
-
-
 
 
 def insertar_gasto_cabeza(c, i):
@@ -439,29 +607,47 @@ def insertar_totales(c, entrada):
 	totalCabezas = entrada["totales"]["totalCabezas"]
 	observaciones = entrada["totales"]["observaciones"]
 
-	distanciaY = 20
+	distanciaY = 15
 	vary=5
 
 	c.setFont("Helvetica", 10)
 	c.drawString(40, 230-(distanciaY * 0)-vary, "TOTAL KILOGRAMOS")
-	numero(270, 230-(distanciaY * 0)-vary, totalKg, "Helvetica-Bold", 10, c)
+	numeroEntero(270, 230-(distanciaY * 0)-vary, totalKg, "Helvetica-Bold", 10, c)
 
 	c.setFont("Helvetica", 10)
 	c.drawString(40, 230-(distanciaY * 1)-vary, "TOTAL CABEZAS")
-	numero(270, 230-(distanciaY * 1)-vary, totalCabezas, "Helvetica-Bold", 10, c)
+	numeroEntero(270, 230-(distanciaY * 1)-vary, totalCabezas, "Helvetica-Bold", 10, c)
 
+
+
+	cantCuotas = len(entrada["observaciones"])
+
+	distanciaY = 11
+	vary=35
+
+	for i in range(0, cantCuotas):
+		c.setFont("Helvetica", 9)
+		c.drawString(40, 230-(distanciaY * i)-vary, entrada["observaciones"][str(i)]["cuota"])
+		c.drawString(130, 230-(distanciaY * i)-vary, entrada["observaciones"][str(i)]["fecha"])
+		numero(270, 230-(distanciaY * i)-vary, entrada["observaciones"][str(i)]["monto"], "Helvetica-Bold", 10, c)
+
+
+	c.setFont("Helvetica", 9)
+	distanciaY = 11
+
+	varBajar = cantCuotas
+
+	for i in range(0, 9-varBajar):
+		c.drawString(40, 230-(distanciaY * (i+varBajar))-vary, observaciones[43*i : 43*i+43])
+
+
+	vary=10
+
+
+	ordenesDeCarga = entrada["dicOrdenesDeCarga"]
+	c.rect(20, 80, 555, 14)
 	c.setFont("Helvetica", 10)
-	distanciaY = 12
-	vary=20
-
-
-	for i in range(0, 7):
-		c.drawString(40, 230-(distanciaY * (2 + i))-vary, observaciones[43*i : 43*i+43])
-
-
-
-
-
+	c.drawString(23, 83, "Ordenes de carga asociadas:     " + ordenesDeCarga)
 
 	c.rect(300, 100, 275, 155)
 
@@ -507,11 +693,10 @@ def insertar_totales(c, entrada):
 	numero(565, 105, entrada["totales"]["total"], "Helvetica-Bold", 14, c)
 
 
-
 def insertar_firmas(c, entrada):
 	c.setLineWidth(2)
-	c.line(40,50, 170, 50)
-	c.line(190,50, 320, 50)
+	c.line(40,45, 170, 45)
+	c.line(190,45, 320, 45)
 
 	centrar(105, 35, entrada["emisor"]["nombreyapellido"], "Helvetica", 9, c)
 	centrar(105, 25, entrada["emisor"]["CUIT"], "Helvetica", 9, c)
@@ -614,6 +799,6 @@ def preliquidacionPDF(entrada):
 
 	c.setTitle(entrada["datos"]["titulo"])
 	c.save()
-	#archivo = os.popen(entrada["datos"]["ruta"])
+	archivo = os.popen(entrada["datos"]["ruta"])
 
-#preliquidacionPDF(entrada2)
+preliquidacionPDF(dicPrueba)

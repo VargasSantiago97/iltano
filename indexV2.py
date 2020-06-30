@@ -30,7 +30,7 @@ import shutil
 
 import json
 
-dicc_objetos={"varFullScreen" : True, "varFullScreenDetalles" : False}
+dicc_objetos={"varFullScreen" : 0, "varFullScreenDetalles" : False}
 diccionario_objetos = {"id_remate_alias" : "NULL", "id_catalogo_alias" : "NULL"}
 
 diccionarioLotes = {}
