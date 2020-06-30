@@ -30,7 +30,7 @@ import shutil
 diccionario_objetos = {}
 
 
-def guardar(diccionario_observaciones, window, cargarTablaObservaciones):
+def guardar(diccionario_observaciones, window):
 	diccionario_observaciones.clear()
 	j=0
 	for i in range(0, 12):
@@ -42,13 +42,12 @@ def guardar(diccionario_observaciones, window, cargarTablaObservaciones):
 			}
 			j+=1
 
-	cargarTablaObservaciones()
 	window.destroy()
 
 
-def planDePagos(diccionario_observaciones, cargarTablaObservaciones, fecha_actual):
+def planDePagos(diccionario_observaciones, winIni):
 
-	window = Tk()
+	window = Toplevel(winIni)
 	window.title("Plan de pagos")
 	window.geometry("280x450")
 
@@ -152,8 +151,6 @@ def planDePagos(diccionario_observaciones, cargarTablaObservaciones, fecha_actua
 	entry11_cuota.insert(0, "Cuota N°: 11")
 	entry12_cuota.insert(0, "Cuota N°: 12")
 
-	entry1_fecha.insert(0, fecha_actual)
-
 	diccionario_objetos["entry1_monto"] = entry1_monto
 	diccionario_objetos["entry2_monto"] = entry2_monto
 	diccionario_objetos["entry3_monto"] = entry3_monto
@@ -193,12 +190,17 @@ def planDePagos(diccionario_observaciones, cargarTablaObservaciones, fecha_actua
 	diccionario_objetos["entry11_cuota"] = entry11_cuota
 	diccionario_objetos["entry12_cuota"] = entry12_cuota
 
+	for i in range(0, 12):
+		diccionario_objetos["entry" + str(i+1) + "_fecha"].delete(0, tk.END)
+		diccionario_objetos["entry" + str(i+1) + "_monto"].delete(0, tk.END)
 
-	btn_guardar = tk.Button(window, text="GUARDAR", backgroun="#a4ff9e", font=("Helvetica Neue",12,"bold"), command= lambda: guardar(diccionario_observaciones, window, cargarTablaObservaciones))
+	for i in range(0, len(diccionario_observaciones)):
+		diccionario_objetos["entry" + str(i+1) + "_fecha"].insert(0, diccionario_observaciones[str(i)]["fecha"])
+		diccionario_objetos["entry" + str(i+1) + "_monto"].insert(0, diccionario_observaciones[str(i)]["monto"])
+
+
+	btn_guardar = tk.Button(window, text="GUARDAR", backgroun="#a4ff9e", font=("Helvetica Neue",12,"bold"), command= lambda: guardar(diccionario_observaciones, window))
 	btn_guardar.place(x = 70, y = 380, width = 130, height = 50)
-
-
-
 
 	window.mainloop()
 

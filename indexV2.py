@@ -1472,10 +1472,8 @@ if(True):
 		tabla_productor.bind('<Return>', (lambda event: seleccionarTablaComprador()))
 		btn_produc_filtrar.bind("<Button-3>", (lambda event: compradorFiltrarUsados()))
 
+
 diccionario_objetos["textID"].set(1)
-
-
 
 window.bind("<Control-s>", (lambda event: window.destroy()))
 window.mainloop()
-

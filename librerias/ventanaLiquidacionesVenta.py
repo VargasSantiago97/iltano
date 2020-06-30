@@ -218,6 +218,12 @@ def cargarDatosVendedor(productor):
 	diccionario_objetos["entry_ruca"].insert(0, str(row[19]))
 
 	diccionario_objetos["id_productor_alias"] = str(row[1])
+
+	if (str(row[6]) == "Monotributista"):
+		checkiva.set(0)
+	else:
+		checkiva.set(1)
+
 def numeroLiquidacion(productor):
 	remate = diccionario_objetos["id_remate_alias"]
 	remateNumero = diccionario_objetos["numero_remate"]

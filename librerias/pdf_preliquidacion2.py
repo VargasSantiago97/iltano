@@ -25,7 +25,8 @@ from reportlab.rl_config import defaultPageSize
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
 
-dire = "C:\\Users\\Santiago\\Desktop\\exportaciones\\pruebas\\fecha_" + str(time.strftime("%d-%m-%y")) + "_hora_" + str(time.strftime("%H-%M-%S")) + ".pdf"
+#dire = "C:\\Users\\Santiago\\Desktop\\exportaciones\\pruebas\\fecha_" + str(time.strftime("%d-%m-%y")) + "_hora_" + str(time.strftime("%H-%M-%S")) + ".pdf"
+dire = "/home/vargas/Escritorio/exportaciones/fecha_" + str(time.strftime("%d-%m-%y")) + "_hora_" + str(time.strftime("%H-%M-%S")) + ".pdf"
 
 imagenLogo = "tano.jpeg"
 
@@ -132,7 +133,7 @@ entrada2 = {
 
 dicPrueba = {
     "datos": {
-        "ruta": "C:/Users/Santiago/Desktop/exportaciones/PreLiquidacion de Compra 200702-001 ~ Santiago ~ 29-06-20 ~ 20-23-04hs.pdf",
+        "ruta": dire,
         "fecha": "",
         "tipoDocumento": "PRE-LIQUIDACION DE COMPRA",
         "numeroDocumento": "200702-001",
@@ -279,8 +280,6 @@ dicPrueba = {
     }
 
 
-
-
 def centrar(x, y, texto, font, size, c):
 	PAGE_WIDTH  = defaultPageSize[0]
 	PAGE_HEIGHT = defaultPageSize[1]
@@ -296,7 +295,10 @@ def centrar(x, y, texto, font, size, c):
 
 def numero(x, y, texto, font, size, c):
 	#print(ent)
-	numero = float(texto)
+	try:
+		numero = float(texto)
+	except:
+		numero = 0.0
 	nuevoNumero = "{:,}".format(numero).replace(',','~').replace('.',',').replace('~','.')
 	if (nuevoNumero[len(nuevoNumero)-2] == ','):
 		nuevoNumero = nuevoNumero + "0"
@@ -311,9 +313,11 @@ def numero(x, y, texto, font, size, c):
 	c.setFont(font, size)
 	c.drawString(posx, posy, nuevoNumero)
 def numeroEntero(x, y, texto, font, size, c):
-	#print(ent)
-	numero = float(texto)
-	numero = int(numero)
+	try:
+		numero = float(texto)
+		numero = int(numero)
+	except:
+		numero = 0
 	nuevoNumero = "{:,}".format(numero).replace(',','~').replace('.',',').replace('~','.')
 	if (nuevoNumero[len(nuevoNumero)-2] == ','):
 		nuevoNumero = nuevoNumero + "0"
@@ -799,6 +803,6 @@ def preliquidacionPDF(entrada):
 
 	c.setTitle(entrada["datos"]["titulo"])
 	c.save()
-	archivo = os.popen(entrada["datos"]["ruta"])
+	#archivo = os.popen(entrada["datos"]["ruta"])
 
-preliquidacionPDF(dicPrueba)
+#preliquidacionPDF(dicPrueba)

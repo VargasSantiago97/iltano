@@ -40,6 +40,9 @@ diccionario_objetos["direccion"] = "C:/Users/Santiago/Desktop/exportaciones"
 
 ubicLiquidaciones = "C:/Users/Santiago/Desktop/exportaciones/liquidaciones"
 
+diccionario_objetos["direccion"] = "/home/vargas/Escritorio/exportaciones"
+ubicLiquidaciones = "/home/vargas/Escritorio/exportaciones"
+
 diccionarioEnviar = {}
 
 
@@ -560,7 +563,7 @@ def imprimirOrdenDeCarga():
 	#DATOS
 	try:
 		dicDatos = {}
-		dicDatos["ruta"] = str(ubicLiquidaciones) + "/Orden de Carga " +  str(diccionario_objetos["entry_nombre"].get()) + ".pdf"
+		dicDatos["ruta"] = str(ubicLiquidaciones) + "/Orden de Carga <" + str(diccionario_objetos["entry_num"].get()) + "> " +  str(diccionario_objetos["entry_nombre"].get()) + ".pdf"
 		dicDatos["fecha"] = str(diccionario_objetos["entry_fecha"].get())
 		dicDatos["tipoDocumento"] = str("ORDEN DE CARGA")
 		dicDatos["numeroDocumento"] = str(diccionario_objetos["entry_num"].get())
@@ -602,6 +605,7 @@ def imprimirOrdenDeCarga():
 	try:
 		dicConceptos = {}
 		k=0
+		totalCabezas = 0
 
 		for i in tabla.get_children():
 			datos = tabla.item(i)["values"]
@@ -618,6 +622,14 @@ def imprimirOrdenDeCarga():
 				dicConceptos[str(k)]["total"] = str("")
 				k += 1
 
+				try:
+					cabezas = float(datos[4])
+					cabezas = int(cabezas)
+				except:
+					cabezas = 0
+
+				totalCabezas = totalCabezas + cabezas
+
 	except:
 		messagebox.showerror("ERROR", "Error obteniendo datos conceptos")
 		return 0
@@ -625,7 +637,7 @@ def imprimirOrdenDeCarga():
 	try:
 		dicTotales = {}
 		dicTotales["total"] = str("")
-		dicTotales["totalCabezas"] = str(diccionario_objetos["entry_totalCabezas"].get())
+		dicTotales["totalCabezas"] = str(totalCabezas)
 		dicTotales["totalKg"] = str(diccionario_objetos["entry_totalKg"].get())
 	except:
 		messagebox.showerror("ERROR", "Error obteniendo datos totales")

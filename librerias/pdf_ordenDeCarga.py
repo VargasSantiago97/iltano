@@ -331,7 +331,7 @@ def insertar_concepto_totales(c, i, entrada, concep):
 	c.setLineWidth(1)
 
 
-	centrar(540, 551 + i, entrada["conceptos"][str(concep)]["cantidad"], "Helvetica-Bold", 15, c)
+	centrar(540, 550 + i, entrada["totales"]["totalCabezas"], "Helvetica-Bold", 15, c)
 
 
 def insertar_gasto_cabeza(c, i):

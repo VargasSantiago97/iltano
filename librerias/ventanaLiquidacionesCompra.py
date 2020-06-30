@@ -8,6 +8,7 @@ import datetime
 
 import tablaElegir
 import pdf_preliquidacion2
+import ventanaPlanDePagos
 
 from tkinter import *
 from tkinter.ttk import *
@@ -28,7 +29,7 @@ import shutil
 
 import json
 
-dicc_objetos={"varFullScreen" : 0, "varFullScreenDetalles" : False}
+dicc_objetos={"varFullScreen" : 1, "varFullScreenDetalles" : False}
 diccionario_objetos = {}
 
 diccionarioLotes = {}
@@ -36,12 +37,17 @@ diccionarioLotes = {}
 direccionBaseDeDatos = "database/iltanohacienda.db"
 
 diccionario_objetos["direccion"] = "C:/Users/Santiago/Desktop/exportaciones"
+diccionario_objetos["direccion"] = "/home/vargas/Escritorio/exportaciones" 
 
 ubicLiquidaciones = "C:/Users/Santiago/Desktop/exportaciones/liquidaciones"
+ubicLiquidaciones = "/home/vargas/Escritorio/exportaciones"
 
 diccionarioEnviar = {}
 
 dicOrdenesDeCarga = {}
+
+
+diccionarioFinanciacion = {}
 
 window = Tk()
 window.title("IL TANO HACIENDA SAS")
@@ -156,6 +162,7 @@ def seleccionarTablaComprador():
 
 	diccionarioLotes.clear()
 	dicOrdenesDeCarga.clear()
+	diccionarioFinanciacion.clear()
 
 	diccionario_objetos["totalCabezas"] = 0
 	diccionario_objetos["totalKg"] = 0
@@ -197,6 +204,7 @@ def seleccionarTablaComprador():
 	diccionario_objetos["btn_guardar"].config(state = "normal")
 	#diccionario_objetos["btn_eliminar"].config(state = "normal")
 	diccionario_objetos["btn_exportar"].config(state = "normal")
+	diccionario_objetos["btn_planPagos"].config(state = "normal")
 
 def cargarDatosComprador(productor):
 	con = sql_connection()
@@ -510,7 +518,7 @@ def guardar():
 		dire = dire + "/PreLiquidacion de Compra " + str(diccionario_objetos["entry_num"].get()) + " ~ " + diccionario_objetos["id_productor_alias"] + " ~ " + str(time.strftime("%d-%m-%y")) + " ~ " + str(time.strftime("%H-%M-%S")) + "hs.pdf"
 
 		diccionarioDatos = {
-		"ruta" : dire,	
+		"ruta" : dire,
 		"fecha" : str(diccionario_objetos["entry_fecha"].get()),
 		"tipoDocumento" : "PRE-LIQUIDACION DE COMPRA",
 		"numeroDocumento" : str(diccionario_objetos["entry_num"].get()),
@@ -542,6 +550,7 @@ def guardar():
 	except:
 		messagebox.showerror("ERROR", "Error al obtener los datos del receptor")
 		return 0
+
 	try:
 		diccionarioEmisor = {
 		"CUIT" : "30-71648051-4",
@@ -625,18 +634,18 @@ def guardar():
 		"totalKg" : totalKg,
 		"observaciones" : observaciones,
 		}
-
 	except:
 		messagebox.showerror("ERROR", "Error al obtener los datos de Totales")
 		return 0
 
 	try:
 		diccionarioObservaciones = {}
-		diccionarioObservaciones["0"] = {
-		"cuota" : str(""),
-		"fecha" : str(""),
-		"monto" : str(""),
-		}
+		for i in range(0, len(diccionarioFinanciacion)):
+			diccionarioObservaciones[str(i)] = {
+			"cuota" : str(diccionarioFinanciacion[str(i)]["cuota"]),
+			"fecha" : str(diccionarioFinanciacion[str(i)]["fecha"]),
+			"monto" : str(diccionarioFinanciacion[str(i)]["monto"]),
+			}
 
 	except:
 		messagebox.showerror("ERROR", "Error al obtener los datos de las observaciones")
@@ -692,11 +701,13 @@ def guardar():
 	except:
 		messagebox.showerror("ERROR", "Error al guardar en base de datos")
 def guardarExportar():
-	guardar()
 	try:
+		guardar()
 		pdf_preliquidacion2.preliquidacionPDF(diccionarioEnviar)
 	except:
 		messagebox.showerror("ERROR", "Error al guardar PDF liquidacion")
+
+#PLAN DE PAGOS
 
 #BARRA DE TITULO
 if(True):
@@ -761,7 +772,6 @@ if(True):
 
 		diccionario_objetos["tabla"] = tabla
 
-
 	#TABLA GASTOS
 	if(True):
 		sbrGastos = Scrollbar(lbl_tablaGastos)
@@ -796,7 +806,6 @@ if(True):
 
 		diccionario_objetos["tablaGastos"] = tablaGastos
 
-
 	#DATOS
 	if(True):
 		lblBuscador = tk.Label(lbl_datos, backgroun="#f0f0f0", foreground="#FFFFFF", relief=SOLID, bd=2)
@@ -824,7 +833,6 @@ if(True):
 
 		#pestañas.place(x = 0, y = 0, relwidth = 1, relheight = 1)
 		pestañas.pack()
-
 
 	#DATOS VARIOS
 	if(True):
@@ -870,7 +878,6 @@ if(True):
 		diccionario_objetos["entry_totalKg"] = entry_totalKg
 		diccionario_objetos["entry_totalCabezas"] = entry_totalCabezas
 		diccionario_objetos["txt_observaciones"] = txt_observaciones
-
 
 	#DATOS COMPRADOR
 	if(True):
@@ -921,7 +928,6 @@ if(True):
 		diccionario_objetos["entry_codPostal"] = entry_codPostal
 		diccionario_objetos["entry_renspa"] = entry_renspa
 		diccionario_objetos["entry_ruca"] = entry_ruca
-
 
 	#TOTALES
 	if(True):
@@ -1007,11 +1013,11 @@ if(True):
 
 	#BOTONES
 	if(True):
-		btn_guardar = tk.Button(lblBotonesAxiones, text="GUARDAR", compound="top", backgroun="#b3f2bc", font=("Helvetica", 15, "bold"), state = "disabled", command = guardar)
-		btn_guardar.grid(column=0, row=0, pady = 20, padx = 10)
+		btn_planPagos = tk.Button(lblBotonesAxiones, text="Plan de\npagos", compound="top", backgroun="#b3f2bc", font=("Helvetica", 9, "bold"), state = "disabled", command = (lambda: ventanaPlanDePagos.planDePagos(diccionarioFinanciacion, window)))
+		btn_planPagos.grid(column=0, row=0, pady = 20, padx = 10)
 
-		#btn_eliminar = tk.Button(lblBotonesAxiones, text="ELIMINAR", compound="top", backgroun="#FF6E6E", font=("Helvetica", 15, "bold"), state = "disabled")
-		#btn_eliminar.grid(column=1, row=0, pady = 20, padx = 10)
+		btn_guardar = tk.Button(lblBotonesAxiones, text="GUARDAR", compound="top", backgroun="#b3f2bc", font=("Helvetica", 15, "bold"), state = "disabled", command = guardar)
+		btn_guardar.grid(column=1, row=0, pady = 20, padx = 10)
 
 		btn_exportar = tk.Button(lblBotonesAxiones, text="GUARDAR Y\nEXPORTAR PDF", compound="top", backgroun="#b3f2bc", font=("Helvetica", 9, "bold"), state = "disabled", command=guardarExportar)
 		btn_exportar.grid(column=2, row=0, pady = 20, padx = 10)
@@ -1019,7 +1025,7 @@ if(True):
 		diccionario_objetos["btn_guardar"] = btn_guardar
 		#diccionario_objetos["btn_eliminar"] = btn_eliminar
 		diccionario_objetos["btn_exportar"] = btn_exportar
-
+		diccionario_objetos["btn_planPagos"] = btn_planPagos
 
 	#BUSCADOR PRODUCTORES
 	if(True):
