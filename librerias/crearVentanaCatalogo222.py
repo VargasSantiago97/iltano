@@ -169,6 +169,31 @@ def categoriaCargada():
 	diccionarioObjetos["dicLotesUbic"].clear()
 	diccionarioObjetos["dicLotesUbic"].update(nuevoDicLotesUbic)
 
+	cantCabezas = 0
+	cantLotes = 0
+
+	for i in range(0, len(nuevoDicCatUbic)):
+		categoria = nuevoDicCatUbic[str(i)]
+
+		for j in range(0, len(nuevoDicLotesUbic[str(categoria)])):
+			lote = nuevoDicLotesUbic[str(categoria)][str(j)]
+			con = sql_connection()
+			condiciones = " WHERE id = " + str(lote)
+			rows = actualizar_db(con, "lotes", condiciones)
+
+			try:
+				cantCabezas = cantCabezas + int(rows[0][3])
+			except:
+				pass
+
+			try:
+				cantLotes += 1
+			except:
+				pass
+
+	diccionario_objetos["cantCabezas"] = cantCabezas
+	diccionario_objetos["cantLotes"] = cantLotes
+
 
 
 
@@ -315,7 +340,6 @@ def cargarDatosLotes():
 				"Mostrar",))
 	except:
 		messagebox.showerror("ERROR", "Error al cargar")
-
 
 
 def tablaADicLotesUbic():
@@ -547,8 +571,8 @@ def crearDiccionarioExportar():
 	x_predio = str(row[4])
 	x_lugar = str(row[5])
 	x_remata = str(row[6])
-	x_totalIngresador = str("null")
-	x_totalCorrales = str("null")
+	x_totalIngresador = str(diccionario_objetos["cantCabezas"])
+	x_totalCorrales = str(diccionario_objetos["cantLotes"])
 
 	if (file==""):
 		return 0

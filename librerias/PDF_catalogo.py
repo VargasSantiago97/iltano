@@ -26,7 +26,7 @@ from reportlab.rl_config import defaultPageSize
 
 
 dire = "PDF\\fecha_" + str(time.strftime("%d-%m-%y")) + "_hora_" + str(time.strftime("%H-%M-%S")) + ".pdf"
-
+dire = "/home/vargas/Escritorio/exportaciones/fecha_" + str(time.strftime("%d-%m-%y")) + "_hora_" + str(time.strftime("%H-%M-%S")) + ".pdf"
 imagenLogo = "tano.jpeg"
 
 
@@ -376,7 +376,7 @@ def preliquidacionPDF(entrada):
 
 		for j in range(0, cant_lotes):
 			var = var + 1
-			if (var>45-(cant_titulosxpag*2)):
+			if (var>40-(cant_titulosxpag*2)):
 				cant_pag = cant_pag + 1
 				var=0
 				vari=0
@@ -439,7 +439,7 @@ def preliquidacionPDF(entrada):
 			proms = proms + prom
 
 			var = var + 1
-			if (var>45-(cant_titulosxpag*2)):
+			if (var>40-(cant_titulosxpag*2)):
 				c.showPage()
 				n_pag = n_pag + 1
 				insertar_npag(c, str(n_pag), str(cant_pag))
@@ -447,8 +447,8 @@ def preliquidacionPDF(entrada):
 				vari=0
 				varBajarParaTotales = 10
 				insertar_cabecera(c, entrada)
-				#insertar_titulo_categoria(c, 718-(14*var)-(vari*30)-varBajarParaTotales, categorias[i])
-				#insertar_titulo_lotes(c, 700-(14*var)-(vari*30)-varBajarParaTotales)
+				insertar_titulo_categoria(c, 718-(14*var)-(vari*30)-varBajarParaTotales, categorias[i])
+				insertar_titulo_lotes(c, 700-(14*var)-(vari*30)-varBajarParaTotales)
 				cant_titulosxpag = 0
 
 		insertar_totales_categoria(c, 686-(var*14)-(vari*30)-varBajarParaTotales, cabezas, kgs, proms)
@@ -491,7 +491,7 @@ def preliquidacionPDF(entrada):
 	c.save()
 	archivo = os.popen(entrada["datos"]["ruta"])
 
-preliquidacionPDF(entrada)
+#preliquidacionPDF(entrada)
 
 
 #TERMINAR DOMICILIO

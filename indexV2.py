@@ -30,8 +30,30 @@ import shutil
 
 import json
 
+
+try:
+	archivoConfig = open("configInicial.txt", "r")
+	direccionBaseDeDatos = archivoConfig.read()
+	archivoConfig.close()
+except:
+	archivoConfig = open("configInicial.txt", "w")
+	messagebox.showinfo("Atencion", "Debe seleccionar en donde se encuentra la base de datos de configuracion del sistema")
+	direccionBaseDeDatos = filedialog.askopenfilename()
+	archivoConfig.write(direccionBaseDeDatos)
+	archivoConfig.close()
+
+if not (os.path.isfile(direccionBaseDeDatos)):
+	archivoConfig = open("configInicial.txt", "w")
+	messagebox.showinfo("Atencion", "Debe seleccionar en donde se encuentra la base de datos de configuracion del sistema")
+	direccionBaseDeDatos = filedialog.askopenfilename()
+	archivoConfig.write(direccionBaseDeDatos)
+	archivoConfig.close()
+
+
+
 dicc_objetos={"varFullScreen" : 0, "varFullScreenDetalles" : False}
 diccionario_objetos = {"id_remate_alias" : "NULL", "id_catalogo_alias" : "NULL"}
+
 
 diccionarioLotes = {}
 
@@ -1273,10 +1295,10 @@ if(True):
 
 	#DATOS
 	if(True):
-		lblBuscador = tk.Label(lbl_datos, backgroun="#f0f0f0", text="PRODUCTOR", foreground="#FFFFFF", relief=SOLID, bd=2)
+		lblBuscador = tk.Label(lbl_datos, backgroun="#f0f0f0", foreground="#FFFFFF", relief=SOLID, bd=2)
 		lblBuscador.place(x=2, y=2, width=300, height=226)
 
-		lblLote = tk.Label(lbl_datos, backgroun="#f0f0f0", text="PRODUCTOR", foreground="#FFFFFF", relief=SOLID, bd=2)
+		lblLote = tk.Label(lbl_datos, backgroun="#f0f0f0", foreground="#FFFFFF", relief=SOLID, bd=2)
 		lblLote.place(x=304, y=2, width=300, height=226)
 
 		lblComprador = tk.Label(lbl_datos, backgroun="#f0f0f0", foreground="#FFFFFF", relief=SOLID, bd=2)
